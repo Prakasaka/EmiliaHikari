@@ -8,7 +8,7 @@ from telegram.ext import CommandHandler, MessageHandler, Filters, run_async
 from telegram.utils.helpers import mention_html, escape_markdown
 
 import emilia.modules.sql.blacklist_sql as sql
-from emilia import dispatcher, LOGGER, spamcheck, OWNER_ID
+from emilia import dispatcher, LOGGER, OWNER_ID
 from emilia.modules.disable import DisableAbleCommandHandler
 from telegram.utils.helpers import mention_markdown
 from emilia.modules.helper_funcs.chat_status import user_admin, user_not_admin
@@ -19,14 +19,12 @@ from emilia.modules.warns import warn
 from emilia.modules.helper_funcs.string_handling import extract_time
 from emilia.modules.connection import connected
 
-from emilia.modules.languages import tl
 from emilia.modules.helper_funcs.alternate import send_message
 
 BLACKLIST_GROUP = 11
 
 
 @run_async
-@spamcheck
 def blacklist(update, context):
 	msg = update.effective_message  # type: Optional[Message]
 	chat = update.effective_chat  # type: Optional[Chat]
@@ -44,7 +42,7 @@ def blacklist(update, context):
 			chat_id = update.effective_chat.id
 			chat_name = chat.title
 	
-	filter_list = tl(update.effective_message, "<b>Kata daftar hitam saat ini di {}:</b>\n").format(chat_name)
+	filter_list = "<b>Current blacklisted words:\n {}:</b>\n".format(chat_name)
 
 	all_blacklisted = sql.get_chat_blacklist(chat_id)
 
@@ -60,14 +58,13 @@ def blacklist(update, context):
 
 	split_text = split_message(filter_list)
 	for text in split_text:
-		if filter_list == tl(update.effective_message, "<b>Kata daftar hitam saat ini di {}:</b>\n").format(chat_name):
-			send_message(update.effective_message, tl(update.effective_message, "Tidak ada pesan daftar hitam di <b>{}</b>!").format(chat_name), parse_mode=ParseMode.HTML)
+		if filter_list == "<b>Current blacklisted words:\n {}:</b>\n".format(chat_name):
+			send_message(update.effective_message, "There are no blacklisted messages in <b>{}</b>!".format(chat_name), parse_mode=ParseMode.HTML)
 			return
 		send_message(update.effective_message, text, parse_mode=ParseMode.HTML)
 
 
 @run_async
-@spamcheck
 @user_admin
 def add_blacklist(update, context):
 	msg = update.effective_message  # type: Optional[Message]
@@ -93,18 +90,17 @@ def add_blacklist(update, context):
 			sql.add_to_blacklist(chat_id, trigger.lower())
 
 		if len(to_blacklist) == 1:
-			send_message(update.effective_message, tl(update.effective_message, "<code>{}</code> ditambahkan ke daftar hitam di <b>{}</b>!").format(html.escape(to_blacklist[0]), chat_name),
+			send_message(update.effective_message, "<code>{}</code> Added to the blacklist in <b>{}</b>!".format(html.escape(to_blacklist[0]), chat_name),
 				parse_mode=ParseMode.HTML)
 
 		else:
-			send_message(update.effective_message, tl(update.effective_message, "<code>{}</code> Pemicu ditambahkan ke daftar hitam di <b>{}</b>!").format(len(to_blacklist), chat_name), parse_mode=ParseMode.HTML)
+			send_message(update.effective_message, "Added <code>{}</code> triggers to the blacklist in <b>{}</b>!".format(len(to_blacklist), chat_name), parse_mode=ParseMode.HTML)
 
 	else:
-		send_message(update.effective_message, tl(update.effective_message, "Beri tahu saya kata-kata apa yang ingin Anda hapus dari daftar hitam."))
+		send_message(update.effective_message, "Tell me which words you would like to add to the blacklist.")
 
 
 @run_async
-@spamcheck
 @user_admin
 def unblacklist(update, context):
 	msg = update.effective_message  # type: Optional[Message]
@@ -135,29 +131,27 @@ def unblacklist(update, context):
 
 		if len(to_unblacklist) == 1:
 			if successful:
-				send_message(update.effective_message, tl(update.effective_message, "<code>{}</code> dihapus dari daftar hitam di <b>{}</b>!").format(html.escape(to_unblacklist[0]), chat_name),
+				send_message(update.effective_message, "Removed <code>{}</code> from the blacklist!".format(html.escape(to_unblacklist[0]), chat_name),
 							   parse_mode=ParseMode.HTML)
 			else:
-				send_message(update.effective_message, "Ini bukan pemicu daftar hitam...!")
+				send_message(update.effective_message, "This is not a trigger for a blacklist...!")
 
 		elif successful == len(to_unblacklist):
-			send_message(update.effective_message, tl(update.effective_message, "<code>{}</code> Pemicu dihapus dari daftar hitam di <b>{}</b>!").format(
+			send_message(update.effective_message, "Removed <code>{}</code> triggers from the blacklist.".format(
 					successful, chat_name), parse_mode=ParseMode.HTML)
 
 		elif not successful:
-			send_message(update.effective_message, tl(update.effective_message, "Tidak satu pun pemicu ini ada, sehingga tidak dapat dihapus.").format(
+			send_message(update.effective_message, "None of these triggers exist, so they weren't removed.".format(
 					successful, len(to_unblacklist) - successful), parse_mode=ParseMode.HTML)
 
 		else:
-			send_message(update.effective_message, tl(update.effective_message, "Pemicu <code>{}</code> dihapus dari daftar hitam. {} Tidak ada, "
-				"jadi tidak dihapus.").format(successful, len(to_unblacklist) - successful),
+			send_message(update.effective_message, "Removed <code>{}</code> triggers from the blacklist. {} did not exist, so it's not deleted.".format(successful, len(to_unblacklist) - successful),
 				parse_mode=ParseMode.HTML)
 	else:
-		send_message(update.effective_message, tl(update.effective_message, "Beri tahu saya kata-kata apa yang ingin Anda hapus dari daftar hitam."))
+		send_message(update.effective_message, "Tell me which words you would like to add to the blacklist.")
 
 
 @run_async
-@spamcheck
 @loggable
 @user_admin
 def blacklist_mode(update, context):
@@ -173,7 +167,7 @@ def blacklist_mode(update, context):
 		chat_name = dispatcher.bot.getChat(conn).title
 	else:
 		if update.effective_message.chat.type == "private":
-			send_message(update.effective_message, tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
+			send_message(update.effective_message, "You can do this command in groups, not PM")
 			return ""
 		chat = update.effective_chat
 		chat_id = update.effective_chat.id
@@ -181,60 +175,58 @@ def blacklist_mode(update, context):
 
 	if args:
 		if args[0].lower() == 'off' or args[0].lower() == 'nothing' or args[0].lower() == 'no':
-			settypeblacklist = tl(update.effective_message, 'di biarkan')
+			settypeblacklist = 'do nothing'
 			sql.set_blacklist_strength(chat_id, 0, "0")
 		elif args[0].lower() == 'del' or args[0].lower() == 'delete':
-			settypeblacklist = tl(update.effective_message, 'di biarkan, pesannya akan dihapus')
+			settypeblacklist = 'delete that msg'
 			sql.set_blacklist_strength(chat_id, 1, "0")
 		elif args[0].lower() == 'warn':
-			settypeblacklist = tl(update.effective_message, 'di peringati')
+			settypeblacklist = 'warn sender'
 			sql.set_blacklist_strength(chat_id, 2, "0")
 		elif args[0].lower() == 'mute':
-			settypeblacklist = tl(update.effective_message, 'di bisukan')
+			settypeblacklist = 'mute sender'
 			sql.set_blacklist_strength(chat_id, 3, "0")
 		elif args[0].lower() == 'kick':
-			settypeblacklist = tl(update.effective_message, 'di tendang')
+			settypeblacklist = 'kick sender'
 			sql.set_blacklist_strength(chat_id, 4, "0")
 		elif args[0].lower() == 'ban':
-			settypeblacklist = tl(update.effective_message, 'di blokir')
+			settypeblacklist = 'banned sender'
 			sql.set_blacklist_strength(chat_id, 5, "0")
 		elif args[0].lower() == 'tban':
 			if len(args) == 1:
-				teks = tl(update.effective_message, """Sepertinya Anda mencoba menetapkan nilai sementara untuk blacklist, tetapi belum menentukan waktu; gunakan `/blacklistmode tban <timevalue>`.
-
-Contoh nilai waktu: 4m = 4 menit, 3h = 3 jam, 6d = 6 hari, 5w = 5 minggu.""")
+				teks = """It looks like you are trying to set a temporary value to blacklist, but has not determined the time; use `/blacklistmode tban <timevalue>`.
+                                          Examples of time values: 4m = 4 minute, 3h = 3 hours, 6d = 6 days, 5w = 5 weeks."""
 				send_message(update.effective_message, teks, parse_mode="markdown")
 				return ""
 			restime = extract_time(msg, args[1])
 			if not restime:
-				teks = tl(update.effective_message, """Nilai waktu tidak valid!
-Contoh nilai waktu: 4m = 4 menit, 3h = 3 jam, 6d = 6 hari, 5w = 5 minggu.""")
+				teks = """Invalid time value!
+                                        Examples of time values: 4m = 4 minute, 3h = 3 hours, 6d = 6 days, 5w = 5 weeks."""
 				send_message(update.effective_message, teks, parse_mode="markdown")
 				return ""
-			settypeblacklist = tl(update.effective_message, 'di blokir sementara selama {}').format(args[1])
+			settypeblacklist = 'temporary banned sender for {}'.format(args[1])
 			sql.set_blacklist_strength(chat_id, 6, str(args[1]))
 		elif args[0].lower() == 'tmute':
 			if len(args) == 1:
-				teks = tl(update.effective_message, """Sepertinya Anda mencoba menetapkan nilai sementara untuk blacklist, tetapi belum menentukan waktu; gunakan `/blacklistmode tmute <timevalue>`.
-
-Contoh nilai waktu: 4m = 4 menit, 3h = 3 jam, 6d = 6 hari, 5w = 5 minggu.""")
+				teks = """It looks like you are trying to set a temporary value to blacklist, but has not determined the time; use `/blacklistmode tmute <timevalue>`.
+                                        Examples of time values: 4m = 4 minute, 3h = 3 hours, 6d = 6 days, 5w = 5 weeks."""
 				send_message(update.effective_message, teks, parse_mode="markdown")
 				return ""
 			restime = extract_time(msg, args[1])
 			if not restime:
-				teks = tl(update.effective_message, """Nilai waktu tidak valid!
-Contoh nilai waktu: 4m = 4 menit, 3h = 3 jam, 6d = 6 hari, 5w = 5 minggu.""")
+				teks = """Invalid time value!
+                                        Examples of time values: 4m = 4 minute, 3h = 3 hours, 6d = 6 days, 5w = 5 weeks."""
 				send_message(update.effective_message, teks, parse_mode="markdown")
 				return ""
-			settypeblacklist = tl(update.effective_message, 'di bisukan sementara selama {}').format(args[1])
+			settypeblacklist = 'temporary muted sender for {}'.format(args[1])
 			sql.set_blacklist_strength(chat_id, 7, str(args[1]))
 		else:
-			send_message(update.effective_message, tl(update.effective_message, "Saya hanya mengerti off/del/warn/ban/kick/mute/tban/tmute!"))
+			send_message(update.effective_message, "I only understand off/del/warn/ban/kick/mute/tban/tmute!")
 			return ""
 		if conn:
 			text = tl(update.effective_message, "Mode blacklist diubah, Pengguna akan `{}` pada *{}*!").format(settypeblacklist, chat_name)
 		else:
-			text = tl(update.effective_message, "Mode blacklist diubah, Pengguna akan `{}`!").format(settypeblacklist)
+			text = "Blacklist mode changed, will `{}` at *{}*!".format(settypeblacklist)
 		send_message(update.effective_message, text, parse_mode="markdown")
 		return "<b>{}:</b>\n" \
 				"<b>Admin:</b> {}\n" \
@@ -243,25 +235,25 @@ Contoh nilai waktu: 4m = 4 menit, 3h = 3 jam, 6d = 6 hari, 5w = 5 minggu.""")
 	else:
 		getmode, getvalue = sql.get_blacklist_setting(chat.id)
 		if getmode == 0:
-			settypeblacklist = tl(update.effective_message, "tidak aktif")
+			settypeblacklist = "disabled"
 		elif getmode == 1:
-			settypeblacklist = tl(update.effective_message, "hapus")
+			settypeblacklist = "delete"
 		elif getmode == 2:
-			settypeblacklist = tl(update.effective_message, "warn")
+			settypeblacklist = "warn"
 		elif getmode == 3:
-			settypeblacklist = tl(update.effective_message, "mute")
+			settypeblacklist = "mute"
 		elif getmode == 4:
-			settypeblacklist = tl(update.effective_message, "kick")
+			settypeblacklist = "kick"
 		elif getmode == 5:
-			settypeblacklist = tl(update.effective_message, "ban")
+			settypeblacklist = "ban"
 		elif getmode == 6:
-			settypeblacklist = tl(update.effective_message, "banned sementara selama {}").format(getvalue)
+			settypeblacklist = "temp ban for {}".format(getvalue)
 		elif getmode == 7:
-			settypeblacklist = tl(update.effective_message, "mute sementara selama {}").format(getvalue)
+			settypeblacklist = "temp mute for {}".format(getvalue)
 		if conn:
-			text = tl(update.effective_message, "Mode blacklist saat ini disetel ke *{}* pada *{}*.").format(settypeblacklist, chat_name)
+			text = "Current blacklist mode is set to *{}* in *{}*.".format(settypeblacklist, chat_name)
 		else:
-			text = tl(update.effective_message, "Mode blacklist saat ini disetel ke *{}*.").format(settypeblacklist)
+			text = "Current blacklist mode is set to *{}*.".format(settypeblacklist)
 		send_message(update.effective_message, text, parse_mode=ParseMode.MARKDOWN)
 	return ""
 
@@ -295,35 +287,35 @@ def del_blacklist(update, context):
 					message.delete()
 				elif getmode == 2:
 					message.delete()
-					warn(update.effective_user, chat, tl(update.effective_message, "Mengatakan kata '{}' yang ada di daftar hitam").format(trigger), message, update.effective_user, conn=False)
+					warn(update.effective_user, chat, "Say '{}' which in blacklist words".format(trigger), message, update.effective_user, conn=False)
 					return
 				elif getmode == 3:
 					message.delete()
 					bot.restrict_chat_member(chat.id, update.effective_user.id, can_send_messages=False)
-					bot.sendMessage(chat.id, tl(update.effective_message, "{} di bisukan karena mengatakan kata '{}' yang ada di daftar hitam").format(mention_markdown(user.id, user.first_name), trigger), parse_mode="markdown")
+					bot.sendMessage(chat.id, "{} muted because say '{}' which in blacklist words".format(mention_markdown(user.id, user.first_name), trigger), parse_mode="markdown")
 					return
 				elif getmode == 4:
 					message.delete()
 					res = chat.unban_member(update.effective_user.id)
 					if res:
-						bot.sendMessage(chat.id, tl(update.effective_message, "{} di tendang karena mengatakan kata '{}' yang ada di daftar hitam").format(mention_markdown(user.id, user.first_name), trigger), parse_mode="markdown")
+						bot.sendMessage(chat.id, "{} kicked because say '{}' which in blacklist words".format(mention_markdown(user.id, user.first_name), trigger), parse_mode="markdown")
 					return
 				elif getmode == 5:
 					message.delete()
 					chat.kick_member(user.id)
-					bot.sendMessage(chat.id, tl(update.effective_message, "{} di blokir karena mengatakan kata '{}' yang ada di daftar hitam").format(mention_markdown(user.id, user.first_name), trigger), parse_mode="markdown")
+					bot.sendMessage(chat.id, "{} banned because say '{}' which in blacklist words".format(mention_markdown(user.id, user.first_name), trigger), parse_mode="markdown")
 					return
 				elif getmode == 6:
 					message.delete()
 					bantime = extract_time(message, value)
 					chat.kick_member(user.id, until_date=bantime)
-					bot.sendMessage(chat.id, tl(update.effective_message, "{} di blokir selama {} karena mengatakan kata '{}' yang ada di daftar hitam").format(mention_markdown(user.id, user.first_name), value, trigger), parse_mode="markdown")
+					bot.sendMessage(chat.id, "{} banned for {} because say '{}' which in blacklist words".format(mention_markdown(user.id, user.first_name), value, trigger), parse_mode="markdown")
 					return
 				elif getmode == 7:
 					message.delete()
 					mutetime = extract_time(message, value)
 					bot.restrict_chat_member(chat.id, user.id, until_date=mutetime, can_send_messages=False)
-					bot.sendMessage(chat.id, tl(update.effective_message, "{} di bisukan selama {} karena mengatakan kata '{}' yang ada di daftar hitam").format(mention_markdown(user.id, user.first_name), value, trigger), parse_mode="markdown")
+					bot.sendMessage(chat.id, "{} muted for {} because say '{}' which in blacklist words".format(mention_markdown(user.id, user.first_name), value, trigger), parse_mode="markdown")
 					return
 			except BadRequest as excp:
 				if excp.message == "Message to delete not found":
@@ -346,20 +338,31 @@ def __migrate__(old_chat_id, new_chat_id):
 
 def __chat_settings__(chat_id, user_id):
 	blacklisted = sql.num_blacklist_chat_filters(chat_id)
-	return tl(user_id, "Ada `{}` kata daftar hitam.").format(blacklisted)
+	return "There are `{}` blacklisted words.".format(blacklisted)
 
 
 def __stats__():
-	return tl(OWNER_ID, "{} pemicu daftar hitam, di seluruh {} obrolan.").format(sql.num_blacklist_filters(),
-															sql.num_blacklist_filter_chats())
+	return "{} blacklist triggers, across {} chats.".format(sql.num_blacklist_filters(), sql.num_blacklist_filter_chats())
 
 
 __mod_name__ = "Word Blacklists"
 
-__help__ = "blacklist_help"
+__help__ = """
+Blacklists are used to stop certain triggers from being said in a group. Any time the trigger is mentioned, \
+the message will immediately be deleted. A good combo is sometimes to pair this up with warn filters!
 
-BLACKLIST_HANDLER = DisableAbleCommandHandler("blacklist", blacklist, pass_args=True,
-											  admin_ok=True)
+*NOTE:* blacklists do not affect group admins.
+ - /blacklist: View the current blacklisted words.
+
+*Admin only:*
+ - /addblacklist <triggers>: Add a trigger to the blacklist. Each line is considered one trigger, so using different \
+lines will allow you to add multiple triggers.
+ - /unblacklist <triggers>: Remove triggers from the blacklist. Same newline logic applies here, so you can remove \
+multiple triggers at once.
+ - /rmblacklist <triggers>: Same as above.
+"""
+
+BLACKLIST_HANDLER = DisableAbleCommandHandler("blacklist", blacklist, pass_args=True, admin_ok=True)
 ADD_BLACKLIST_HANDLER = CommandHandler("addblacklist", add_blacklist)
 UNBLACKLIST_HANDLER = CommandHandler(["unblacklist", "rmblacklist"], unblacklist)
 BLACKLISTMODE_HANDLER = CommandHandler("blacklistmode", blacklist_mode, pass_args=True)

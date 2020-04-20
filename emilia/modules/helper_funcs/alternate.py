@@ -9,7 +9,6 @@ from telegram import error
 
 from emilia import dispatcher, DEL_CMDS, SUDO_USERS, WHITELIST_USERS, LOGGER
 
-from emilia.modules import languages
 
 DUMP_CHAT = -1001287670948
 

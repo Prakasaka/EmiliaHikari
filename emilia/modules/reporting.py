@@ -7,12 +7,11 @@ from telegram.error import BadRequest, Unauthorized
 from telegram.ext import CommandHandler, MessageHandler, run_async, Filters, CallbackQueryHandler
 from telegram.utils.helpers import mention_html, mention_markdown
 
-from emilia import dispatcher, LOGGER, spamcheck, OWNER_ID, SUDO_USERS, SUPPORT_USERS, STRICT_GBAN
+from emilia import dispatcher, LOGGER, OWNER_ID, SUDO_USERS, SUPPORT_USERS, STRICT_GBAN
 from emilia.modules.helper_funcs.chat_status import user_not_admin, user_admin
 from emilia.modules.log_channel import loggable
 from emilia.modules.sql import reporting_sql as sql
 
-from emilia.modules.languages import tl
 from emilia.modules.helper_funcs.alternate import send_message
 
 REPORT_GROUP = 5
@@ -21,7 +20,6 @@ CURRENT_REPORT = {}
 
 
 @run_async
-@spamcheck
 @user_admin
 def report_setting(update, context):
 	chat = update.effective_chat  # type: Optional[Chat]
@@ -32,32 +30,30 @@ def report_setting(update, context):
 		if len(args) >= 1:
 			if args[0] in ("yes", "on"):
 				sql.set_user_setting(chat.id, True)
-				send_message(update.effective_message, tl(update.effective_message, "Menghidupkan pelaporan! Anda akan diberi tahu setiap kali ada yang melaporkan sesuatu."))
+				send_message(update.effective_message, "Turned on reporting! You'll be notified whenever anyone reports something.")
 
 			elif args[0] in ("no", "off"):
 				sql.set_user_setting(chat.id, False)
-				send_message(update.effective_message, tl(update.effective_message, "Mematikan pelaporan! Anda tidak akan mendapatkan laporan apa pun."))
+				send_message(update.effective_message, "Turned off reporting! You wont get any reports.")
 		else:
-			send_message(update.effective_message, tl(update.effective_message, "Preferensi laporan Anda saat ini: `{}`").format(sql.user_should_report(chat.id)),
+			send_message(update.effective_message, "Your current report preference is: `{}`".format(sql.user_should_report(chat.id)),
 						   parse_mode=ParseMode.MARKDOWN)
 
 	else:
 		if len(args) >= 1:
 			if args[0] in ("yes", "on"):
 				sql.set_chat_setting(chat.id, True)
-				send_message(update.effective_message, tl(update.effective_message, "Menghidupkan pelaporan! Admin yang telah mengaktifkan laporan akan diberi tahu ketika seseorang menyebut /report "
-							   "atau @admin."))
+				send_message(update.effective_message, "Turned on reporting! Admins who have turned on reports will be notified when /report or @admin are called.")
 
 			elif args[0] in ("no", "off"):
 				sql.set_chat_setting(chat.id, False)
-				send_message(update.effective_message, tl(update.effective_message, "Mematikan pelaporan! Tidak ada admin yang akan diberitahukan ketika seseorang menyebut /report atau @admin."))
+				send_message(update.effective_message, "Turned off reporting! No admins will be notified on /report or @admin.")
 		else:
-			send_message(update.effective_message, tl(update.effective_message, "Pengaturan obrolan saat ini adalah: `{}`").format(sql.chat_should_report(chat.id)),
+			send_message(update.effective_message, "This chat's current setting is: `{}`".format(sql.chat_should_report(chat.id)),
 						   parse_mode=ParseMode.MARKDOWN)
 
 
 @run_async
-@spamcheck
 @user_not_admin
 @loggable
 def report(update, context) -> str:
@@ -77,22 +73,19 @@ def report(update, context) -> str:
 		admin_list = chat.get_administrators()
 
 		if chat.username and chat.type == Chat.SUPERGROUP:
-			msg = tl(update.effective_message, "<b>{}:</b>" \
-				  "\n<b>Pengguna yang dilaporkan:</b> {} (<code>{}</code>)" \
-				  "\n<b>Dilaporkan oleh:</b> {} (<code>{}</code>)").format(html.escape(chat.title),
-																	  mention_html(
-																		  reported_user.id,
-																		  reported_user.first_name),
-																	  reported_user.id,
-																	  mention_html(user.id,
-																				   user.first_name),
-																	  user.id)
+			   msg = "<b>{}:</b>" \
+                           "\n<b>Reported user:</b> {} (<code>{}</code>)" \
+                           "\n<b>Reported by:</b> {} (<code>{}</code>)".format(html.escape(chat.title), mention_html(reported_user.id,
+													reported_user.first_name),
+													reported_user.id,
+													mention_html(user.id,
+													user.first_name),
+													user.id)
 			#link = "\n<b>Link:</b> " \
 			#       "<a href=\"http://telegram.me/{}/{}\">klik disini</a>".format(chat.username, message.message_id)
 
 		else:
-			msg = tl(update.effective_message, "{} memanggil admin di \"{}\"!").format(mention_html(user.id, user.first_name),
-															   html.escape(chat_name))
+			msg = "{} is calling for admins in \"{}\"!".format(mention_html(user.id, user.first_name), html.escape(chat_name))
 			#link = ""
 
 		if chat.username:
@@ -100,16 +93,16 @@ def report(update, context) -> str:
 		else:
 			chatlink = "https://t.me/c/{}/{}".format(str(chat.id)[4:], str(message.reply_to_message.message_id))
 		keyboard = [
-			  [InlineKeyboardButton(tl(update.effective_message, "⚠️ Pesan yang dilaporkan"), url=chatlink)],
-			  [InlineKeyboardButton(tl(update.effective_message, "⚠️ Tendang"), callback_data="rp_{}=1={}".format(chat.id, reported_user.id)),
-			  InlineKeyboardButton(tl(update.effective_message, "⛔️ Banned"), callback_data="rp_{}=2={}".format(chat.id, reported_user.id))],
-			  [InlineKeyboardButton(tl(update.effective_message, "Hapus pesan"), callback_data="rp_{}=3={}".format(chat.id, message.reply_to_message.message_id))],
-			  [InlineKeyboardButton(tl(update.effective_message, "Tutup Tombol"), callback_data="rp_{}=4={}".format(chat.id, reported_user.id))]
+			  [InlineKeyboardButton("⚠️ Message reported", url=chatlink)],
+			  [InlineKeyboardButton("⚠️ Kick", callback_data="rp_{}=1={}".format(chat.id, reported_user.id)),
+			  InlineKeyboardButton("⛔️ Banned", callback_data="rp_{}=2={}".format(chat.id, reported_user.id))],
+			  [InlineKeyboardButton("Delete messagen", callback_data="rp_{}=3={}".format(chat.id, message.reply_to_message.message_id))],
+			  [InlineKeyboardButton("Close button", callback_data="rp_{}=4={}".format(chat.id, reported_user.id))]
 			]
 		reply_markup = InlineKeyboardMarkup(keyboard)
 
 		should_forward = True
-		context.bot.send_message(chat.id, tl(update.effective_message, "<i>⚠️ Pesan telah di laporkan ke semua admin!</i>"), parse_mode=ParseMode.HTML, reply_to_message_id=message.message_id)
+		context.bot.send_message(chat.id, "<i>⚠️ Message has been reported to all admins!</i>", parse_mode=ParseMode.HTML, reply_to_message_id=message.message_id)
 
 		CURRENT_REPORT[str(chat.id)] = msg
 		CURRENT_REPORT[str(chat.id)+"key"] = reply_markup
@@ -142,7 +135,6 @@ def report(update, context) -> str:
 	return ""
 
 @run_async
-@spamcheck
 @user_not_admin
 @loggable
 def report_alt(update, context) -> str:
@@ -155,16 +147,14 @@ def report_alt(update, context) -> str:
 		chat_name = chat.title or chat.first or chat.username
 		admin_list = chat.get_administrators()
 
-		msg = tl(update.effective_message, "<b>{}:</b>" \
-			  "\n<b>Pengguna yang dilaporkan:</b> {} (<code>{}</code>)" \
-			  "\n<b>Dilaporkan oleh:</b> {} (<code>{}</code>)").format(html.escape(chat.title),
-																	  mention_html(
-																		  reported_user.id,
-																		  reported_user.first_name),
-																	  reported_user.id,
-																	  mention_html(user.id,
-																				   user.first_name),
-																	  user.id)
+		msg = "<b>{}:</b>" \
+                           "\n<b>Reported user:</b> {} (<code>{}</code>)" \
+                           "\n<b>Reported by:</b> {} (<code>{}</code>)".format(html.escape(chat.title), mention_html(reported_user.id,
+                                                                                                        reported_user.first_name),
+                                                                                                        reported_user.id,
+                                                                                                        mention_html(user.id,
+                                                                                                        user.first_name),
+                                                                                                        user.id)
 		all_admins = []
 		for admin in admin_list:
 			if admin.user.is_bot:  # don't tag bot
@@ -173,7 +163,7 @@ def report_alt(update, context) -> str:
 			if sql.user_should_report(admin.user.id):
 				all_admins.append("<a href='tg://user?id={}'>⁣</a>".format(admin.user.id))
 
-		context.bot.send_message(chat.id, tl(update.effective_message, "⚠️ {} <b>telah di laporkan ke admin!</b>{}").format(
+		context.bot.send_message(chat.id, "⚠️ {} <b>has been reported to the admin</b>{}".format(
 					mention_html(reported_user.id, reported_user.first_name),
 					"".join(all_admins)), parse_mode=ParseMode.HTML, reply_to_message_id=message.reply_to_message.message_id)
 		return msg
@@ -192,42 +182,42 @@ def button(bot, update):
 	userinfo = CURRENT_REPORT.get(str(report_chat)+"user")
 	key = CURRENT_REPORT.get(str(report_chat)+"key")
 	if msg == None or userinfo == None or key == None:
-		query.message.edit_text(tl(update.effective_message, "Sesi telah berakhir!"))
+		query.message.edit_text("Session is time out!")
 		return
 
 	if splitter[1] == "1":
 		keyboard = [
-			[InlineKeyboardButton(tl(update.effective_message, "Ya"), callback_data="ak_1+y|{}={}".format(report_chat, report_target)),
-			InlineKeyboardButton(tl(update.effective_message, "Tidak"), callback_data="ak_1+n|{}={}".format(report_chat, report_target))]
+			[InlineKeyboardButton("Yes", callback_data="ak_1+y|{}={}".format(report_chat, report_target)),
+			InlineKeyboardButton("No", callback_data="ak_1+n|{}={}".format(report_chat, report_target))]
 		]
 		reply_markup = InlineKeyboardMarkup(keyboard)
-		context.bot.edit_message_text(text=msg + tl(update.effective_message, "\n\nApakah anda yakin ingin menendang {}?").format(userinfo.get('name')),
+		context.bot.edit_message_text(text=msg + "\n\nAre you sure you want to kick {}?".format(userinfo.get('name')),
 						  chat_id=query.message.chat_id,
 						  message_id=query.message.message_id, parse_mode=ParseMode.HTML,
 						  reply_markup=reply_markup)
 	elif splitter[1] == "2":
 		keyboard = [
-			[InlineKeyboardButton(tl(update.effective_message, "Ya"), callback_data="ak_2+y|{}={}".format(report_chat, report_target)),
-			InlineKeyboardButton(tl(update.effective_message, "Tidak"), callback_data="ak_2+n|{}={}".format(report_chat, report_target))]
+			[InlineKeyboardButton("Yes", callback_data="ak_2+y|{}={}".format(report_chat, report_target)),
+			InlineKeyboardButton("No", callback_data="ak_2+n|{}={}".format(report_chat, report_target))]
 		]
 		reply_markup = InlineKeyboardMarkup(keyboard)
-		context.bot.edit_message_text(text=msg + tl(update.effective_message, "\n\nApakah anda yakin ingin banned {}?").format(userinfo.get('name')),
+		context.bot.edit_message_text(text=msg + "\n\nAre you sure you want to banned {}?".format(userinfo.get('name')),
 						  chat_id=query.message.chat_id,
 						  message_id=query.message.message_id, parse_mode=ParseMode.HTML,
 						  reply_markup=reply_markup)
 	elif splitter[1] == "3":
 		keyboard = [
-			[InlineKeyboardButton(tl(update.effective_message, "Ya"), callback_data="ak_3+y|{}={}".format(report_chat, report_target)),
-			InlineKeyboardButton(tl(update.effective_message, "Tidak"), callback_data="ak_3+n|{}={}".format(report_chat, report_target))]
+			[InlineKeyboardButton("Yes", callback_data="ak_3+y|{}={}".format(report_chat, report_target)),
+			InlineKeyboardButton("No", callback_data="ak_3+n|{}={}".format(report_chat, report_target))]
 		]
 		reply_markup = InlineKeyboardMarkup(keyboard)
-		context.bot.edit_message_text(text=msg + tl(update.effective_message, "\n\nHapus pesan?"),
+		context.bot.edit_message_text(text=msg + "\n\nDelete message?",
 						  chat_id=query.message.chat_id,
 						  message_id=query.message.message_id, parse_mode=ParseMode.HTML,
 						  reply_markup=reply_markup)
 	elif splitter[1] == "4":
 		try:
-			context.bot.edit_message_text(text=msg + tl(update.effective_message, "\n\nTombol ditutup!"),
+			context.bot.edit_message_text(text=msg + "\n\nButton closed!",
 						  chat_id=query.message.chat_id,
 						  message_id=query.message.message_id, parse_mode=ParseMode.HTML)
 		except Exception as err:
@@ -261,10 +251,10 @@ def buttonask(bot, update):
 		if splitter[0] == "1":
 			try:
 				context.bot.unbanChatMember(report_chat, report_target)
-				context.bot.sendMessage(report_chat, text=tl(update.effective_message, "{} telah di tendang!\nOleh: {}").format(\
+				context.bot.sendMessage(report_chat, text="{} has been kicked!\nBy: {}".format(\
 					mention_markdown(userinfo['id'], userinfo['name']), mention_markdown(chat.id, chat.first_name)), \
 					parse_mode=ParseMode.MARKDOWN)
-				context.bot.edit_message_text(text=msg + tl(update.effective_message, "\n\n{} telah di tendang!").format(mention_html(userinfo['id'], userinfo['name'])),
+				context.bot.edit_message_text(text=msg + "\n\n{} has been kicked!".format(mention_html(userinfo['id'], userinfo['name'])),
 							  chat_id=query.message.chat_id,
 							  message_id=query.message.message_id, parse_mode=ParseMode.HTML)
 			except Exception as err:
@@ -274,10 +264,10 @@ def buttonask(bot, update):
 		elif splitter[0] == "2":
 			try:
 				context.bot.kickChatMember(report_chat, report_target)
-				context.bot.sendMessage(report_chat, text=tl(update.effective_message, "{} telah di banned!\nOleh: {}").format(\
+				context.bot.sendMessage(report_chat, text="{} has been banned!\nBy: {}".format(\
 					mention_markdown(userinfo['id'], userinfo['name']), mention_markdown(chat.id, chat.first_name)), \
 					parse_mode=ParseMode.MARKDOWN)
-				context.bot.edit_message_text(text=msg + tl(update.effective_message, "\n\n{} telah di banned!").format(mention_html(userinfo['id'], userinfo['name'])),
+				context.bot.edit_message_text(text=msg + "\n\n{} has been banned!".format(mention_html(userinfo['id'], userinfo['name'])),
 							  chat_id=query.message.chat_id,
 							  message_id=query.message.message_id, parse_mode=ParseMode.HTML)
 			except Exception as err:
@@ -287,7 +277,7 @@ def buttonask(bot, update):
 		elif splitter[0] == "3":
 			try:
 				context.bot.deleteMessage(report_chat, report_target)
-				context.bot.edit_message_text(text=msg + tl(update.effective_message, "\n\nPesan dihapus!"),
+				context.bot.edit_message_text(text=msg + "\n\nMessage was deleted!",
 							  chat_id=query.message.chat_id,
 							  message_id=query.message.message_id, parse_mode=ParseMode.HTML)
 			except Exception as err:
@@ -303,7 +293,7 @@ def buttonask(bot, update):
 
 def user_protection_checker(bot, user_id):
 	if not user_id:
-		return False, tl(update.effective_message, "Anda sepertinya tidak mengacu pada pengguna.")
+		return False, "You don't seem to be referring to a user."
 
 	if int(user_id) == OWNER_ID:
 		return False, "\n\nError: This one is my owner!"
@@ -325,18 +315,27 @@ def __migrate__(old_chat_id, new_chat_id):
 
 
 def __chat_settings__(chat_id, user_id):
-	return tl(user_id, "Obrolan ini disetel untuk mengirim laporan pengguna ke admin, melalui /report dan @admin: `{}`").format(
+	return user_id, "This chat is setup to send user reports to admins, via /report and @admin: `{}`".format(
 		sql.chat_should_report(chat_id))
 
 
 def __user_settings__(user_id):
-	return tl(user_id, "Anda menerima laporan dari obrolan yang Anda ikuti: `{}`.\nAktifkan ini dengan /reports di PM.").format(
+	return user_id, "You receive reports from chats you're admin in: `{}`.\nToggle this with /reports in PM.".format(
 		sql.user_should_report(user_id))
 
 
 __mod_name__ = "Reporting"
 
-__help__ = "reporting_help"
+__help__ = """
+ - /report <reason>: reply to a message to report it to admins.
+ - @admin: reply to a message to report it to admins.
+NOTE: neither of these will get triggered if used by admins
+
+*Admin only:*
+ - /reports <on/off>: change report setting, or view current status.
+   - If done in pm, toggles your status.
+   - If in chat, toggles that chat's status.
+"""
 
 
 REPORT_HANDLER = CommandHandler("report", report_alt, filters=Filters.group)

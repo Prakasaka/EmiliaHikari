@@ -69,7 +69,6 @@ if ENV:
 	CERT_PATH = os.environ.get("CERT_PATH")
 
 	DB_URI = os.environ.get('DATABASE_URL')
-	DONATION_LINK = os.environ.get('DONATION_LINK')
 	LOAD = os.environ.get("LOAD", "").split()
 	NO_LOAD = os.environ.get("NO_LOAD", "translation").split()
 	DEL_CMDS = bool(os.environ.get('DEL_CMDS', False))
@@ -78,9 +77,6 @@ if ENV:
 	BAN_STICKER = os.environ.get('BAN_STICKER', 'CAADBAAD4kYAAuOnXQW5LUN400QOBQI')
 	# ALLOW_EXCL = os.environ.get('ALLOW_EXCL', False)
 	CUSTOM_CMD = os.environ.get('CUSTOM_CMD', False)
-	API_WEATHER = os.environ.get('API_OPENWEATHER', None)
-	API_ACCUWEATHER = os.environ.get('API_ACCUWEATHER', None)
-	MAPS_API = os.environ.get('MAPS_API', None)
 	TEMPORARY_DATA = os.environ.get('TEMPORARY_DATA', None)
 	SPAMWATCH_TOKEN = os.environ.get('SPAMWATCH_TOKEN', None)
 
@@ -130,7 +126,6 @@ else:
 	CERT_PATH = Config.CERT_PATH
 
 	DB_URI = Config.SQLALCHEMY_DATABASE_URI
-	DONATION_LINK = Config.DONATION_LINK
 	LOAD = Config.LOAD
 	NO_LOAD = Config.NO_LOAD
 	DEL_CMDS = Config.DEL_CMDS
@@ -139,9 +134,6 @@ else:
 	BAN_STICKER = Config.BAN_STICKER
 	# ALLOW_EXCL = Config.ALLOW_EXCL
 	CUSTOM_CMD = Config.CUSTOM_CMD
-	API_WEATHER = Config.API_OPENWEATHER
-	API_ACCUWEATHER = Config.API_ACCUWEATHER
-	MAPS_API = Config.MAPS_API
 	TEMPORARY_DATA = Config.TEMPORARY_DATA
 	try:
 		SPAMWATCH_TOKEN = Config.SPAMWATCH_TOKEN
@@ -167,43 +159,3 @@ from emilia.modules.helper_funcs.handlers import CustomCommandHandler
 
 if CUSTOM_CMD and len(CUSTOM_CMD) >= 1:
 	tg.CommandHandler = CustomCommandHandler
-
-try:
-	from emilia.antispam import antispam_restrict_user, antispam_cek_user, detect_user
-	LOGGER.info("Note: AntiSpam loaded!")
-	antispam_module = True
-except ModuleNotFoundError:
-	antispam_module = False
-
-
-def spamcheck(func):
-	@wraps(func)
-	def check_user(update, context, *args, **kwargs):
-		chat = update.effective_chat
-		user = update.effective_user
-		message = update.effective_message
-		# If not user, return function
-		if not user:
-			return func(update, context, *args, **kwargs)
-		# If msg from self, return True
-		if user and user.id == context.bot.id:
-			return False
-		if IS_DEBUG:
-			print("{} | {} | {} | {}".format(message.text or message.caption, user.id, message.chat.title, chat.id))
-		if antispam_module:
-			parsing_date = time.mktime(message.date.timetuple())
-			detecting = detect_user(user.id, chat.id, message, parsing_date)
-			if detecting:
-				return False
-			antispam_restrict_user(user.id, parsing_date)
-		if int(user.id) in SPAMMERS:
-			if IS_DEBUG:
-				print("^ This user is spammer!")
-			return False
-		elif int(chat.id) in GROUP_BLACKLIST:
-			dispatcher.bot.sendMessage(chat.id, "This group is in blacklist, i'm leave...")
-			dispatcher.bot.leaveChat(chat.id)
-			return False
-		return func(update, context, *args, **kwargs)
-
-	return check_user

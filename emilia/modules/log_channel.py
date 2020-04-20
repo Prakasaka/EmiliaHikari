@@ -1,10 +1,9 @@
 from functools import wraps
 from typing import Optional
 
-from emilia import spamcheck, OWNER_ID
+from emilia import OWNER_ID
 from emilia.modules.helper_funcs.misc import is_module_loaded
 
-from emilia.modules.languages import tl
 from emilia.modules.helper_funcs.alternate import send_message
 
 FILENAME = __name__.rsplit(".", 1)[-1]
@@ -29,7 +28,7 @@ if is_module_loaded(FILENAME):
             if result:
                 if chat.type == chat.SUPERGROUP and chat.username:
                     result += "\n<b>Link:</b> " \
-                              "<a href=\"http://telegram.me/{}/{}\">klik disini</a>".format(chat.username,
+                              "<a href=\"http://telegram.me/{}/{}\">Click here</a>".format(chat.username,
                                                                                            message.message_id)
                 log_chat = sql.get_chat_log_channel(chat.id)
                 if log_chat:
@@ -52,18 +51,17 @@ if is_module_loaded(FILENAME):
             bot.send_message(log_chat_id, result, parse_mode=ParseMode.HTML)
         except BadRequest as excp:
             if excp.message == "Chat not found":
-                bot.send_message(orig_chat_id, tl(update.effective_message, "Saluran log ini telah dihapus - tidak bisa dibuka."))
+                bot.send_message(orig_chat_id, "This log channel has been deleted - unsetting.")
                 sql.stop_chat_logging(orig_chat_id)
             else:
                 LOGGER.warning(excp.message)
                 LOGGER.warning(result)
                 LOGGER.exception("Could not parse")
 
-                bot.send_message(log_chat_id, result + tl(update.effective_message, "\n\nMemformat telah dinonaktifkan karena kesalahan tak terduga."))
+                bot.send_message(log_chat_id, result + "\n\nFormatting has been disabled due to an unexpected error.")
 
 
     @run_async
-    @spamcheck
     @user_admin
     def logging(update, context):
         message = update.effective_message  # type: Optional[Message]
@@ -72,23 +70,19 @@ if is_module_loaded(FILENAME):
         log_channel = sql.get_chat_log_channel(chat.id)
         if log_channel:
             log_channel_info = context.bot.get_chat(log_channel)
-            send_message(update.effective_message, 
-                tl(update.effective_message, "Grup ini memiliki semua log yang dikirim ke: {} (`{}`)").format(escape_markdown(log_channel_info.title),
-                                                                         log_channel),
-                parse_mode=ParseMode.MARKDOWN)
+            send_message(update.effective_message, "This group has all it's logs sent to: {} (`{}`)".format(escape_markdown(log_channel_info.title), log_channel),parse_mode=ParseMode.MARKDOWN)
 
         else:
-            send_message(update.effective_message, tl(update.effective_message, "Tidak ada saluran log yang telah ditetapkan untuk grup ini!"))
+            send_message(update.effective_message, "No log channel has been set for this group!")
 
 
     @run_async
-    @spamcheck
     @user_admin
     def setlog(update, context):
         message = update.effective_message  # type: Optional[Message]
         chat = update.effective_chat  # type: Optional[Chat]
         if chat.type == chat.CHANNEL:
-            send_message(update.effective_message, tl(update.effective_message, "Sekarang, teruskan /setlog ke grup yang Anda ingin ikat saluran ini!"))
+            send_message(update.effective_message, "Now, forward the /setlog to the group you want to tie this channel to!")
 
         elif message.forward_from_chat:
             sql.set_chat_log_channel(chat.id, message.forward_from_chat.id)
@@ -101,28 +95,22 @@ if is_module_loaded(FILENAME):
                     LOGGER.exception("Error deleting message in log channel. Should work anyway though.")
                     
             try:
-                context.bot.send_message(message.forward_from_chat.id,
-                             tl(update.effective_message, "Saluran ini telah ditetapkan sebagai saluran log untuk {}.").format(
-                                 chat.title or chat.first_name))
+                context.bot.send_message(message.forward_from_chat.id, "This channel has been set as the log channel for {}.".format(chat.title or chat.first_name))
             except Unauthorized as excp:
                 if excp.message == "Forbidden: bot is not a member of the channel chat":
-                    context.bot.send_message(chat.id, tl(update.effective_message, "Gagal menyetel saluran log!\nSaya mungkin bukan admin di channel tersebut."))
+                    context.bot.send_message(chat.id, "Failed to set the log channel!\nI might not be the admin on the channel.")
                     sql.stop_chat_logging(chat.id)
                     return
                 else:
                     LOGGER.exception("ERROR in setting the log channel.")
                     
-            context.bot.send_message(chat.id, tl(update.effective_message, "Berhasil mengatur saluran log!"))
+            context.bot.send_message(chat.id, "Successfully set log channel!")
 
         else:
-            send_message(update.effective_message, tl(update.effective_message, "Langkah-langkah untuk mengatur saluran log adalah:\n"
-                               " - tambahkan bot ke saluran yang diinginkan\n"
-                               " - Kirimkan /setlog ke saluran\n"
-                               " - Teruskan /setlog ke grup\n"))
+            send_message(update.effective_message, "The steps to set a log channel are:\n - add bot to the desired channel\n - send /setlog to the channel\n - forward the /setlog to the group\n")
 
 
     @run_async
-    @spamcheck
     @user_admin
     def unsetlog(update, context):
         message = update.effective_message  # type: Optional[Message]
@@ -130,15 +118,15 @@ if is_module_loaded(FILENAME):
 
         log_channel = sql.stop_chat_logging(chat.id)
         if log_channel:
-            context.bot.send_message(log_channel, tl(update.effective_message, "Channel telah dibatalkan tautannya {}").format(chat.title))
-            send_message(update.effective_message, tl(update.effective_message, "Log saluran telah dinonaktifkan."))
+            context.bot.send_message(log_channel, "Channel has been unlinked from {}".format(chat.title))
+            send_message(update.effective_message, "Log channel has been un-set.")
 
         else:
-            send_message(update.effective_message, tl(update.effective_message, "Belum ada saluran log yang ditetapkan!"))
+            send_message(update.effective_message, "No log channel has been set yet!")
 
 
     def __stats__():
-        return tl(OWNER_ID, "{} saluran log ditetapkan.").format(sql.num_logchannels())
+        return OWNER_ID, "{} log channels set.".format(sql.num_logchannels())
 
 
     def __migrate__(old_chat_id, new_chat_id):
@@ -149,12 +137,22 @@ if is_module_loaded(FILENAME):
         log_channel = sql.get_chat_log_channel(chat_id)
         if log_channel:
             log_channel_info = dispatcher.bot.get_chat(log_channel)
-            return tl(user_id, "Grup ini memiliki semua log yang dikirim ke: {} (`{}`)").format(escape_markdown(log_channel_info.title),
+            return user_id, "This group has all it's logs sent to: {} (`{}`)".format(escape_markdown(log_channel_info.title),
                                                                             log_channel)
-        return tl(user_id, "Tidak ada saluran masuk yang ditetapkan untuk grup ini!")
+        return user_id, "No log channel is set for this group!"
 
 
-    __help__ = "logchannel_help"
+    __help__ = """
+*Admin only:*
+- /logchannel: get log channel info
+- /setlog: set the log channel.
+- /unsetlog: unset the log channel.
+
+Setting the log channel is done by:
+- adding the bot to the desired channel (as an admin!)
+- sending /setlog in the channel
+- forwarding the /setlog to the group
+"""
 
     __mod_name__ = "Channel Log"
 

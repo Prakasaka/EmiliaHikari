@@ -8,7 +8,7 @@ from telegram.error import BadRequest
 from telegram.ext import CommandHandler, run_async, Filters
 
 import emilia.modules.sql.notes_sql as sql
-from emilia import dispatcher, LOGGER, OWNER_ID, SUDO_USERS, spamcheck, TEMPORARY_DATA
+from emilia import dispatcher, LOGGER, OWNER_ID, SUDO_USERS, TEMPORARY_DATA
 from emilia.__main__ import DATA_IMPORT
 from emilia.modules.helper_funcs.chat_status import user_admin
 from emilia.modules.helper_funcs.misc import build_keyboard, revert_buttons
@@ -22,7 +22,6 @@ import emilia.modules.sql.blacklist_sql as blacklistsql
 import emilia.modules.sql.blsticker_sql as blackliststksql
 from emilia.modules.sql import disable_sql as disabledsql
 from emilia.modules.sql import cust_filters_sql as filtersql
-from emilia.modules.sql import languages_sql as langsql
 import emilia.modules.sql.locks_sql as locksql
 from emilia.modules.locks import LOCK_TYPES
 from emilia.modules.sql import notes_sql as notesql
@@ -34,11 +33,9 @@ import emilia.modules.sql.welcome_sql as welcsql
 from emilia.modules.connection import connected
 
 from emilia.modules.helper_funcs.msg_types import Types
-from emilia.modules.languages import tl
 from emilia.modules.helper_funcs.alternate import send_message
 
 @run_async
-@spamcheck
 @user_admin
 def import_data(update, context):
 	msg = update.effective_message  # type: Optional[Message]
@@ -54,7 +51,7 @@ def import_data(update, context):
 		chat_name = dispatcher.bot.getChat(conn).title
 	else:
 		if update.effective_message.chat.type == "private":
-			send_message(update.effective_message, tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
+			send_message(update.effective_message, tl(update.effective_message, "You can do this command in groups, not PM"))
 			return ""
 		chat = update.effective_chat
 		chat_id = update.effective_chat.id
@@ -63,12 +60,12 @@ def import_data(update, context):
 	if msg.reply_to_message and msg.reply_to_message.document:
 		filetype = msg.reply_to_message.document.file_name
 		if filetype.split('.')[-1] not in ("backup", "json", "txt"):
-			send_message(update.effective_message, tl(update.effective_message, "File cadangan tidak valid!"))
+			send_message(update.effective_message, "Invalid backup file!")
 			return
 		try:
 			file_info = context.bot.get_file(msg.reply_to_message.document.file_id)
 		except BadRequest:
-			send_message(update.effective_message, tl(update.effective_message, "Coba unduh dan unggah ulang file seperti Anda sendiri sebelum mengimpor - yang ini sepertinya rusak!"))
+			send_message(update.effective_message, "Try downloading and reuploading the file as yourself before importing - this one seems to be iffy!")
 			return
 
 		with BytesIO() as file:
@@ -428,44 +425,44 @@ def import_data(update, context):
 							imp_warn_chat += 1
 
 				if conn:
-					text = tl(update.effective_message, "Cadangan sepenuhnya dikembalikan pada *{}*. Selamat datang kembali! 😀").format(chat_name)
+					text = "Backup fully imported in *{}*. Welcome back! 😀".format(chat_name)
 				else:
-					text = tl(update.effective_message, "Cadangan sepenuhnya dikembalikan. Selamat datang kembali! 😀").format(chat_name)
-				text += tl(update.effective_message, "\n\nYang saya kembalikan:\n")
+					text = "Backup fully imported. Welcome back! 😀".format(chat_name)
+				text += "\n\nRestored:\n"
 				if imp_antiflood:
-					text += tl(update.effective_message, "- Pengaturan Antiflood\n")
+					text += "- Antiflood Settings\n"
 				if imp_blacklist:
-					text += tl(update.effective_message, "- Pengaturan Blacklist\n")
+					text += "- Blacklist Settings\n"
 				if imp_blacklist_count:
-					text += tl(update.effective_message, "- {} blacklists\n").format(imp_blacklist_count)
+					text += "- {} blacklists\n".format(imp_blacklist_count)
 				if imp_blsticker:
-					text += tl(update.effective_message, "- {} blacklist stickers\n").format(imp_blsticker_count)
+					text += "- {} blacklist stickers\n".format(imp_blsticker_count)
 				if imp_disabled_count:
-					text += tl(update.effective_message, "- {} cmd disabled\n").format(imp_disabled_count)
+					text += "- {} cmd disabled\n".format(imp_disabled_count)
 				if imp_filters_count:
-					text += tl(update.effective_message, "- {} filters\n").format(imp_filters_count)
+					text += "- {} filters\n".format(imp_filters_count)
 				if imp_greet_pref:
-					text += tl(update.effective_message, "- Pengaturan salam\n")
+					text += "- Greeting settings\n"
 				if imp_greet:
-					text += tl(update.effective_message, "- Pesan salam\n")
+					text += "- Greetings message\n"
 				if imp_gdbye:
-					text += tl(update.effective_message, "- Pesan selamat tinggal\n")
+					text += "- Goodbye message\n"
 				if imp_locks:
-					text += tl(update.effective_message, "- Penguncian\n")
+					text += "- Locked\n"
 				if imp_notes:
-					text += tl(update.effective_message, "- {} catatan\n").format(imp_notes)
+					text += "- {} notes\n".format(imp_notes)
 				if imp_report:
-					text += tl(update.effective_message, "- Pengaturan pelaporan\n")
+					text += "- Reporting setting\n"
 				if imp_rules:
-					text += tl(update.effective_message, "- Pesan peraturan grup\n")
+					text += "- Rules group\n"
 				if imp_lang:
-					text += tl(update.effective_message, "- Pengaturan bahasa\n")
+					text += "- Language settings\n"
 				if imp_warn:
-					text += tl(update.effective_message, "- Pengaturan peringatan\n")
+					text += "- Warn settings\n"
 				if imp_warn_chat:
-					text += tl(update.effective_message, "- {} pengguna peringatan\n").format(imp_warn_chat)
+					text += "- {} user alert\n".format(imp_warn_chat)
 				if imp_warn_filter:
-					text += tl(update.effective_message, "- {} filter peringatan\n").format(imp_warn_filter)
+					text += "- {} filter warning\n".format(imp_warn_filter)
 				try:
 					send_message(update.effective_message, text, parse_mode="markdown")
 				except BadRequest:
@@ -474,11 +471,11 @@ def import_data(update, context):
 					f = open("{}-notimported.txt".format(chat_id), "w")
 					f.write(str(NOT_IMPORTED))
 					f.close()
-					context.bot.sendDocument(chat_id, document=open('{}-notimported.txt'.format(chat_id), 'rb'), caption=tl(update.effective_message, "*Data yang tidak dapat di import*"), timeout=360, parse_mode=ParseMode.MARKDOWN)
+					context.bot.sendDocument(chat_id, document=open('{}-notimported.txt'.format(chat_id), 'rb'), caption="*Data which can't be imported*", timeout=360, parse_mode=ParseMode.MARKDOWN)
 					os.remove("{}-notimported.txt".format(chat_id))
 				return
 		except Exception as err:
-			send_message(update.effective_message, tl(update.effective_message, "Telah terjadi kesalahan dalam import backup Emilia!\nGabung ke [Grup support](https://t.me/EmiliaOfficial) kami untuk melaporkan dan mengatasi masalah ini!\n\nTerima kasih"), parse_mode="markdown")
+			send_message(update.effective_message, "An exception occured while restoring your data from Emilia backup!", parse_mode="markdown")
 			LOGGER.exception("An error when importing from Emilia base!")
 			return
 
@@ -661,36 +658,36 @@ def import_data(update, context):
 							warnssql.set_warn_mode(chat_id, 3)
 							imp_warn = True
 					if conn:
-						text = tl(update.effective_message, "Cadangan sepenuhnya dikembalikan pada *{}*. Selamat datang kembali! 😀").format(chat_name)
+						text = "Backup fully imported in *{}*. Welcome back! 😀".format(chat_name)
 					else:
-						text = tl(update.effective_message, "Cadangan sepenuhnya dikembalikan. Selamat datang kembali! 😀").format(chat_name)
-					text += tl(update.effective_message, "\n\nYang saya kembalikan:\n")
+						text = "Backup fully imported. Welcome back! 😀".format(chat_name)
+					text += "\n\nRestored:\n"
 					if imp_antiflood:
-						text += tl(update.effective_message, "- Pengaturan Antiflood\n")
+						text += "- Antiflood Settings\n"
 					if imp_blacklist:
-						text += tl(update.effective_message, "- Pengaturan Blacklist\n")
+						text += "- Blacklist Settings\n"
 					if imp_blacklist_count:
-						text += tl(update.effective_message, "- {} blacklists\n").format(imp_blacklist_count)
+						text += "- {} blacklists\n".format(imp_blacklist_count)
 					if imp_disabled_count:
-						text += tl(update.effective_message, "- {} cmd disabled\n").format(imp_disabled_count)
+						text += "- {} cmd disabled\n".format(imp_disabled_count)
 					if imp_filters_count:
-						text += tl(update.effective_message, "- {} filters\n").format(imp_filters_count)
+						text += "- {} filters\n".format(imp_filters_count)
 					if imp_greet_pref:
-						text += tl(update.effective_message, "- Pengaturan salam\n")
+						text += "- Greeting settings\n"
 					if imp_greet:
-						text += tl(update.effective_message, "- Pesan salam\n")
+						text += "- Greeting messages\n"
 					if imp_gdbye:
-						text += tl(update.effective_message, "- Pesan selamat tinggal\n")
+						text += "- Goodbye message\n"
 					if imp_notes:
-						text += tl(update.effective_message, "- {} catatan\n").format(imp_notes)
+						text += "- {} notes\n".format(imp_notes)
 					if imp_report:
-						text += tl(update.effective_message, "- Pengaturan pelaporan\n")
+						text += "- Reporting setting\n"
 					if imp_rules:
-						text += tl(update.effective_message, "- Pesan peraturan grup\n")
+						text += "- Rules group\n"
 					if imp_lang:
-						text += tl(update.effective_message, "- Pengaturan bahasa\n")
+						text += "- Language settings\n"
 					if imp_warn:
-						text += tl(update.effective_message, "- Pengaturan peringatan\n")
+						text += "- Warn settings\n"
 					try:
 						send_message(update.effective_message, text, parse_mode="markdown")
 					except BadRequest:
@@ -699,38 +696,36 @@ def import_data(update, context):
 						f = open("{}-notimported.txt".format(chat_id), "w")
 						f.write(str(NOT_IMPORTED))
 						f.close()
-						context.bot.sendDocument(chat_id, document=open('{}-notimported.txt'.format(chat_id), 'rb'), caption=tl(update.effective_message, "*Data yang tidak dapat di import*"), timeout=360, parse_mode=ParseMode.MARKDOWN)
+						context.bot.sendDocument(chat_id, document=open('{}-notimported.txt'.format(chat_id), 'rb'), caption="*Data which can't be imported*", timeout=360, parse_mode=ParseMode.MARKDOWN)
 						os.remove("{}-notimported.txt".format(chat_id))
 					return
 		except Exception as err:
-			send_message(update.effective_message, tl(update.effective_message, "Telah terjadi kesalahan dalam import backup Rose!\nGabung ke [Grup support](https://t.me/joinchat/Fykz0VTMpqZvlkb8S0JevQ) kami untuk melaporkan dan mengatasi masalah ini!\n\nTerima kasih"), parse_mode="markdown")
+			send_message(update.effective_message, "An exception occured while restoring your data from Rose backup!", parse_mode="markdown")
 			LOGGER.exception("An error when importing from Rose base!")
 			return
 
 		# only import one group
 		if len(data) > 1 and str(chat_id) not in data:
-			send_message(update.effective_message, tl(update.effective_message, "Ada lebih dari satu grup di file ini, dan tidak ada yang memiliki id obrolan yang sama dengan"
-						   "grup ini - bagaimana cara memilih apa yang akan diimpor?"))
+			send_message(update.effective_message, "Theres more than one group here in this file, and none have the same chat id as this group - how do I choose what to import?")
 			return
 
 		# Check if backup is this chat
 		try:
 			if data.get(str(chat_id)) == None:
 				if conn:
-					text = tl(update.effective_message, "Backup berasal chat lain, Saya tidak bisa mengembalikan chat lain kedalam chat *{}*").format(chat_name)
+					text = "Backup comes from another chat, I can't return another chat to chat *{}*".format(chat_name)
 				else:
-					text = tl(update.effective_message, "Backup berasal chat lain, Saya tidak bisa mengembalikan chat lain kedalam chat ini")
+					text = "Backup comes from another chat, I can't return another chat to this chat"
 				return send_message(update.effective_message, text, parse_mode="markdown")
 		except:
-			return send_message(update.effective_message, tl(update.effective_message, "Telah terjadi error dalam pengecekan data, silahkan laporkan kepada pembuat saya "
-								  "untuk masalah ini untuk membuat saya lebih baik! Terima kasih! 🙂"))
+			return send_message(update.effective_message, "An exception occured while restoring your data, please report to my creator for solve this problem to make me better! Thanks! 🙂")
 		# Check if backup is from self
 		try:
 			if str(bot.id) != str(data[str(chat_id)]['bot']):
-				return send_message(update.effective_message, tl(update.effective_message, "Backup berasal dari bot lain, dokumen, foto, video, audio, suara tidak akan "
-							   "bekerja, jika file anda tidak ingin hilang, import dari bot yang dicadangkan."
-							   "jika masih tidak bekerja, laporkan pada pembuat bot tersebut untuk "
-							   "membuat saya lebih baik! Terima kasih! 🙂"))
+				return send_message(update.effective_message, "Backup comes from other bots, documents, photos, videos, audio, sounds will not "
+                                                           "works, if your data wont to be lost, import from the exported bot."
+                                                           "if it still does not work, report it to the bot maker for "
+                                                           "make me better! Thanks! 🙂")
 		except:
 			pass
 		# Select data source
@@ -743,24 +738,23 @@ def import_data(update, context):
 			for mod in DATA_IMPORT:
 				mod.__import_data__(str(chat_id), data)
 		except Exception:
-			send_message(update.effective_message, tl(update.effective_message, "Kesalahan terjadi saat memulihkan data Anda. Prosesnya mungkin tidak lengkap. Jika "
-						   "Anda mengalami masalah dengan ini, pesan @AyraHikari dengan file cadangan Anda, jadi "
-						   "masalah bisa di-debug. Pemilik saya akan dengan senang hati membantu, dan setiap bug "
-						   "dilaporkan membuat saya lebih baik! Terima kasih! 🙂"))
-			LOGGER.exception("Impor untuk id chat %s dengan nama %s gagal.", str(chat_id), str(chat.title))
+			send_message(update.effective_message, "An exception occured while restoring your data. The process may not be complete. If "
+                                                   "you have a problem with this, contact @AyraHikari with your backup file, so "
+                                                   "issue can be debugged. My owner will be happy to help, and every bug "
+                                                   "reported makes me better! Thanks! 🙂")
+			LOGGER.exception("Import for chat id %s with name %s failed.", str(chat_id), str(chat.title))
 			return
 
 		# TODO: some of that link logic
 		# NOTE: consider default permissions stuff?
 		if conn:
-			text = tl(update.effective_message, "Cadangan sepenuhnya dikembalikan pada *{}*. Selamat datang kembali! 😀").format(chat_name)
+			text = "Backup fully imported in *{}*. Welcome back! 😀".format(chat_name)
 		else:
-			text = tl(update.effective_message, "Cadangan sepenuhnya dikembalikan. Selamat datang kembali! 😀").format(chat_name)
+			text = "Backup fully imported. Welcome back! 😀"
 		send_message(update.effective_message, text, parse_mode="markdown")
 
 
 @run_async
-@spamcheck
 @user_admin
 def export_data(update, context):
 	msg = update.effective_message  # type: Optional[Message]
@@ -778,7 +772,7 @@ def export_data(update, context):
 		chat_name = dispatcher.bot.getChat(conn).title
 	else:
 		if update.effective_message.chat.type == "private":
-			send_message(update.effective_message, tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
+			send_message(update.effective_message, "You can do this command in groups, not PM")
 			return ""
 		chat = update.effective_chat
 		chat_id = update.effective_chat.id
@@ -790,7 +784,7 @@ def export_data(update, context):
 	if cek.get('status'):
 		if jam <= int(cek.get('value')):
 			waktu = time.strftime("%H:%M:%S %d/%m/%Y", time.localtime(cek.get('value')))
-			send_message(update.effective_message, tl(update.effective_message, "Anda dapat mencadangan data sekali dalam 12 jam!\n[Orang ini](tg://user?id={}) sudah mencadangan data\nAnda dapat mencadangan data lagi pada `{}`").format(cek.get('user'), waktu), parse_mode=ParseMode.MARKDOWN)
+			send_message(update.effective_message, "You can backup data once in 3 hours!\n[Orang ini](tg://user?id={}) has backed up the data\nYou can backup data again at `{}`".format(cek.get('user'), waktu), parse_mode=ParseMode.MARKDOWN)
 			return
 		else:
 			if user.id != OWNER_ID:
@@ -876,10 +870,6 @@ def export_data(update, context):
 
 	getcur, cur_value, extra_verify, timeout, timeout_mode, cust_text = welcsql.welcome_security(chat_id)
 	greetings["security"] = {"enable": getcur, "text": cust_text, "time": cur_value, "extra_verify": extra_verify, "timeout": timeout, "timeout_mode": timeout_mode}
-
-	# Backuping chat language
-	getlang = langsql.get_lang(chat_id)
-	language = {"language": getlang}
 
 	# Backuping locks
 	curr_locks = locksql.get_locks(chat_id)
@@ -981,10 +971,10 @@ def export_data(update, context):
 		context.bot.sendMessage(TEMPORARY_DATA, "*Berhasil mencadangan untuk:*\nNama chat: `{}`\nID chat: `{}`\nPada: `{}`".format(chat.title, chat_id, tgl), parse_mode=ParseMode.MARKDOWN)
 	except BadRequest:
 		pass
-	send = context.bot.sendDocument(current_chat_id, document=open('{}-Emilia.backup'.format(chat_id), 'rb'), caption=tl(update.effective_message, "*Berhasil mencadangan untuk:*\nNama chat: `{}`\nID chat: `{}`\nPada: `{}`\n\nNote: cadangan ini khusus untuk bot ini, jika di import ke bot lain maka catatan dokumen, video, audio, voice, dan lain-lain akan hilang").format(chat.title, chat_id, tgl), timeout=360, reply_to_message_id=msg.message_id, parse_mode=ParseMode.MARKDOWN)
+	send = context.bot.sendDocument(current_chat_id, document=open('{}-Emilia.backup'.format(chat_id), 'rb'), caption="*Successfully backed up for:*\nChat: `{}`\nChat ID: `{}`\nAt: `{}`\n\nNote: This backup is specific to this bot, if it is imported to another bot then document, video, audio, voice, and other notes will be lost".format(chat.title, chat_id, tgl), timeout=360, reply_to_message_id=msg.message_id, parse_mode=ParseMode.MARKDOWN)
 	try:
 		# Send to temp data for prevent unexpected issue
-		context.bot.sendDocument(TEMPORARY_DATA, document=send.document.file_id, caption=tl(update.effective_message, "*Berhasil mencadangan untuk:*\nNama chat: `{}`\nID chat: `{}`\nPada: `{}`\n\nNote: cadangan ini khusus untuk bot ini, jika di import ke bot lain maka catatan dokumen, video, audio, voice, dan lain-lain akan hilang").format(chat.title, chat_id, tgl), timeout=360, parse_mode=ParseMode.MARKDOWN)
+		context.bot.sendDocument(TEMPORARY_DATA, document=send.document.file_id, caption="*Successfully backed up for:*\nChat: `{}`\nChat ID: `{}`\nAt: `{}`\n\nNote: This backup is specific to this bot, if it is imported to another bot then document, video, audio, voice, and other notes will be lost".format(chat.title, chat_id, tgl), timeout=360, parse_mode=ParseMode.MARKDOWN)
 	except BadRequest:
 		pass
 	os.remove("{}-Emilia.backup".format(chat_id)) # Cleaning file
@@ -1017,7 +1007,12 @@ def get_chat(chat_id, chat_data):
 
 __mod_name__ = "Import/Export"
 
-__help__ = "backups_help"
+__help__ = """
+*Admin only:*
+ - /import: reply to a group butler/marie/rose/emilia backup file to import as much as possible, making the transfer super simple!
+Note that files/photos from other bots can't be imported due to telegram restrictions. Except for Emilia backup it self.
+ - /export: export group data, you can do this 12 hours once.
+"""
 
 IMPORT_HANDLER = CommandHandler("import", import_data, filters=Filters.group)
 EXPORT_HANDLER = CommandHandler("export", export_data, pass_chat_data=True)

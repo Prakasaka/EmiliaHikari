@@ -8,7 +8,7 @@ from telegram.error import BadRequest
 from telegram.ext import CommandHandler, MessageHandler, DispatcherHandlerStop, run_async, Filters
 from telegram.utils.helpers import escape_markdown, mention_markdown
 
-from emilia import dispatcher, LOGGER, spamcheck, OWNER_ID
+from emilia import dispatcher, LOGGER, OWNER_ID
 from emilia.modules.disable import DisableAbleCommandHandler
 from emilia.modules.helper_funcs.chat_status import user_admin
 from emilia.modules.helper_funcs.extraction import extract_text
@@ -20,7 +20,6 @@ from emilia.modules.sql import cust_filters_sql as sql
 
 from emilia.modules.connection import connected
 
-from emilia.modules.languages import tl
 from emilia.modules.helper_funcs.alternate import send_message
 
 HANDLER_GROUP = 10
@@ -40,7 +39,6 @@ ENUM_FUNC_MAP = {
 
 
 @run_async
-@spamcheck
 def list_handlers(update, context):
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
@@ -49,21 +47,21 @@ def list_handlers(update, context):
 	if not conn == False:
 		chat_id = conn
 		chat_name = dispatcher.bot.getChat(conn).title
-		filter_list = "*Filter di {}:*\n"
+		filter_list = "*Filters in {}:*\n"
 	else:
 		chat_id = update.effective_chat.id
 		if chat.type == "private":
-			chat_name = tl(update.effective_message, "filter lokal")
-			filter_list = tl(update.effective_message, "*filter lokal:*\n")
+			chat_name = "local filters"
+			filter_list = "*local filters:*\n"
 		else:
 			chat_name = chat.title
-			filter_list = tl(update.effective_message, "*Filter di {}*:\n")
+			filter_list = "*Filters in {}*:\n"
 
 	all_handlers = sql.get_chat_triggers(chat_id)
 
 
 	if not all_handlers:
-		send_message(update.effective_message, tl(update.effective_message, "Tidak ada filter di {}!").format(chat_name))
+		send_message(update.effective_message, "There is no filter in {}!".format(chat_name))
 		return
 
 	for keyword in all_handlers:
@@ -78,7 +76,6 @@ def list_handlers(update, context):
 
 
 # NOT ASYNC BECAUSE DISPATCHER HANDLER RAISED
-@spamcheck
 @user_admin
 def filters(update, context):
 	chat = update.effective_chat  # type: Optional[Chat]
@@ -93,17 +90,17 @@ def filters(update, context):
 	else:
 		chat_id = update.effective_chat.id
 		if chat.type == "private":
-			chat_name = tl(update.effective_message, "catatan lokal")
+			chat_name = "local notes"
 		else:
 			chat_name = chat.title
 
 	if not msg.reply_to_message and len(args) < 2:
-		send_message(update.effective_message, tl(update.effective_message, "Anda harus memberi nama untuk filter ini!"))
+		send_message(update.effective_message, "You must give a name for this filter!")
 		return
 
 	if msg.reply_to_message:
 		if len(args) < 2:
-			send_message(update.effective_message, tl(update.effective_message, "Anda harus memberi nama untuk filter ini!"))
+			send_message(update.effective_message, "You must give a name for this filter!")
 			return
 		else:
 			keyword = args[1]
@@ -127,7 +124,7 @@ def filters(update, context):
 		text, buttons = button_markdown_parser(extracted[1], entities=msg.parse_entities(), offset=offset)
 		text = text.strip()
 		if not text:
-			send_message(update.effective_message, tl(update.effective_message, "Tidak ada pesan catatan - Anda tidak bisa HANYA menekan tombol, Anda perlu pesan untuk melakukannya!"))
+			send_message(update.effective_message, "There is no note message - You can't JUST have buttons, you need a message to go with it!")
 			return
 
 	elif msg.reply_to_message and len(args) >= 2:
@@ -142,7 +139,7 @@ def filters(update, context):
 		text = text.strip()
 
 	elif not text and not file_type:
-		send_message(update.effective_message, tl(update.effective_message, "Anda harus memberi nama untuk filter ini!"))
+		send_message(update.effective_message, "You must give a name for this filter!")
 		return
 
 	elif msg.reply_to_message:
@@ -156,23 +153,22 @@ def filters(update, context):
 		text, buttons = button_markdown_parser(text_to_parsing, entities=msg.parse_entities(), offset=offset)
 		text = text.strip()
 		if (msg.reply_to_message.text or msg.reply_to_message.caption) and not text:
-			send_message(update.effective_message, tl(update.effective_message, "Tidak ada pesan catatan - Anda tidak bisa HANYA menekan tombol, Anda perlu pesan untuk melakukannya!"))
+			send_message(update.effective_message, "There is no note message - You can't JUST have buttons, you need a message to go with it!")
 			return
 
 	else:
-		send_message(update.effective_message, tl(update.effective_message, "Invalid filter!"))
+		send_message(update.effective_message, "Invalid filter!")
 		return
 
 	sql.new_add_filter(chat_id, keyword, text, file_type, file_id, buttons)
 	# This is an old method
 	# sql.add_filter(chat_id, keyword, content, is_sticker, is_document, is_image, is_audio, is_voice, is_video, buttons)
 
-	send_message(update.effective_message, tl(update.effective_message, "Handler '{}' ditambahkan di *{}*!").format(keyword, chat_name), parse_mode=telegram.ParseMode.MARKDOWN)
+	send_message(update.effective_message, "Handler '{}' added in *{}*!".format(keyword, chat_name), parse_mode=telegram.ParseMode.MARKDOWN)
 	raise DispatcherHandlerStop
 
 
 # NOT ASYNC BECAUSE DISPATCHER HANDLER RAISED
-@spamcheck
 @user_admin
 def stop_filter(update, context):
 	chat = update.effective_chat  # type: Optional[Chat]
@@ -186,27 +182,27 @@ def stop_filter(update, context):
 	else:
 		chat_id = update.effective_chat.id
 		if chat.type == "private":
-			chat_name = tl(update.effective_message, "catatan lokal")
+			chat_name = "local notes"
 		else:
 			chat_name = chat.title
 
 	if len(args) < 2:
-		send_message(update.effective_message, tl(update.effective_message, "Apa yang harus saya hentikan?"))
+		send_message(update.effective_message, "What should I stop?")
 		return
 
 	chat_filters = sql.get_chat_triggers(chat_id)
 
 	if not chat_filters:
-		send_message(update.effective_message, tl(update.effective_message, "Tidak ada filter aktif di sini!"))
+		send_message(update.effective_message, "There are no active filters here!")
 		return
 
 	for keyword in chat_filters:
 		if keyword == args[1]:
 			sql.remove_filter(chat_id, args[1])
-			send_message(update.effective_message, tl(update.effective_message, "Ya, saya akan berhenti menjawabnya di *{}*.").format(chat_name), parse_mode=telegram.ParseMode.MARKDOWN)
+			send_message(update.effective_message, "Yep, I'll stop replying than in *{}*.".format(chat_name), parse_mode=telegram.ParseMode.MARKDOWN)
 			raise DispatcherHandlerStop
 
-	send_message(update.effective_message, "Itu bukan filter aktif - jalankan /filter untuk semua filter aktif.")
+	send_message(update.effective_message, "That's not a current filter - run /filters for all active filters.")
 
 
 @run_async
@@ -251,14 +247,14 @@ def reply_filter(update, context):
 							try:
 								context.bot.send_message(chat.id, filtext, parse_mode="markdown", disable_web_page_preview=True, reply_markup=keyboard)
 							except BadRequest as excp:
-								LOGGER.exception("Gagal mengirim pesan: " + excp.message)
+								LOGGER.exception("Failed to send message: " + excp.message)
 								send_message(update.effective_message, tl(update.effective_message, get_exception(excp, filt, chat)))
 								pass
 						else:
 							try:
 								send_message(update.effective_message, tl(update.effective_message, get_exception(excp, filt, chat)))
 							except BadRequest as excp:
-								LOGGER.exception("Gagal mengirim pesan: " + excp.message)
+								LOGGER.exception("Failed to send message: " + excp.message)
 								pass
 				else:
 					ENUM_FUNC_MAP[filt.file_type](chat.id, filt.file_id, caption=filtext, reply_to_message_id=message.message_id, parse_mode="markdown", disable_web_page_preview=True, reply_markup=keyboard)
@@ -288,11 +284,9 @@ def reply_filter(update, context):
 					except BadRequest as excp:
 						if excp.message == "Unsupported url protocol":
 							try:
-								send_message(update.effective_message, tl(update.effective_message, "Anda tampaknya mencoba menggunakan protokol url yang tidak didukung. Telegram "
-												   "tidak mendukung tombol untuk beberapa protokol, seperti tg://. Silakan coba "
-												   "lagi."))
+								send_message(update.effective_message, "You seem to be trying to use an unsupported url protocol. Telegram doesn't support buttons for some protocols, such as tg://. Please try again")
 							except BadRequest as excp:
-								LOGGER.exception("Gagal mengirim pesan: " + excp.message)
+								LOGGER.exception("Failed to send message: " + excp.message)
 								pass
 						elif excp.message == "Reply message not found":
 							try:
@@ -300,13 +294,13 @@ def reply_filter(update, context):
 												 disable_web_page_preview=True,
 												 reply_markup=keyboard)
 							except BadRequest as excp:
-								LOGGER.exception("Gagal mengirim pesan: " + excp.message)
+								LOGGER.exception("Failed to send message: " + excp.message)
 								pass
 						else:
 							try:
-								send_message(update.effective_message, tl(update.effective_message, "Catatan ini tidak dapat dikirim karena formatnya salah."))
+								send_message(update.effective_message, "This note could not be sent, as it is incorrectly formatted.")
 							except BadRequest as excp:
-								LOGGER.exception("Gagal mengirim pesan: " + excp.message)
+								LOGGER.exception("Failed to send message: " + excp.message)
 								pass
 							LOGGER.warning("Message %s could not be parsed", str(filt.reply))
 							LOGGER.exception("Could not parse filter %s in chat %s", str(filt.keyword), str(chat.id))
@@ -316,24 +310,24 @@ def reply_filter(update, context):
 					try:
 						send_message(update.effective_message, filt.reply)
 					except BadRequest as excp:
-						LOGGER.exception("Gagal mengirim pesan: " + excp.message)
+						LOGGER.exception("Failed to send message: " + excp.message)
 						pass
 				break
 
 
 def get_exception(excp, filt, chat):
 	if excp.message == "Unsupported url protocol":
-		return "Anda tampaknya mencoba menggunakan protokol url yang tidak didukung. Telegram tidak mendukung tombol untuk beberapa protokol, seperti tg://. Silakan coba lagi."
+		return "You seem to be trying to use an unsupported url protocol. Telegram doesn't support buttons for some protocols, such as tg://. Please try again"
 	elif excp.message == "Reply message not found":
 		return "noreply"
 	else:
 		LOGGER.warning("Message %s could not be parsed", str(filt.reply))
 		LOGGER.exception("Could not parse filter %s in chat %s", str(filt.keyword), str(chat.id))
-		return "Catatan ini tidak dapat dikirim karena formatnya salah."
+		return "This note cannot be sent because it is in the wrong format."
 
 
 def __stats__():
-	return tl(OWNER_ID, "{} filter, pada {} obrolan.").format(sql.num_filters(), sql.num_chats())
+	return "{} filters, across {} chats.".format(sql.num_filters(), sql.num_chats())
 
 
 def __import_data__(chat_id, data):
@@ -349,10 +343,18 @@ def __migrate__(old_chat_id, new_chat_id):
 
 def __chat_settings__(chat_id, user_id):
 	cust_filters = sql.get_chat_triggers(chat_id)
-	return tl(user_id, "Ada `{}` filter khusus di sini.").format(len(cust_filters))
+	return "There are `{}` custom filters here.".format(len(cust_filters))
 
 
-__help__ = "filters_help"
+__help__ = """
+ - /filters: list all active filters in this chat.
+
+*Admin only:*
+ - /filter <keyword> <reply message>: add a filter to this chat. The bot will now reply that message whenever 'keyword' is mentioned. If you reply to a sticker with a keyword, the bot will reply with that sticker. 
+NOTE: all filter keywords are in lowercase. If you want your keyword to be a sentence, use quotes. eg: /filter "hey there" How you doin?
+ - /stop <filter keyword>: stop that filter.
+}
+"""
 
 __mod_name__ = "Filters"
 

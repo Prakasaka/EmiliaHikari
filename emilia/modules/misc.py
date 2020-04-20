@@ -13,7 +13,7 @@ from telegram import ParseMode
 from telegram.ext import CommandHandler, run_async, Filters
 from telegram.utils.helpers import escape_markdown, mention_html, mention_markdown
 
-from emilia import dispatcher, OWNER_ID, SUDO_USERS, SUPPORT_USERS, WHITELIST_USERS, BAN_STICKER, spamcheck, MAPS_API
+from emilia import dispatcher, OWNER_ID, SUDO_USERS, SUPPORT_USERS, WHITELIST_USERS, BAN_STICKER
 from emilia.__main__ import STATS, USER_INFO
 from emilia.modules.disable import DisableAbleCommandHandler
 from emilia.modules.helper_funcs.extraction import extract_user
@@ -21,140 +21,150 @@ from emilia.modules.helper_funcs.filters import CustomFilters
 from emilia.modules.helper_funcs.msg_types import get_message_type
 from emilia.modules.helper_funcs.misc import build_keyboard_alternate
 
-from emilia.modules.languages import tl
-from emilia.modules.sql import languages_sql as lang_sql
 import emilia.modules.sql.feds_sql as feds_sql
 from emilia.modules.helper_funcs.alternate import send_message
 
-# Change language locale to Indonesia
-# Install language:
-# - sudo apt-get install language-pack-id language-pack-id-base manpages
-# locale.setlocale(locale.LC_TIME, 'id_ID.UTF-8')
+
+MARKDOWN_HELP: """
+Markdown is a very powerful formatting tool supported by telegram. {} has some enhancements, to make sure that \
+saved messages are correctly parsed, and to allow you to create buttons.
+- <code>_italic_</code>: wrapping text with '_' will produce italic text
+- <code>*bold*</code>: wrapping text with '*' will produce bold text
+- <code>`code`</code>: wrapping text with '`' will produce monospaced text, also known as 'code'
+- <code>[sometext](someURL)</code>: this will create a link - the message will just show <code>sometext</code>, \
+and tapping on it will open the page at <code>someURL</code>.
+EG: <code>[test](example.com)</code>
+- <code>[buttontext](buttonurl:someURL)</code>: this is a special enhancement to allow users to have telegram \
+buttons in their markdown. <code>buttontext</code> will be what is displayed on the button, and <code>someurl</code> \
+will be the url which is opened.
+EG: <code>[This is a button](buttonurl:example.com)</code>
+If you want multiple buttons on the same line, use :same, as such:
+<code>[one](buttonurl:example.com)
+[two](buttonurl:google.com:same)</code>
+This will create two buttons on a single line, instead of one button per line.
+Keep in mind that your message <b>MUST</b> contain some text other than just a button!
+"""
+
 
 RUN_STRINGS = (
-    "Kemana Anda pikir Anda akan pergi?",
-    "Hah? apa? apakah mereka lolos?",
-    "ZZzzZZzz... Hah? apa? oh... hanya mereka lagi, lupakan saja.",
-    "Kembali kesini!",
-    "Tidak terlalu cepat...",
-    "Jangan lari-lari di ruangan! 😠",
-    "Jangan tinggalkan aku sendiri bersama mereka!! 😧",
-    "Anda lari, Anda mati.",
-    "Lelucon pada Anda, saya ada di mana-mana 😏",
-    "Anda akan menyesalinya...",
-    "Anda juga bisa mencoba /kickme, saya dengar itu menyenangkan 😄",
-    "Ganggulah orang lain, tidak ada yang peduli 😒",
-    "Anda bisa lari, tetapi Anda tidak bisa bersembunyi.",
-    "Apakah itu semua yang kamu punya?",
-    "Saya di belakang Anda...",
-    "Larilah sesuka kalian, Anda tidak dapat melarikan diri dari takdir",
-    "Kita bisa melakukan ini dengan cara mudah, atau dengan cara yang sulit.",
-    "Anda tidak mengerti, bukan?",
-    "Ya, kamu sebaiknya lari!",
-    "Tolong, ingatkan aku betapa aku peduli?",
-    "Saya akan berlari lebih cepat jika saya adalah Anda.",
-    "Itu pasti orang yang kita cari.",
-    "Semoga peluang akan selalu menguntungkan Anda.",
-    "Kata-kata terakhir yang terkenal.",
-    "Dan mereka menghilang selamanya, tidak pernah terlihat lagi.",
-    "\"Oh, lihat aku! Aku sangat keren, aku bisa lari dari bot!\" - orang ini",
-    "Ya ya, cukup ketuk /kickme saja 😏",
-    "Ini, ambil cincin ini dan pergi ke Mordor saat Anda berada di sana.",
-    "Legenda mengatakan, mereka masih berlari...",
-    "Tidak seperti Harry Potter, orang tuamu tidak bisa melindungimu dariku.",
-    "Ketakutan menyebabkan kemarahan. Kemarahan menyebabkan kebencian. Kebencian menyebabkan penderitaan. "
-    "Jika Anda terus berlari ketakutan, Anda mungkin menjadi Vader berikutnya.",
-    "Darah hanya menyebabkan darah, dan kekerasan melahirkan kekerasan. Tidak lebih. Balas dendam hanyalah nama lain untuk pembunuhan."
-    "Jika anda terus berlari dan mengganggu yang lain, maka saya akan membalaskan dendam untuk yang terganggu.",
-    "Teruskan, tidak yakin kami ingin Anda di sini.",
-    "Anda seorang penyi- Oh. Tunggu. Kamu bukan Harry, lanjutkan berlari.",
-    "DILARANG BERLARI DI KORIDOR! 😠",
-    "Vale, deliciae.",
-    "Siapa yang membiarkan anjing-anjing itu keluar?",
-    "Itu lucu, karena tidak ada yang peduli.",
-    "Ah, sayang sekali. Saya suka yang itu.",
-    "Terus terang, aku tidak peduli.",
-    "Saya tidak peduli dengan anda... Jadi, lari lebih cepat!",
-    "Anda tidak bisa MENANGANI kebenaran!",
-    "Dulu, di galaksi yang sangat jauh... Seseorang pasti peduli dengan dia.",
-    "Hei, lihat mereka! Mereka berlari dari Emilia yang tak terelakkan ... Lucu sekali 😂",
-    "Han menembak lebih dulu. Begitu juga saya.",
-    "Apa yang kamu kejar? kelinci putih?",
-    "Sepertinya dokter akan mengatakan... LARI!",
+    "Where do you think you're going?",
+    "Huh? what? did they get away?",
+    "ZZzzZZzz... Huh? what? oh, just them again, nevermind.",
+    "Get back here!",
+    "Not so fast...",
+    "Look out for the wall!",
+    "Don't leave me alone with them!!",
+    "You run, you die.",
+    "Jokes on you, I'm everywhere",
+    "You're gonna regret that...",
+    "You could also try /kickme, I hear that's fun.",
+    "Go bother someone else, no-one here cares.",
+    "You can run, but you can't hide.",
+    "Is that all you've got?",
+    "I'm behind you...",
+    "You've got company!",
+    "We can do this the easy way, or the hard way.",
+    "You just don't get it, do you?",
+    "Yeah, you better run!",
+    "Please, remind me how much I care?",
+    "I'd run faster if I were you.",
+    "That's definitely the droid we're looking for.",
+    "May the odds be ever in your favour.",
+    "Famous last words.",
+    "And they disappeared forever, never to be seen again.",
+    "\"Oh, look at me! I'm so cool, I can run from a bot!\" - this person",
+    "Yeah yeah, just tap /kickme already.",
+    "Here, take this ring and head to Mordor while you're at it.",
+    "Legend has it, they're still running...",
+    "Unlike Harry Potter, your parents can't protect you from me.",
+    "Fear leads to anger. Anger leads to hate. Hate leads to suffering. If you keep running in fear, you might "
+    "be the next Vader.",
+    "Multiple calculations later, I have decided my interest in your shenanigans is exactly 0.",
+    "Legend has it, they're still running.",
+    "Keep it up, not sure we want you here anyway.",
+    "You're a wiza- Oh. Wait. You're not Harry, keep moving.",
+    "NO RUNNING IN THE HALLWAYS!",
+    "Hasta la vista, baby.",
+    "Who let the dogs out?",
+    "It's funny, because no one cares.",
+    "Ah, what a waste. I liked that one.",
+    "Frankly, my dear, I don't give a damn.",
+    "My milkshake brings all the boys to yard... So run faster!",
+    "You can't HANDLE the truth!",
+    "A long time ago, in a galaxy far far away... Someone would've cared about that. Not anymore though.",
+    "Hey, look at them! They're running from the inevitable banhammer... Cute.",
+    "Han shot first. So will I.",
+    "What are you running after, a white rabbit?",
+    "As The Doctor would say... RUN!",
 )
 
 SLAP_TEMPLATES = (
-    "{user1} {hits} {user2} dengan {item}.",
-    "{user1} {hits} {user2} di mukanya dengan {item}.",
-    "{user1} {hits} {user2} dengan keras menggunakan {item}.",
-    "{user1} {throws} sebuah {item} ke {user2}.",
-    "{user1} meraih sebuah {item} dan {throws} itu di wajah {user2}.",
-    "{user1} melempar sebuah {item} ke {user2}.",
-    "{user1} mulai menampar konyol {user2} dengan {item}.",
-    "{user1} menusuk {user2} dan berulang kali {hits} dia dengan {item}.",
-    "{user1} {hits} {user2} dengan sebuah {item}.",
-    "{user1} mengikat {user2} ke kursi dan {throws} sebuah {item}.",
-    "{user1} memberikan dorongan ramah untuk membantu {user2} belajar berenang di lava."
+    "{user1} {hits} {user2} with a {item}.",
+    "{user1} {hits} {user2} in the face with a {item}.",
+    "{user1} {hits} {user2} around a bit with a {item}.",
+    "{user1} {throws} a {item} at {user2}.",
+    "{user1} grabs a {item} and {throws} it at {user2}'s face.",
+    "{user1} launches a {item} in {user2}'s general direction.",
+    "{user1} starts slapping {user2} silly with a {item}.",
+    "{user1} pins {user2} down and repeatedly {hits} them with a {item}.",
+    "{user1} grabs up a {item} and {hits} {user2} with it.",
+    "{user1} ties {user2} to a chair and {throws} a {item} at them.",
+    "{user1} gave a friendly push to help {user2} learn to swim in lava."
 )
 
 ITEMS = (
-    "wajan besi cor",
-    "ikan tongkol",
-    "tongkat pemukul baseball",
-    "pedang excalibur",
-    "tongkat kayu",
-    "paku",
-    "mesin pencetak",
-    "sekop",
-    "monitor CRT",
-    "buku pelajaran fisika",
-    "pemanggang roti",
-    "potret Richard Stallman",
-    "televisi",
-    "lima ton truk",
-    "gulungan lakban",
-    "buku",
+    "cast iron skillet",
+    "large trout",
+    "baseball bat",
+    "cricket bat",
+    "wooden cane",
+    "nail",
+    "printer",
+    "shovel",
+    "CRT monitor",
+    "physics textbook",
+    "toaster",
+    "portrait of Richard Stallman",
+    "television",
+    "five ton truck",
+    "roll of duct tape",
+    "book",
     "laptop",
-    "televisi lama",
-    "karung batu",
-    "ikan lele",
-    "gas LPG",
-    "tongkat pemukul berduri",
-    "pemadam api",
-    "batu yang berat",
-    "potongan kotoran",
-    "sarang lebah",
-    "sepotong daging busuk",
-    "beruang",
-    "sekarung batu bata",
+    "old television",
+    "sack of rocks",
+    "rainbow trout",
+    "rubber chicken",
+    "spiked bat",
+    "fire extinguisher",
+    "heavy rock",
+    "chunk of dirt",
+    "beehive",
+    "piece of rotten meat",
+    "bear",
+    "ton of bricks",
 )
 
 THROW = (
-    "melempar",
-    "melempar",
-    "membuang",
-    "melempar",
+    "throws",
+    "flings",
+    "chucks",
+    "hurls",
 )
 
 HIT = (
-    "memukul",
-    "memukul",
-    "menampar",
-    "memukul",
-    "menampar keras",
+    "hits",
+    "whacks",
+    "slaps",
+    "smacks",
+    "bashes",
 )
 
-GMAPS_LOC = "https://maps.googleapis.com/maps/api/geocode/json"
-GMAPS_TIME = "https://maps.googleapis.com/maps/api/timezone/json"
-
 
 @run_async
-@spamcheck
 def runs(update, context):
-    send_message(update.effective_message, random.choice(tl(update.effective_message, "RUN_STRINGS")))
+    send_message(update.effective_message, random.choice("RUN_STRINGS"))
 
 @run_async
-@spamcheck
 def slap(update, context):
     args = context.args
     msg = update.effective_message  # type: Optional[Message]
@@ -182,10 +192,10 @@ def slap(update, context):
         user1 = "{}".format(mention_markdown(context.bot.id, context.bot.first_name))
         user2 = curr_user
 
-    temp = random.choice(tl(update.effective_message, "SLAP_TEMPLATES"))
-    item = random.choice(tl(update.effective_message, "ITEMS"))
-    hit = random.choice(tl(update.effective_message, "HIT"))
-    throw = random.choice(tl(update.effective_message, "THROW"))
+    temp = random.choice("SLAP_TEMPLATES")
+    item = random.choice("ITEMS")
+    hit = random.choice("HIT")
+    throw = random.choice("THROW")
 
     repl = temp.format(user1=user1, user2=user2, item=item, hits=hit, throws=throw)
 
@@ -193,16 +203,6 @@ def slap(update, context):
 
 
 @run_async
-def get_bot_ip(update, context):
-    """ Sends the bot's IP address, so as to be able to ssh in if necessary.
-        OWNER ONLY.
-    """
-    res = requests.get("http://ipinfo.io/ip")
-    send_message(update.effective_message, res.text)
-
-
-@run_async
-@spamcheck
 def get_id(update, context):
     args = context.args
     user_id = extract_user(update.effective_message, args)
@@ -210,21 +210,21 @@ def get_id(update, context):
         if update.effective_message.reply_to_message and update.effective_message.reply_to_message.forward_from:
             user1 = update.effective_message.reply_to_message.from_user
             user2 = update.effective_message.reply_to_message.forward_from
-            text = tl(update.effective_message, "Pengirim asli, {}, memiliki ID `{}`.\nSi penerus pesan, {}, memiliki ID `{}`.").format(
+            text = "The original sender, {}, has an ID of `{}`.\nThe forwarder, {}, has an ID of `{}`.".format(
                     escape_markdown(user2.first_name),
                     user2.id,
                     escape_markdown(user1.first_name),
                     user1.id)
             if update.effective_message.chat.type != "private":
-                text += "\n" + tl(update.effective_message, "Id grup ini adalah `{}`.").format(update.effective_message.chat.id)
+                text += "\n" + "This group's id is `{}`.".format(update.effective_message.chat.id)
             send_message(update.effective_message, 
                 text,
                 parse_mode=ParseMode.MARKDOWN)
         else:
             user = context.bot.get_chat(user_id)
-            text = tl(update.effective_message, "Id {} adalah `{}`.").format(escape_markdown(user.first_name), user.id)
+            text = "{}'s id is `{}`.".format(escape_markdown(user.first_name), user.id)
             if update.effective_message.chat.type != "private":
-                text += "\n" + tl(update.effective_message, "Id grup ini adalah `{}`.").format(update.effective_message.chat.id)
+                text += "\n" + "This group's id is `{}`.".format(update.effective_message.chat.id)
             send_message(update.effective_message, text,
                                                 parse_mode=ParseMode.MARKDOWN)
     elif user_id == "error":
@@ -233,24 +233,23 @@ def get_id(update, context):
         except BadRequest:
             send_message(update.effective_message, "Error: Unknown User/Chat!")
             return
-        text = tl(update.effective_message, "Id Anda adalah `{}`.").format(update.effective_message.from_user.id)
-        text += "\n" + tl(update.effective_message, "Id grup tersebut adalah `{}`.").format(user.id)
+        text = "Your id is `{}`.".format(update.effective_message.from_user.id)
+        text += "\n" + "This group's id is `{}`.".format(user.id)
         if update.effective_message.chat.type != "private":
-            text += "\n" + tl(update.effective_message, "Id grup ini adalah `{}`.").format(update.effective_message.chat.id)
+            text += "\n" + "This group's id is `{}`.".format(update.effective_message.chat.id)
         send_message(update.effective_message, text, parse_mode=ParseMode.MARKDOWN)
     else:
         chat = update.effective_chat  # type: Optional[Chat]
         if chat.type == "private":
-            send_message(update.effective_message, tl(update.effective_message, "Id Anda adalah `{}`.").format(update.effective_message.from_user.id),
+            send_message(update.effective_message, "Your id is `{}`.".format(update.effective_message.from_user.id),
                                                 parse_mode=ParseMode.MARKDOWN)
 
         else:
-            send_message(update.effective_message, tl(update.effective_message, "Id Anda adalah `{}`.").format(update.effective_message.from_user.id) + "\n" + tl(update.effective_message, "Id grup ini adalah `{}`.").format(chat.id),
+            send_message(update.effective_message, "Your id is `{}`.".format(update.effective_message.from_user.id) + "\n" + "This group's id is `{}`.".format(chat.id),
                                                 parse_mode=ParseMode.MARKDOWN)
 
 
 @run_async
-@spamcheck
 def info(update, context):
     args = context.args
     msg = update.effective_message  # type: Optional[Message]
@@ -266,42 +265,39 @@ def info(update, context):
     elif not msg.reply_to_message and (not args or (
             len(args) >= 1 and not args[0].startswith("@") and not args[0].isdigit() and not msg.parse_entities(
         [MessageEntity.TEXT_MENTION]))):
-        send_message(update.effective_message, tl(update.effective_message, "Saya tidak dapat mengekstrak pengguna dari ini."))
+        send_message(update.effective_message, "I can't extract a user from this.")
         return
 
     else:
         return
 
-    text = tl(update.effective_message, "<b>Info Pengguna</b>:") \
+    text = "<b>User info</b>:" \
            + "\nID: <code>{}</code>".format(user.id) + \
-           tl(update.effective_message, "\nNama depan: {}").format(html.escape(user.first_name))
+           "\nFirst Name: {}".format(html.escape(user.first_name))
 
     if user.last_name:
-        text += tl(update.effective_message, "\nNama belakang: {}").format(html.escape(user.last_name))
+        text += "\nLast Name: {}".format(html.escape(user.last_name))
 
     if user.username:
-        text += tl(update.effective_message, "\nNama pengguna: @{}").format(html.escape(user.username))
+        text += "\nUsername: @{}".format(html.escape(user.username))
 
-    text += tl(update.effective_message, "\nTautan pengguna permanen: {}").format(mention_html(user.id, "link"))
+    text += "\nPermanent user link: {}".format(mention_html(user.id, "link"))
 
     if user.id == OWNER_ID:
-        text += tl(update.effective_message, "\n\nOrang ini adalah pemilik saya - saya tidak akan pernah melakukan apa pun terhadap mereka!")
+        text += "\n\nThis person is my owner - I would never do anything against them!"
     else:
         if user.id in SUDO_USERS:
-            text += tl(update.effective_message, "\n\nOrang ini adalah salah satu pengguna sudo saya! " \
-                    "Hampir sama kuatnya dengan pemilik saya - jadi tontonlah.")
+            text += "\n\nThis person is one of my sudo users! Nearly as powerful as my owner - so watch it."
         else:
             if user.id in SUPPORT_USERS:
-                text += tl(update.effective_message, "\n\nOrang ini adalah salah satu pengguna dukungan saya! " \
-                        "Tidak sekuat pengguna sudo, tetapi masih dapat menyingkirkan Anda dari peta.")
+                text += "\n\nThis person is one of my support users! Not quite a sudo user, but can still gban you off the map."
 
             if user.id in WHITELIST_USERS:
-                text += tl(update.effective_message, "\n\nOrang ini telah dimasukkan dalam daftar putih! " \
-                        "Itu berarti saya tidak diizinkan untuk melarang/menendang mereka.")
+                text += "\n\nThis person has been whitelisted! That means I'm not allowed to ban/kick them."
 
     fedowner = feds_sql.get_user_owner_fed_name(user.id)
     if fedowner:
-        text += tl(update.effective_message, "\n\n<b>Pengguna ini adalah pemilik federasi ini:</b>\n<code>")
+        text += "\n\n<b>This user is a owner fed in the current federation:</b>\n<code>"
         text += "</code>, <code>".join(fedowner)
         text += "</code>"
     # fedadmin = feds_sql.get_user_admin_fed_name(user.id)
@@ -315,82 +311,6 @@ def info(update, context):
             text += "\n\n" + mod_info
 
     send_message(update.effective_message, text, parse_mode=ParseMode.HTML)
-
-
-@run_async
-@spamcheck
-def get_time(update, context):
-    args = context.args
-    location = " ".join(args)
-    if location.lower() == context.bot.first_name.lower():
-        send_message(update.effective_message, tl(update.effective_message, "Selalu ada waktu banned untukku!"))
-        context.bot.send_sticker(update.effective_chat.id, BAN_STICKER)
-        return
-
-    res = requests.get(GMAPS_LOC, params=dict(address=location, key=MAPS_API))
-    print(res.text)
-
-    if res.status_code == 200:
-        loc = json.loads(res.text)
-        if loc.get('status') == 'OK':
-            lat = loc['results'][0]['geometry']['location']['lat']
-            long = loc['results'][0]['geometry']['location']['lng']
-
-            country = None
-            city = None
-
-            address_parts = loc['results'][0]['address_components']
-            for part in address_parts:
-                if 'country' in part['types']:
-                    country = part.get('long_name')
-                if 'administrative_area_level_1' in part['types'] and not city:
-                    city = part.get('long_name')
-                if 'locality' in part['types']:
-                    city = part.get('long_name')
-
-            if city and country:
-                location = "{}, {}".format(city, country)
-            elif country:
-                location = country
-
-            timenow = int(datetime.utcnow().timestamp())
-            res = requests.get(GMAPS_TIME, params=dict(location="{},{}".format(lat, long), timestamp=timenow))
-            if res.status_code == 200:
-                offset = json.loads(res.text)['dstOffset']
-                timestamp = json.loads(res.text)['rawOffset']
-                time_there = datetime.fromtimestamp(timenow + timestamp + offset).strftime("%H:%M:%S hari %A %d %B")
-                send_message(update.effective_message, "Sekarang pukul {} di {}".format(time_there, location))
-
-
-@run_async
-@spamcheck
-def get_time_alt(update, context):
-    args = context.args
-    if args:
-        location = " ".join(args)
-        if location.lower() == context.bot.first_name.lower():
-            send_message(update.effective_message, "Selalu ada waktu banned untukku!")
-            context.bot.send_sticker(update.effective_chat.id, BAN_STICKER)
-            return
-
-        res = requests.get('https://dev.virtualearth.net/REST/v1/timezone/?query={}&key={}'.format(location, MAPS_API))
-
-        if res.status_code == 200:
-            loc = res.json()
-            if len(loc['resourceSets'][0]['resources'][0]['timeZoneAtLocation']) == 0:
-                send_message(update.effective_message, tl(update.effective_message, "Lokasi tidak di temukan!"))
-                return
-            placename = loc['resourceSets'][0]['resources'][0]['timeZoneAtLocation'][0]['placeName']
-            localtime = loc['resourceSets'][0]['resources'][0]['timeZoneAtLocation'][0]['timeZone'][0]['convertedTime']['localTime']
-            if lang_sql.get_lang(update.effective_chat.id) == "id":
-                locale.setlocale(locale.LC_TIME, 'id_ID.UTF-8')
-                time = datetime.strptime(localtime, '%Y-%m-%dT%H:%M:%S').strftime("%H:%M:%S hari %A, %d %B")
-            else:
-                time = datetime.strptime(localtime, '%Y-%m-%dT%H:%M:%S').strftime("%H:%M:%S %A, %d %B")
-            send_message(update.effective_message, tl(update.effective_message, "Sekarang pukul `{}` di `{}`").format(time, placename), parse_mode="markdown")
-    else:
-        send_message(update.effective_message, tl(update.effective_message, "Gunakan `/time nama daerah`\nMisal: `/time jakarta`"), parse_mode="markdown")
-
 
 @run_async
 def echo(update, context):
@@ -410,34 +330,34 @@ def echo(update, context):
             else:
                 context.bot.send_message(chat_id, text, quote=False, disable_web_page_preview=True, parse_mode=ParseMode.MARKDOWN, reply_markup=InlineKeyboardMarkup(tombol))
         except BadRequest:
-            context.bot.send_message(chat_id, tl(update.effective_message, "Teks markdown salah!\nJika anda tidak tahu apa itu markdown, silahkan ketik `/markdownhelp` pada PM."), parse_mode="markdown")
+            context.bot.send_message(chat_id, "Wrong markdown text! If you don't know what markdown is, please type `/markdownhelp` in PM.", parse_mode="markdown")
             return
 
 
 @run_async
-@spamcheck
 def markdown_help(update, context):
-    send_message(update.effective_message, tl(update.effective_message, "MARKDOWN_HELP").format(dispatcher.bot.first_name), parse_mode=ParseMode.HTML)
-    send_message(update.effective_message, tl(update.effective_message, "Coba teruskan pesan berikut kepada saya, dan Anda akan lihat!"))
-    send_message(update.effective_message, tl(update.effective_message, "/save test Ini adalah tes markdown. _miring_, *tebal*, `kode`, "
-                                        "[URL](contoh.com) [tombol](buttonurl:github.com) "
-                                        "[tombol2](buttonurl:google.com:same)"))
+    send_message(update.effective_message, MARKDOWN_HELP.format(dispatcher.bot.first_name), parse_mode=ParseMode.HTML)
+    send_message(update.effective_message, "Try forwarding the following message to me, and you'll see!")
+    send_message(update.effective_message, "/save test This is a markdown test. _italics_, *bold*, `code`, [URL](example.com) [button](buttonurl:github.com) [button2](buttonurl:google.com:same)")
 
 
 @run_async
 def stats(update, context):
-    send_message(update.effective_message, tl(update.effective_message, "Statistik saat ini:\n") + "\n".join([mod.__stats__() for mod in STATS]))
+    send_message(update.effective_message, "Current stats:\n" + "\n".join([mod.__stats__() for mod in STATS]))
 
 
 # /ip is for private use
-__help__ = "misc_help"
+__help__ = """
+ - /id: get the current group id. If used by replying to a message, gets that user's id.
+ - /runs: reply a random string from an array of replies.
+ - /slap: slap a user, or get slapped if not a reply.
+ - /info: get information about a user.
+ - /markdownhelp: quick summary of how markdown works in telegram - can only be called in private chats.
+"""
 
 __mod_name__ = "Misc"
 
 ID_HANDLER = DisableAbleCommandHandler("id", get_id, pass_args=True)
-IP_HANDLER = CommandHandler("ip", get_bot_ip, filters=Filters.chat(OWNER_ID))
-
-TIME_HANDLER = DisableAbleCommandHandler("time", get_time_alt, pass_args=True)
 
 RUNS_HANDLER = DisableAbleCommandHandler(["runs", "lari"], runs)
 SLAP_HANDLER = DisableAbleCommandHandler("slap", slap, pass_args=True)
@@ -449,8 +369,6 @@ MD_HELP_HANDLER = CommandHandler("markdownhelp", markdown_help, filters=Filters.
 STATS_HANDLER = CommandHandler("stats", stats, filters=CustomFilters.sudo_filter)
 
 dispatcher.add_handler(ID_HANDLER)
-dispatcher.add_handler(IP_HANDLER)
-dispatcher.add_handler(TIME_HANDLER)
 dispatcher.add_handler(RUNS_HANDLER)
 dispatcher.add_handler(SLAP_HANDLER)
 dispatcher.add_handler(INFO_HANDLER)

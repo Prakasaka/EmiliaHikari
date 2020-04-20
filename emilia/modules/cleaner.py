@@ -6,7 +6,7 @@ from telegram.error import BadRequest
 from telegram.ext import Filters, MessageHandler, CommandHandler, run_async
 from telegram.utils.helpers import mention_html, escape_markdown
 
-from emilia import dispatcher, spamcheck
+from emilia import dispatcher
 from emilia.modules.helper_funcs.chat_status import is_user_admin, user_admin, can_restrict
 from emilia.modules.helper_funcs.string_handling import extract_time
 from emilia.modules.disable import DisableAbleCommandHandler
@@ -14,7 +14,6 @@ from emilia.modules.log_channel import loggable
 from emilia.modules.sql import cleaner_sql as sql
 from emilia.modules.connection import connected
 
-from emilia.modules.languages import tl
 from emilia.modules.helper_funcs.alternate import send_message
 
 
@@ -24,7 +23,6 @@ def clean_blue_text_must_click(update, context):
 		update.effective_message.delete()
 
 @run_async
-@spamcheck
 @user_admin
 def set_blue_text_must_click(update, context):
 	chat = update.effective_chat  # type: Optional[Chat]
@@ -38,7 +36,7 @@ def set_blue_text_must_click(update, context):
 		chat_name = dispatcher.bot.getChat(conn).title
 	else:
 		if update.effective_message.chat.type == "private":
-			send_message(update.effective_message, tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
+			send_message(update.effective_message, "You can do this command in groups, not PM")
 			return ""
 		chat_id = update.effective_chat.id
 		chat_name = update.effective_message.chat.title
@@ -48,26 +46,32 @@ def set_blue_text_must_click(update, context):
 		if val == "off" or val == "no":
 			sql.set_cleanbt(chat_id, False)
 			if conn:
-				text = tl(update.effective_message, "Penghapus pesan biru telah di *non-aktifka*n di *{}*.").format(chat_name)
+				text = "Blue text cleaner was *disabled* in *{}*.".format(chat_name)
 			else:
-				text = tl(update.effective_message, "Penghapus pesan biru telah di *non-aktifkan*.")
+				text = "Blue text cleaner was *disabled*."
 			send_message(update.effective_message, text, parse_mode="markdown")
 
 		elif val == "yes" or val == "ya" or val == "on":
 			sql.set_cleanbt(chat_id, True)
 			if conn:
-				text = tl(update.effective_message, "Penghapus pesan biru telah di *aktifkan* di *{}*.").format(chat_name)
+				text = "Blue text cleaner was *enabled* in *{}*.".format(chat_name)
 			else:
-				text = tl(update.effective_message, "Penghapus pesan biru telah di *aktifkan*.")
+				text = "Blue text cleaner was *enabled*."
 			send_message(update.effective_message, text, parse_mode="markdown")
 
 		else:
-			send_message(update.effective_message, tl(update.effective_message, "Argumen tidak dikenal - harap gunakan 'yes', atau 'no'."))
+			send_message(update.effective_message, "Unknown argument - please use 'yes', or 'no'.")
 	else:
-		send_message(update.effective_message, tl(update.effective_message, "Pengaturan untuk penghapus pesan biru saat ini di {}: *{}*").format(chat_name, "Enabled" if sql.is_enable(chat_id) else "Disabled"), parse_mode="markdown")
+		send_message(update.effective_message, "Curent settings for Blue text cleaner at {}: *{}*".format(chat_name, "Enabled" if sql.is_enable(chat_id) else "Disabled"), parse_mode="markdown")
 
 
-__help__ = "cleaner_help"
+__help__ = """
+*Admin only:*
+ - /cleanbluetext <on/off>: Delete all blue text message.
+
+Note:
+- This feature may broke others bot
+"""
 
 __mod_name__ = "Cleaner"
 

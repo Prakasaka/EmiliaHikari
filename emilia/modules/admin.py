@@ -8,7 +8,7 @@ from telegram.ext import CommandHandler, MessageHandler, Filters
 from telegram.ext.dispatcher import run_async
 from telegram.utils.helpers import escape_markdown, mention_html, mention_markdown
 
-from emilia import dispatcher, updater, spamcheck, LOGGER
+from emilia import dispatcher, updater, LOGGER
 from emilia.modules.disable import DisableAbleCommandHandler
 from emilia.modules.helper_funcs.chat_status import bot_admin, can_promote, user_admin, can_pin
 from emilia.modules.helper_funcs.extraction import extract_user
@@ -18,7 +18,6 @@ from emilia.modules.log_channel import loggable
 from emilia.modules.connection import connected
 from emilia.modules.sql import admin_sql as sql
 
-from emilia.modules.languages import tl
 from emilia.modules.helper_funcs.alternate import send_message
 
 ENUM_FUNC_MAP = {
@@ -34,7 +33,6 @@ ENUM_FUNC_MAP = {
 
 
 @run_async
-@spamcheck
 @bot_admin
 @can_promote
 @user_admin
@@ -53,7 +51,7 @@ def promote(update, context):
 		chat_name = dispatcher.bot.getChat(conn).title
 	else:
 		if update.effective_message.chat.type == "private":
-			send_message(update.effective_message, tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
+			send_message(update.effective_message, "You can do this command in groups, not PM")
 			return ""
 		chat = update.effective_chat
 		chat_id = update.effective_chat.id
@@ -61,19 +59,19 @@ def promote(update, context):
 
 	user_id = extract_user(message, args)
 	if not user_id:
-		send_message(update.effective_message, tl(update.effective_message, "Anda sepertinya tidak mengacu pada pengguna."))
+		send_message(update.effective_message, "You don't seem to be referring to a user.")
 		return ""
 	if user_id == "error":
-		send_message(update.effective_message, tl(update.effective_message, "Error: Unknown user!"))
+		send_message(update.effective_message, "Error: Unknown user!")
 		return ""
 
 	user_member = chat.get_member(user_id)
 	if user_member.status == 'administrator' or user_member.status == 'creator':
-		send_message(update.effective_message, tl(update.effective_message, "Bagaimana saya ingin menaikan jabatan seseorang yang sudah menjadi admin?"))
+		send_message(update.effective_message, "How am I meant to promote someone that's already an admin?")
 		return ""
 
 	if user_id == context.bot.id:
-		send_message(update.effective_message, tl(update.effective_message, "Saya tidak bisa menaikan jabatan diri saya sendiri! Hanya admin yang dapat melakukanya untuk saya."))
+		send_message(update.effective_message, "I can't promote myself! Get an admin to do it for me.")
 		return ""
 
 	# set same perms as bot - bot can't assign higher perms than itself!
@@ -92,12 +90,12 @@ def promote(update, context):
 							)
 	except BadRequest as error:
 		if error.message == "Bot_groups_blocked":
-			send_message(update.effective_message, tl(update.effective_message, "Gagal menaikan jabatan: Bot terkunci"))
+			send_message(update.effective_message, "Failed to promote: Bot was locked")
 		else:
-			send_message(update.effective_message, tl(update.effective_message, "Tidak dapat mempromosikan pengguna, mungkin saya bukan admin atau tidak punya izin untuk mempromosikan pengguna."))
+			send_message(update.effective_message, "Cannot promote users, maybe I am not admin or do not have permission to promote users.")
 		return
 
-	send_message(update.effective_message, tl(update.effective_message, "💖 Berhasil dinaikan jabatannya!"))
+	send_message(update.effective_message, "Successfully promoted!")
 	
 	return "<b>{}:</b>" \
 		   "\n#PROMOTED" \
@@ -108,7 +106,6 @@ def promote(update, context):
 
 
 @run_async
-@spamcheck
 @bot_admin
 @can_promote
 @user_admin
@@ -126,7 +123,7 @@ def demote(update, context):
 		chat_name = dispatcher.bot.getChat(conn).title
 	else:
 		if update.effective_message.chat.type == "private":
-			send_message(update.effective_message, tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
+			send_message(update.effective_message, "You can do this command in groups, not PM")
 			return ""
 		chat = update.effective_chat
 		chat_id = update.effective_chat.id
@@ -134,23 +131,23 @@ def demote(update, context):
 
 	user_id = extract_user(message, args)
 	if not user_id:
-		send_message(update.effective_message, tl(update.effective_message, "Anda sepertinya tidak mengacu pada pengguna."))
+		send_message(update.effective_message, "You don't seem to be referring to a user.")
 		return ""
 	if user_id == "error":
-		send_message(update.effective_message, tl(update.effective_message, "Error: Unknown user!"))
+		send_message(update.effective_message, "Error: Unknown user!")
 		return ""
 
 	user_member = chat.get_member(user_id)
 	if user_member.status == 'creator':
-		send_message(update.effective_message, tl(update.effective_message, "Orang ini MENCIPTAKAN obrolan ini, bagaimana saya menurunkannya?"))
+		send_message(update.effective_message, "This person CREATED the chat, how would I demote them?")
 		return ""
 
 	if not user_member.status == 'administrator':
-		send_message(update.effective_message, tl(update.effective_message, "Tidak dapat menurunkan jabatan apa yang belum dipromosikan!"))
+		send_message(update.effective_message, "Can't demote what wasn't promoted!")
 		return ""
 
 	if user_id == context.bot.id:
-		send_message(update.effective_message, tl(update.effective_message, "Saya tidak bisa menurunkan jabatan diri saya sendiri! Hanya admin yang dapat melakukanya untuk saya."))
+		send_message(update.effective_message, "I can't demote myself! Get an admin to do it for me.")
 		return ""
 
 	try:
@@ -164,7 +161,7 @@ def demote(update, context):
 							  can_pin_messages=False,
 							  can_promote_members=False
 							)
-		send_message(update.effective_message, tl(update.effective_message, "💔 Berhasil diturunkan jabatannya!"))
+		send_message(update.effective_message, "💔 Successfully demoted!")
 		return "<b>{}:</b>" \
 			   "\n#DEMOTED" \
 			   "\n<b>Admin:</b> {}" \
@@ -173,13 +170,11 @@ def demote(update, context):
 										  mention_html(user_member.user.id, user_member.user.first_name))
 
 	except BadRequest:
-		send_message(update.effective_message, tl(update.effective_message, "Tidak dapat menurunkan jabatannya. Saya mungkin bukan admin, atau status admin ditunjuk oleh "
-						   "orang lain, jadi saya tidak bisa bertindak atas hak mereka!"))
+		send_message(update.effective_message, "Could not demote. I might not be admin, or the admin status was appointed by another user, so I can't act upon them!")
 		return ""
 
 
 @run_async
-@spamcheck
 @bot_admin
 @can_pin
 @user_admin
@@ -195,14 +190,14 @@ def pin(update, context):
 		chat_id = conn
 		chat_name = dispatcher.bot.getChat(conn).title
 		if len(args)  <= 1:
-			send_message(update.effective_message, tl(update.effective_message, "Gunakan /pin <notify/loud/silent/violent> <link pesan>"))
+			send_message(update.effective_message, "Use /pin <notify/loud/silent/violent> <message link>")
 			return ""
 		prev_message = args[1]
 		if "/" in prev_message:
 			prev_message = prev_message.split("/")[-1]
 	else:
 		if update.effective_message.chat.type == "private":
-			send_message(update.effective_message, tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
+			send_message(update.effective_message, "You can do this command in groups, not PM")
 			return ""
 		chat = update.effective_chat
 		chat_id = update.effective_chat.id
@@ -210,7 +205,7 @@ def pin(update, context):
 		if update.effective_message.reply_to_message:
 			prev_message = update.effective_message.reply_to_message.message_id
 		else:
-			send_message(update.effective_message, tl(update.effective_message, "Balas pesan untuk pin pesan tersebut pada grup ini"))
+			send_message(update.effective_message, "Reply to a message for pin that message in this group")
 			return ""
 
 	is_group = chat.type != "private" and chat.type != "channel"
@@ -223,7 +218,7 @@ def pin(update, context):
 		try:
 			context.bot.pinChatMessage(chat.id, prev_message, disable_notification=is_silent)
 			if conn:
-				send_message(update.effective_message, tl(update.effective_message, "Saya sudah pin pesan dalam grup {}").format(chat_name))
+				send_message(update.effective_message, "I have pinned messages in the group {}".format(chat_name))
 		except BadRequest as excp:
 			if excp.message == "Chat_not_modified":
 				pass
@@ -237,7 +232,6 @@ def pin(update, context):
 
 
 @run_async
-@spamcheck
 @bot_admin
 @can_pin
 @user_admin
@@ -254,7 +248,7 @@ def unpin(update, context):
 		chat_name = dispatcher.bot.getChat(conn).title
 	else:
 		if update.effective_message.chat.type == "private":
-			send_message(update.effective_message, tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
+			send_message(update.effective_message, "You can do this command in groups, not PM")
 			return ""
 		chat = update.effective_chat
 		chat_id = update.effective_chat.id
@@ -263,7 +257,7 @@ def unpin(update, context):
 	try:
 		context.bot.unpinChatMessage(chat.id)
 		if conn:
-			send_message(update.effective_message, tl(update.effective_message, "Saya sudah unpin pesan dalam grup {}").format(chat_name))
+			send_message(update.effective_message, "I have unpin the message in the group {}".format(chat_name))
 	except BadRequest as excp:
 		if excp.message == "Chat_not_modified":
 			pass
@@ -273,11 +267,10 @@ def unpin(update, context):
 	return "<b>{}:</b>" \
 		   "\n#UNPINNED" \
 		   "\n<b>Admin:</b> {}".format(html.escape(chat.title),
-									   mention_html(user.id, user.first_name))
+					mention_html(user.id, user.first_name))
 
 
 @run_async
-@spamcheck
 @bot_admin
 @user_admin
 def invite(update, context):
@@ -292,7 +285,7 @@ def invite(update, context):
 		chat_name = dispatcher.bot.getChat(conn).title
 	else:
 		if update.effective_message.chat.type == "private":
-			send_message(update.effective_message, tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
+			send_message(update.effective_message, "You can do this command in groups, not PM")
 			return ""
 		chat = update.effective_chat
 		chat_id = update.effective_chat.id
@@ -306,13 +299,12 @@ def invite(update, context):
 			invitelink = context.bot.exportChatInviteLink(chat.id)
 			send_message(update.effective_message, invitelink)
 		else:
-			send_message(update.effective_message, tl(update.effective_message, "Saya tidak memiliki akses ke tautan undangan, coba ubah izin saya!"))
+			send_message(update.effective_message, "I don't have access to the invite link, try changing my permissions!")
 	else:
-		send_message(update.effective_message, tl(update.effective_message, "Saya hanya dapat memberi Anda tautan undangan untuk supergroup dan saluran, maaf!"))
+		send_message(update.effective_message, "I can only give you invite links for supergroups and channels, sorry!")
 
 
 @run_async
-@spamcheck
 def adminlist(update, context):
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
@@ -325,19 +317,19 @@ def adminlist(update, context):
 		chat_name = dispatcher.bot.getChat(conn).title
 	else:
 		if update.effective_message.chat.type == "private":
-			send_message(update.effective_message, tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
+			send_message(update.effective_message, "You can do this command in groups, not PM")
 			return ""
 		chat = update.effective_chat
 		chat_id = update.effective_chat.id
 		chat_name = update.effective_message.chat.title
 
 	administrators = context.bot.getChatAdministrators(chat_id)
-	text = tl(update.effective_message, "Admin di *{}*:").format(update.effective_chat.title or tl(update.effective_message, "chat ini"))
+	text = "Admin in *{}*:".format(update.effective_chat.title or "current chat")
 	for admin in administrators:
 		user = admin.user
 		status = admin.status
 		if user.first_name == '':
-			name = tl(update.effective_message, "☠ Akun Terhapus")
+			name = "☠ Deleted Account"
 		else:
 			name = "{}".format(mention_markdown(user.id, user.first_name + " " + (user.last_name or "")))
 		#if user.username:
@@ -349,7 +341,7 @@ def adminlist(update, context):
 		user = admin.user
 		status = admin.status
 		if user.first_name == '':
-			name = tl(update.effective_message, "☠ Akun Terhapus")
+			name = "☠ Deleted Account"
 		else:
 			name = "{}".format(mention_markdown(user.id, user.first_name + " " + (user.last_name or "")))
 		#if user.username:
@@ -364,7 +356,6 @@ def adminlist(update, context):
 
 
 @run_async
-@spamcheck
 @can_pin
 @user_admin
 def permapin(update, context):
@@ -380,7 +371,7 @@ def permapin(update, context):
 		chat_name = dispatcher.bot.getChat(conn).title
 	else:
 		if update.effective_message.chat.type == "private":
-			send_message(update.effective_message, tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
+			send_message(update.effective_message, "You can do this command in groups, not PM")
 			return ""
 		chat = update.effective_chat
 		chat_id = update.effective_chat.id
@@ -397,18 +388,17 @@ def permapin(update, context):
 			sendingmsg = context.bot.send_message(chat_id, text, parse_mode="markdown",
 								 disable_web_page_preview=True, reply_markup=InlineKeyboardMarkup(tombol))
 		except BadRequest:
-			context.bot.send_message(chat_id, tl(update.effective_message, "Teks markdown salah!\nJika anda tidak tahu apa itu markdown, silahkan ketik `/markdownhelp` pada PM."), parse_mode="markdown")
+			context.bot.send_message(chat_id, "Wrong markdown text!\nIf you don't know what markdown is, please type `/markdownhelp` in PM.", parse_mode="markdown")
 			return
 	else:
 		sendingmsg = ENUM_FUNC_MAP[str(data_type)](chat_id, content, caption=text, parse_mode="markdown", disable_web_page_preview=True, reply_markup=InlineKeyboardMarkup(tombol))
 	try:
 		context.bot.pinChatMessage(chat_id, sendingmsg.message_id)
 	except BadRequest:
-		send_message(update.effective_message, tl(update.effective_message, "Saya tidak punya akses untuk pin pesan!"))
+		send_message(update.effective_message, "I don't have access to pin message!")
 
 
 @run_async
-@spamcheck
 @can_pin
 @user_admin
 def permanent_pin_set(update, context):
@@ -423,26 +413,26 @@ def permanent_pin_set(update, context):
 		chat_name = dispatcher.bot.getChat(conn).title
 		if not args:
 			get_permapin = sql.get_permapin(chat_id)
-			text_maker = tl(update.effective_message, "Permanen pin saat ini di atur: `{}`").format(bool(int(get_permapin)))
+			text_maker = "Current permanent pin: `{}`".format(bool(int(get_permapin)))
 			if get_permapin:
 				if chat.username:
 					old_pin = "https://t.me/{}/{}".format(chat.username, get_permapin)
 				else:
 					old_pin = "https://t.me/c/{}/{}".format(str(chat.id)[4:], get_permapin)
-				text_maker += tl(update.effective_message, "\nUntuk menonaktifkan permanen pin: `/permanentpin off`")
-				text_maker += tl(update.effective_message, "\n\n[Pesan permanen pin ada disini]({})").format(old_pin)
-			send_message(update.effective_message, tl(update.effective_message, text_maker), parse_mode="markdown")
+				text_maker += "\nTo disable permanent pin: `/permanentpin off`"
+				text_maker += "\n\n[Permanent pin message is here]({})".format(old_pin)
+			send_message(update.effective_message, text_maker, parse_mode="markdown")
 			return ""
 		prev_message = args[0]
 		if prev_message == "off":
 			sql.set_permapin(chat_id, 0)
-			send_message(update.effective_message, tl(update.effective_message, "Permanen pin telah di nonaktifkan!"))
+			send_message(update.effective_message, "Permanent pin has been disabled!")
 			return
 		if "/" in prev_message:
 			prev_message = prev_message.split("/")[-1]
 	else:
 		if update.effective_message.chat.type == "private":
-			send_message(update.effective_message, tl(update.effective_message, "Anda bisa lakukan command ini pada grup, bukan pada PM"))
+			send_message(update.effective_message, "You can do this command in groups, not PM")
 			return ""
 		chat = update.effective_chat
 		chat_id = update.effective_chat.id
@@ -451,18 +441,18 @@ def permanent_pin_set(update, context):
 			prev_message = update.effective_message.reply_to_message.message_id
 		elif len(args) >= 1 and args[0] == "off":
 			sql.set_permapin(chat.id, 0)
-			send_message(update.effective_message, tl(update.effective_message, "Permanen pin telah di nonaktifkan!"))
+			send_message(update.effective_message, "Permanent pin has been disabled!")
 			return
 		else:
 			get_permapin = sql.get_permapin(chat_id)
-			text_maker = tl(update.effective_message, "Permanen pin saat ini di atur: `{}`").format(bool(int(get_permapin)))
+			text_maker = tl(update.effective_message, "Successfully set permanent pin: `{}`").format(bool(int(get_permapin)))
 			if get_permapin:
 				if chat.username:
 					old_pin = "https://t.me/{}/{}".format(chat.username, get_permapin)
 				else:
 					old_pin = "https://t.me/c/{}/{}".format(str(chat.id)[4:], get_permapin)
-				text_maker += tl(update.effective_message, "\nUntuk menonaktifkan permanen pin: `/permanentpin off`")
-				text_maker += tl(update.effective_message, "\n\n[Pesan permanen pin ada disini]({})").format(old_pin)
+				text_maker += "\nTo disable permanent pin: `/permanentpin off`"
+				text_maker += "\n\n[Permanent pin message is here]({})".format(old_pin)
 			send_message(update.effective_message, text_maker, parse_mode="markdown")
 			return ""
 
@@ -470,7 +460,7 @@ def permanent_pin_set(update, context):
 
 	if prev_message and is_group:
 		sql.set_permapin(chat.id, prev_message)
-		send_message(update.effective_message, tl(update.effective_message, "Permanent pin berhasil di atur!"))
+		send_message(update.effective_message, "Successfully set permanent pin!")
 		return "<b>{}:</b>" \
 			   "\n#PERMANENT_PIN" \
 			   "\n<b>Admin:</b> {}".format(html.escape(chat.title), mention_html(user.id, user.first_name))
@@ -495,7 +485,7 @@ def permanent_pin(update, context):
 				old_pin = "https://t.me/{}/{}".format(chat.username, get_permapin)
 			else:
 				old_pin = "https://t.me/c/{}/{}".format(str(chat.id)[4:], get_permapin)
-			send_message(update.effective_message, tl(update.effective_message, "*Permanen pin error:*\nSaya tidak bisa menyematkan pesan di sini!\nPastikan saya admin dan dapat pin pesan.\n\nPermanen pin di nonaktifkan, [pesan permanen pin lama ada disini]({})").format(old_pin), parse_mode="markdown")
+			send_message(update.effective_message, "*Permanent pin error:*\nI can't pin messages here!\nMake sure I'm admin and can pin messages.\n\nPermanent pin disabled now, [here is your old pinned message]({})".format(old_pin), parse_mode="markdown")
 			return
 
 		if to_del:
@@ -509,35 +499,45 @@ def permanent_pin(update, context):
 def __chat_settings__(chat_id, user_id):
 	administrators = dispatcher.bot.getChatAdministrators(chat_id)
 	chat = dispatcher.bot.getChat(chat_id)
-	text = "Admin di *{}*:".format(chat.title or "chat ini")
+	text = "Admin in *{}*:".format(chat.title or "current chat")
 	for admin in administrators:
 		user = admin.user
 		status = admin.status
 		if user.first_name == '':
-			name = tl(user_id, "☠ Akun Terhapus")
+			name = user_id, "☠ Deleted Account"
 		else:
 			name = "{}".format(mention_markdown(user.id, user.first_name + " " + (user.last_name or "")))
 		#if user.username:
 		#    name = escape_markdown("@" + user.username)
 		if status == "creator":
 			text += "\n 👑 Creator:"
-			text += "\n` • `{} \n\n 🔱 Admin:".format(name)
+			text += "\n` • `{} \n\n 🔱 Admins:".format(name)
 	for admin in administrators:
 		user = admin.user
 		status = admin.status
 		if user.first_name == '':
-			name = tl(user_id, "☠ Akun Terhapus")
+			name = user_id, "☠ Deleted Account"
 		else:
 			name = "{}".format(mention_markdown(user.id, user.first_name + " " + (user.last_name or "")))
 		#if user.username:
 		#    name = escape_markdown("@" + user.username)
 		if status == "administrator":
 			text += "\n` • `{}".format(name)
-	text += tl(user_id, "\n\nKamu adalah *{}*").format(dispatcher.bot.get_chat_member(chat_id, user_id).status)
+	text += user_id, "\n\nYou are *{}*".format(dispatcher.bot.get_chat_member(chat_id, user_id).status)
 	return text
 
 
-__help__ = "admin_help"
+__help__ = """
+ - /adminlist | /admins: list of admins in the chat
+*Admin only:*
+ - /pin: silently pins the message replied to - add 'loud' or 'notify' to give notifs to users.
+ - /unpin: unpins the currently pinned message
+ - /permapin <text>: Pin a custom messages via bots. This message can contain markdown, and can be used in replies to the media include additional buttons and text.
+ - /permanentpin: Set a permanent pin for supergroup chat, when an admin or telegram channel change pinned message, bot will change pinned message immediatelly
+ - /invitelink: gets invitelink
+ - /promote: promotes the user replied to
+ - /demote: demotes the user replied to
+"""
 
 __mod_name__ = "Admin"
 

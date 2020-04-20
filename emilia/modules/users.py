@@ -13,7 +13,6 @@ from emilia import dispatcher, OWNER_ID, LOGGER
 from emilia.modules.helper_funcs.filters import CustomFilters
 
 import emilia.modules.sql.feds_sql as fedsql
-from emilia.modules import languages
 from emilia.modules.helper_funcs.alternate import send_message
 
 USERS_GROUP = 4
@@ -65,8 +64,7 @@ def broadcast(update, context):
                 failed += 1
                 LOGGER.warning("Couldn't send broadcast to %s, group name %s", str(chat.chat_id), str(chat.chat_name))
 
-        send_message(update.effective_message, "Siaran selesai. {} grup gagal menerima pesan, mungkin "
-                                            "karena ditendang.".format(failed))
+        send_message(update.effective_message, "Broadcast complete. {} group failed to receive message, maybe because it was kicked".format(failed))
 
 
 @run_async
@@ -83,7 +81,7 @@ def log_user(update, context):
         if user:
             fban, fbanreason, fbantime = fedsql.get_fban_user(fed_id, user.id)
             if fban:
-                send_message(update.effective_message, languages.tl(update.effective_message, "Pengguna ini dilarang di federasi saat ini!\nAlasan: `{}`").format(fbanreason), parse_mode="markdown")
+                send_message(update.effective_message, "This user is banned in the current federation!\nReason: `{}`".format(fbanreason), parse_mode="markdown")
                 try:
                     context.bot.kick_chat_member(chat.id, user.id)
                 except:
@@ -108,25 +106,25 @@ def log_user(update, context):
 @run_async
 def chats(update, context):
     all_chats = sql.get_all_chats() or []
-    chatfile = 'Daftar obrolan.\n'
+    chatfile = 'Chat list.\n'
     for chat in all_chats:
         chatfile += "{} - ({})\n".format(chat.chat_name, chat.chat_id)
 
     with BytesIO(str.encode(chatfile)) as output:
         output.name = "chatlist.txt"
         update.effective_message.reply_document(document=output, filename="chatlist.txt",
-                                                caption="Berikut ini daftar obrolan dalam database saya.")
+                                                caption="The following is a list of chats in my database.")
 
 
 def __user_info__(user_id, chat_id):
     if user_id == dispatcher.bot.id:
-        return languages.tl(chat_id, """Saya telah melihatnya... Wow. Apakah mereka menguntit saya? Mereka ada di semua tempat yang sama dengan saya... oh. Ini aku.""")
+        return "I've seen them in... Wow. Are they stalking me? They're in all the same places I am... oh. It's me."
     num_chats = sql.get_user_num_chats(user_id)
-    return languages.tl(chat_id, """Saya telah melihatnya <code>{}</code> obrolan total.""").format(num_chats)
+    return "I've seen them in <code>{}</code> chats in total.".format(num_chats)
 
 
 def __stats__():
-    return languages.tl(OWNER_ID, "{} pengguna, pada {} obrolan").format(sql.num_users(), sql.num_chats())
+    return "{} users, across {} chats".format(sql.num_users(), sql.num_chats())
 
 
 def __migrate__(old_chat_id, new_chat_id):

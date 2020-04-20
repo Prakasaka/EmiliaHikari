@@ -11,7 +11,7 @@ from telegram.ext import MessageHandler, Filters, CommandHandler, run_async, Cal
 from telegram.utils.helpers import mention_markdown, mention_html, escape_markdown
 
 import emilia.modules.sql.welcome_sql as sql
-from emilia import dispatcher, OWNER_ID, LOGGER, spamcheck, IS_DEBUG
+from emilia import dispatcher, OWNER_ID, LOGGER, IS_DEBUG
 try:
 	from emilia import SPAMWATCH_TOKEN
 except:
@@ -25,8 +25,10 @@ from emilia.modules.helper_funcs.welcome_timeout import welcome_timeout
 from emilia.modules.log_channel import loggable
 
 import emilia.modules.sql.feds_sql as fedsql
-from emilia.modules.languages import tl
 from emilia.modules.helper_funcs.alternate import send_message, leave_chat
+
+
+WELC_HELP_TXT = "Your group's welcome/goodbye messages can be personalised in multiple ways. If you want the messages to be individually generated, like the default welcome message is, you can use *these* variables:\n - `{{first}}`: this represents the user's *first* name\n - `{{last}}`: this represents the user's *last* name. Defaults to *first name* if user has no last name.\n - `{{fullname}}`: this represents the user's *full* name. Defaults to *first name* if user has no last name.\n - `{{username}}`: this represents the user's *username*. Defaults to a *mention* of the user's first name if has no username.\n - `{{mention}}`: this simply *mentions* a user - tagging them with their first name.\n - `{{id}}`: this represents the user's *id*\n - `{{count}}`: this represents the user's *member number*.\n - `{{chatname}}`: this represents the *current chat name*.\n\nEach variable MUST be surrounded by `{{}}` to be replaced.\nWelcome messages also support markdown, so you can make any elements bold/italic/code/links. Buttons are also supported, so you can make your welcomes look awesome with some nice intro buttons.\nTo create a button linking to your rules, use this: `[Rules](buttonurl:{{rules}})`.\nIf you're feeling fun, you can even set images/gifs/videos/voice messages as the welcome message by replying to the desired media, and calling /setwelcome."
 
 
 OWNER_SPECIAL = False
@@ -56,36 +58,28 @@ def send(update, message, keyboard, backup_message):
 		msg = dispatcher.bot.send_message(chat.id, message, parse_mode=ParseMode.MARKDOWN, reply_markup=keyboard, reply_to_message_id=reply, disable_web_page_preview=True)
 	except IndexError:
 		msg = dispatcher.bot.send_message(chat.id, markdown_parser(backup_message +
-																  tl(update.effective_message, "\nCatatan: pesan saat ini tidak valid "
-																  "karena masalah markdown. Bisa jadi "
-																  "karena nama pengguna.")),
+																  "\nNote: the current message was invalid due to markdown issues. Could be due to the user's name."),
 												  reply_to_message_id=reply, 
 												  parse_mode=ParseMode.MARKDOWN)
 	except KeyError:
 		msg = dispatcher.bot.send_message(chat.id, markdown_parser(backup_message +
-																  tl(update.effective_message, "\nCatatan: pesan saat ini tidak valid "
-																  "karena ada masalah dengan beberapa salah tempat. "
-																  "Harap perbarui")),
+																  "\nNote: the current message is invalid due to an issue with some misplaced curly brackets. Please update"),
 												  reply_to_message_id=reply, 
 												  parse_mode=ParseMode.MARKDOWN)
 	except BadRequest as excp:
 		if excp.message == "Button_url_invalid":
 			msg = dispatcher.bot.send_message(chat.id, markdown_parser(backup_message +
-																	  tl(update.effective_message, "\nCatatan: pesan saat ini memiliki url yang tidak "
-																	  "valid di salah satu tombolnya. Harap perbarui.")),
+																	  "\nNote: the current message has an invalid url in one of its buttons. Please update."),
 													  reply_to_message_id=reply, 
 													  parse_mode=ParseMode.MARKDOWN)
 		elif excp.message == "Unsupported url protocol":
 			msg = dispatcher.bot.send_message(chat.id, markdown_parser(backup_message +
-																	  tl(update.effective_message, "\nCatatan: pesan saat ini memiliki tombol yang "
-																	  "menggunakan protokol url yang tidak didukung "
-																	  "oleh telegram. Harap perbarui.")),
+																	  "\nNote: the current message has buttons which use url protocols that are unsupported by telegram. Please update."),
 													  reply_to_message_id=reply, 
 													  parse_mode=ParseMode.MARKDOWN)
 		elif excp.message == "Wrong url host":
 			msg = dispatcher.bot.send_message(chat.id, markdown_parser(backup_message +
-																	  tl(update.effective_message, "\nCatatan: pesan saat ini memiliki beberapa url "
-																	  "yang buruk. Harap perbarui.")),
+																	  "\nNote: the current message has some bad urls. Please update."),
 													  reply_to_message_id=reply, 
 													  parse_mode=ParseMode.MARKDOWN)
 			LOGGER.warning(message)
@@ -96,8 +90,7 @@ def send(update, message, keyboard, backup_message):
 		else:
 			try:
 				msg = dispatcher.bot.send_message(chat.id, markdown_parser(backup_message +
-																	  tl(update.effective_message, "\nCatatan: Terjadi kesalahan saat mengirim pesan "
-																	  "kustom. Harap perbarui.")),
+																	  "\nNote: An error occured when sending the custom message. Please update."),
 													  reply_to_message_id=reply, 
 													  parse_mode=ParseMode.MARKDOWN)
 				LOGGER.exception("ERROR!")
@@ -130,9 +123,9 @@ def new_member(update, context):
 			# Give the owner a special welcome
 			if OWNER_SPECIAL and new_mem.id == OWNER_ID:
 				if cleanserv:
-					context.bot.send_message(chat.id, tl(update.effective_message, "Master telah pulang! Mari kita mulai pesta ini! 😆"))
+					context.bot.send_message(chat.id, "Master is in the houseeee, let's get this party started! 😆")
 				else:
-					send_message(update.effective_message, tl(update.effective_message, "Master telah pulang! Mari kita mulai pesta ini! 😆"))
+					send_message(update.effective_message, "Master is in the houseeee, let's get this party started! 😆")
 				continue
 
 			# Don't welcome yourself
@@ -213,7 +206,7 @@ def new_member(update, context):
 					try:
 						sent = ENUM_FUNC_MAP[welc_type](chat.id, cust_content, caption=formatted_text, reply_markup=keyboard, parse_mode="markdown", reply_to_message_id=reply)
 					except BadRequest:
-						sent = send_message(update.effective_message, tl(update.effective_message, "Catatan: Terjadi kesalahan saat mengirim pesan kustom. Harap perbarui."))
+						sent = send_message(update.effective_message, "Note: An error occurred while sending custom messages. Please update.")
 					return
 				else:
 					# else, move on
@@ -364,7 +357,7 @@ def check_bot_button(update, context):
 	getalluser = sql.get_chat_userlist(chat.id)
 	if getalluser and user.id in list(getalluser) and getalluser[user.id] == False:
 		try:
-			query.answer(text=tl(update.effective_message, "Kamu telah disuarakan!"))
+			query.answer(text=tl(update.effective_message, "You've been unmuted!"))
 		except BadRequest as err:
 			print("-> Failed: {}".format(err))
 			return
@@ -393,16 +386,16 @@ def check_bot_button(update, context):
 	if int(user.id) != int(user_id):
 		if IS_DEBUG:
 			print("Not that user")
-		query.answer(text=tl(update.effective_message, "Kamu bukan pengguna yang di tuju!"))
+		query.answer(text="You are not the intended user!")
 		return
 	if getalluser.get(user.id) and getalluser.get(user.id) == True:
-		query.answer(text=tl(update.effective_message, "Kamu sudah pernah mengklik ini sebelumnya!"))
+		query.answer(text="You've clicked this before!")
 		return
 	try:
 		context.bot.restrict_chat_member(chat.id, user.id, permissions=ChatPermissions(can_send_messages=True, can_send_media_messages=True, can_send_other_messages=True, can_add_web_page_previews=True))
 	except BadRequest as err:
 		if not update.effective_chat.get_member(context.bot.id).can_restrict_members:
-			query.answer(text=tl(update.effective_message, "Saya tidak dapat membatasi orang disini, tanya admin untuk unmute!"))
+			query.answer(text="I can't restrict people here, ask admin to unmute you!")
 		else:
 			query.answer(text="Error: " + str(err.message))
 		return
@@ -439,7 +432,7 @@ def check_bot_button(update, context):
 				context.bot.editMessageCaption(chat.id, message_id=query.message.message_id, caption=formatted_text, reply_markup=keyboard, parse_mode="markdown")
 		except BadRequest:
 			pass
-		query.answer(text=tl(update.effective_message, "Kamu telah disuarakan!"))
+		query.answer(text="You've been unmuted!")
 		return
 	# else, move on
 	first_name = query.from_user.first_name or "PersonWithNoName"  # edge case of empty name - occurs for some bugs.
@@ -468,7 +461,7 @@ def check_bot_button(update, context):
 		keyb = []
 	keyboard = InlineKeyboardMarkup(keyb)
 	context.bot.editMessageText(chat_id=chat.id, message_id=query.message.message_id, text=res, reply_markup=keyboard, parse_mode="markdown")
-	query.answer(text=tl(update.effective_message, "Kamu telah disuarakan!"))
+	query.answer(text="You've been unmuted!")
 	#TODO need kick users after 2 hours and remove message 
 
 
@@ -485,7 +478,7 @@ def left_member(update, context):
 
 			# Give the owner a special goodbye
 			if OWNER_SPECIAL and left_mem.id == OWNER_ID:
-				send_message(update.effective_message, tl(update.effective_message, "Selamat jalan master 😢"))
+				send_message(update.effective_message, "RIP Master 😢")
 				return
 
 			# if media goodbye, use appropriate function for it
@@ -528,7 +521,7 @@ def left_member(update, context):
 				try:
 					ENUM_FUNC_MAP[goodbye_type](chat.id, cust_content, caption=formatted_text, reply_markup=keyboard, parse_mode="markdown", reply_to_message_id=reply)
 				except BadRequest:
-					send_message(update.effective_message, tl(update.effective_message, "Catatan: Terjadi kesalahan saat mengirim pesan kustom. Harap perbarui."))
+					send_message(update.effective_message, "Note: An error occurred while sending custom messages. Please update.")
 				return
 
 			first_name = left_mem.first_name or "PersonWithNoName"  # edge case of empty name - occurs for some bugs.
@@ -565,7 +558,6 @@ def left_member(update, context):
 
 
 @run_async
-@spamcheck
 @user_admin
 def security(update, context):
 	args = context.args
@@ -576,26 +568,25 @@ def security(update, context):
 		if (var == "yes" or var == "ya" or var == "on"):
 			check = context.bot.getChatMember(chat.id, context.bot.id)
 			if check.status == 'member' or check['can_restrict_members'] == False:
-				text = tl(update.effective_message, "Saya tidak bisa membatasi orang di sini! Pastikan saya admin agar bisa membisukan seseorang!")
+				text = "I can't restrict member here! Make sure I'm an admin an can mute someone!"
 				send_message(update.effective_message, text, parse_mode="markdown")
 				return ""
 			sql.set_welcome_security(chat.id, True, extra_verify, str(cur_value), str(timeout), int(timeout_mode), cust_text)
-			send_message(update.effective_message, tl(update.effective_message, "Keamanan untuk member baru di aktifkan!"))
+			send_message(update.effective_message, "Security for new members is activated!")
 		elif (var == "no" or var == "ga" or var == "off"):
 			sql.set_welcome_security(chat.id, False, extra_verify, str(cur_value), str(timeout), int(timeout_mode), cust_text)
-			send_message(update.effective_message, tl(update.effective_message, "Di nonaktifkan, saya tidak akan membisukan member masuk lagi"))
+			send_message(update.effective_message, "Disabled, I will not mute new member again")
 		else:
-			send_message(update.effective_message, tl(update.effective_message, "Silakan tulis `on`/`ya`/`off`/`ga`!"), parse_mode=ParseMode.MARKDOWN)
+			send_message(update.effective_message, "Please write `on`/`ya`/`off`/`ga`!", parse_mode=ParseMode.MARKDOWN)
 	else:
 		getcur, extra_verify, cur_value, timeout, timeout_mode, cust_text = sql.welcome_security(chat.id)
 		if cur_value[:1] == "0":
-			cur_value = tl(update.effective_message, "Selamanya")
-		text = tl(update.effective_message, "Pengaturan saat ini adalah:\nWelcome security: `{}`\nVerify security: `{}`\nMember akan di mute selama: `{}`\nWaktu verifikasi timeout: `{}` ({})\nTombol unmute custom: `{}`").format(getcur, extra_verify, cur_value, make_time(int(timeout)), "kick" if 1 else "banned", cust_text)
+			cur_value = "Forever"
+		text = "Current settings are:\nWelcome security: `{}`\nVerify security: `{}`\nMembers will be muted for: `{}`\nVerification timeout: `{}`\nUnmute custom button: `{}`".format(getcur, extra_verify, cur_value, make_time(int(timeout)), "kick" if 1 else "banned", cust_text)
 		send_message(update.effective_message, text, parse_mode="markdown")
 
 
 @run_async
-@spamcheck
 @user_admin
 def security_mute(update, context):
 	args = context.args
@@ -607,23 +598,22 @@ def security_mute(update, context):
 		if var[:1] == "0":
 			mutetime = "0"
 			sql.set_welcome_security(chat.id, getcur, extra_verify, "0", timeout, timeout_mode, cust_text)
-			text = tl(update.effective_message, "Setiap member baru akan di bisukan selamanya sampai dia menekan tombol selamat datang!")
+			text = "Every new member will be muted forever until they presses the welcome button!"
 		else:
 			mutetime = extract_time(message, var)
 			if mutetime == "":
 				return
 			sql.set_welcome_security(chat.id, getcur, extra_verify, str(var), timeout, timeout_mode, cust_text)
-			text = tl(update.effective_message, "Setiap member baru akan di bisukan selama {} sampai dia menekan tombol selamat datang!").format(var)
+			text = "Every new member will be muted for {} until they presses the welcome button!".format(var)
 		send_message(update.effective_message, text)
 	else:
 		if str(cur_value) == "0":
-			send_message(update.effective_message, tl(update.effective_message, "Pengaturan saat ini: member baru akan di bisukan selamanya sampai dia menekan tombol selamat datang!"))
+			send_message(update.effective_message, "Current settings: new member will be muted forever until they presses the welcome button!")
 		else:
-			send_message(update.effective_message, tl(update.effective_message, "Pengaturan saat ini: member baru akan di bisukan selama {} sampai dia menekan tombol selamat datang!").format(cur_value))
+			send_message(update.effective_message, "Current settings: new member will be muted for {} until they presses the welcome button!".format(cur_value))
 
 
 @run_async
-@spamcheck
 @user_admin
 def security_text(update, context):
 	args = context.args
@@ -633,25 +623,23 @@ def security_text(update, context):
 	if len(args) >= 1:
 		text = " ".join(args)
 		sql.set_welcome_security(chat.id, getcur, extra_verify, cur_value, timeout, timeout_mode, text)
-		text = tl(update.effective_message, "Tombol custom teks telah di ubah menjadi: `{}`").format(text)
+		text = "Custom text button has been changed to: `{}`".format(text)
 		send_message(update.effective_message, text, parse_mode="markdown")
 	else:
-		send_message(update.effective_message, tl(update.effective_message, "Tombol teks security saat ini adalah: `{}`").format(cust_text), parse_mode="markdown")
+		send_message(update.effective_message, "Current custom text button is: `{}`".format(cust_text), parse_mode="markdown")
 
 
 @run_async
-@spamcheck
 @user_admin
 def security_text_reset(update, context):
 	chat = update.effective_chat  # type: Optional[Chat]
 	message = update.effective_message  # type: Optional[Message]
 	getcur, extra_verify, cur_value, timeout, timeout_mode, cust_text = sql.welcome_security(chat.id)
-	sql.set_welcome_security(chat.id, getcur, extra_verify, cur_value, timeout, timeout_mode, tl(update.effective_message, "Klik disini untuk mensuarakan"))
-	send_message(update.effective_message, tl(update.effective_message, "Tombol custom teks security telah di reset menjadi: `Klik disini untuk mensuarakan`"), parse_mode="markdown")
+	sql.set_welcome_security(chat.id, getcur, extra_verify, cur_value, timeout, timeout_mode, "Click here to unmute")
+	send_message(update.effective_message, "Custom text security button has been reset to: `Click here to unmute`", parse_mode="markdown")
 
 
 @run_async
-@spamcheck
 @user_admin
 def cleanservice(update, context):
 	args = context.args
@@ -659,22 +647,22 @@ def cleanservice(update, context):
 	if chat.type != chat.PRIVATE:
 		if len(args) >= 1:
 			var = args[0].lower()
-			if (var == "no" or var == "off" or var == "tidak"):
+			if (var == "no" or var == "off"):
 				sql.set_clean_service(chat.id, False)
-				send_message(update.effective_message, tl(update.effective_message, "Saya meninggalkan pesan layanan"))
-			elif(var == "yes" or var == "ya" or var == "on"):
+				send_message(update.effective_message, "I left a service message")
+			elif(var == "yes" or var == "on"):
 				sql.set_clean_service(chat.id, True)
-				send_message(update.effective_message, tl(update.effective_message, "Saya akan membersihkan pesan layanan"))
+				send_message(update.effective_message, "I will clean the service message")
 			else:
-				send_message(update.effective_message, tl(update.effective_message, "Silakan masukkan yes/ya atau no/tidak!"), parse_mode=ParseMode.MARKDOWN)
+				send_message(update.effective_message, "Please enter yes or no!", parse_mode=ParseMode.MARKDOWN)
 		else:
-			send_message(update.effective_message, tl(update.effective_message, "Silakan masukkan yes/ya atau no/tidak!"), parse_mode=ParseMode.MARKDOWN)
+			send_message(update.effective_message, "Please enter yes or no!", parse_mode=ParseMode.MARKDOWN)
 	else:
 		curr = sql.clean_service(chat.id)
 		if curr:
-			send_message(update.effective_message, tl(update.effective_message, "Saat ini saya akan membersihkan `x joined the group` ketika ada member baru."), parse_mode=ParseMode.MARKDOWN)
+			send_message(update.effective_message, "At this time I will clean `x joined the group` when there is a new member.", parse_mode=ParseMode.MARKDOWN)
 		else:
-			send_message(update.effective_message, tl(update.effective_message, "Saat ini saya tidak akan membersihkan `x joined the group` ketika ada member baru."), parse_mode=ParseMode.MARKDOWN)
+			send_message(update.effective_message, "At this time I will not clean `x joined the group` when there is a new member.", parse_mode=ParseMode.MARKDOWN)
 
 
 
@@ -695,20 +683,20 @@ def welcome(update, context):
 		cleanserv = sql.clean_service(chat.id)
 		getcur, extra_verify, cur_value, timeout, timeout_mode, cust_text = sql.welcome_security(chat.id)
 		if getcur:
-			welcsec = tl(update.effective_message, "Aktif ")
+			welcsec = "Enabled "
 		else:
-			welcsec = tl(update.effective_message, "Tidak aktif ")
+			welcsec = "Disabled"
 		if cur_value[:1] == "0":
-			welcsec += tl(update.effective_message, "(di bisukan selamanya sampai menekan tombol unmute)")
+			welcsec += "(mute forever until pressing the unmute button)"
 		else:
-			welcsec += tl(update.effective_message, "(di bisukan selama {})").format(cur_value)
-		text = tl(update.effective_message, "Obrolan ini diatur dengan setelan selamat datang: `{}`\n").format(pref)
-		text += tl(update.effective_message, "Saat ini Saya menghapus pesan selamat datang lama: `{}`\n").format(prev_welc)
-		text += tl(update.effective_message, "Saat ini Saya menghapus layanan pesan: `{}`\n").format(cleanserv)
-		text += tl(update.effective_message, "Saat ini saya membisukan pengguna ketika mereka bergabung: `{}`\n").format(welcsec)
-		text += tl(update.effective_message, "Pengguna baru harus verifikasi tombol: `{}`\n").format(tl(update.effective_message, "Aktif ") if extra_verify else tl(update.effective_message, "Tidak aktif "))
-		text += tl(update.effective_message, "Tombol welcomemute akan mengatakan: `{}`\n").format(cust_text)
-		text += tl(update.effective_message, "\n*Pesan selamat datang (tidak mengisi {{}}) adalah:*")
+			welcsec += "(muted for {})".format(cur_value)
+		text = "This chat is set with a welcome setting: `{}`\n".format(pref)
+		text += "At this time I deleted the old welcome message: `{}`\n".format(prev_welc)
+		text += "I am currently deleting the message service: `{}`\n".format(cleanserv)
+		text += "Currently I mute users when they join: `{}`\n".format(welcsec)
+		text += "New users must verify: `{}`\n".format("Enabled " if extra_verify else "Disabled")
+		text += "The button welcomemute will say: `{}`\n".format(cust_text)
+		text += "\n*Welcome message (not filling the {{}}) is:*"
 		send_message(update.effective_message, text,
 			parse_mode=ParseMode.MARKDOWN)
 
@@ -743,15 +731,15 @@ def welcome(update, context):
 	elif len(args) >= 1:
 		if args[0].lower() in ("on", "yes"):
 			sql.set_welc_preference(str(chat.id), True)
-			send_message(update.effective_message, tl(update.effective_message, "Saya akan sopan 😁"))
+			send_message(update.effective_message, "I'll be polite! 😁")
 
 		elif args[0].lower() in ("off", "no"):
 			sql.set_welc_preference(str(chat.id), False)
-			send_message(update.effective_message, tl(update.effective_message, "Aku ngambek, tidak menyapa lagi. 😣"))
+			send_message(update.effective_message, "I'm sulking, not saying hello anymore. 😣")
 
 		else:
 			# idek what you're writing, say yes or no
-			send_message(update.effective_message, tl(update.effective_message, "Saya hanya mengerti 'on/yes' atau 'off/no' saja!"))
+			send_message(update.effective_message, "I only understand 'on/yes' or 'off/no' only!")
 
 
 @run_async
@@ -764,8 +752,7 @@ def goodbye(update, context):
 		noformat = args and args[0] == "noformat"
 		pref, goodbye_m, cust_content, goodbye_type = sql.get_gdbye_pref(chat.id)
 		send_message(update.effective_message, 
-			tl(update.effective_message, "Obrolan ini memiliki setelan selamat tinggal yang disetel ke: `{}`.\n*Pesan selamat tinggal "
-			"(tidak mengisi {{}}) adalah:*").format(pref),
+			"This chat has it's goodbye setting set to: `{}`.\n*The goodbye  message (not filling the {{}}) is:*".format(pref),
 			parse_mode=ParseMode.MARKDOWN)
 
 		buttons = sql.get_gdbye_buttons(chat.id)
@@ -799,19 +786,18 @@ def goodbye(update, context):
 	elif len(args) >= 1:
 		if args[0].lower() in ("on", "yes"):
 			sql.set_gdbye_preference(str(chat.id), True)
-			send_message(update.effective_message, tl(update.effective_message, "Aku akan menyesal jika orang-orang pergi!"))
+			send_message(update.effective_message, "I'll be sorry when people leave!")
 
 		elif args[0].lower() in ("off", "no"):
 			sql.set_gdbye_preference(str(chat.id), False)
-			send_message(update.effective_message, tl(update.effective_message, "Mereka pergi, mereka sudah mati bagi saya."))
+			send_message(update.effective_message, "They leave, they're dead to me.")
 
 		else:
 			# idk what you're writing, say yes or no
-			send_message(update.effective_message, tl(update.effective_message, "Saya hanya mengerti 'on/yes' atau 'off/no' saja!"))
+			send_message(update.effective_message, "I only understand 'on/yes' or 'off/no' only!")
 
 
 @run_async
-@spamcheck
 @user_admin
 @loggable
 def set_welcome(update, context) -> str:
@@ -822,43 +808,39 @@ def set_welcome(update, context) -> str:
 	# If user is not set text and not reply a message
 	if not msg.reply_to_message:
 		if len(msg.text.split()) == 1:
-			send_message(update.effective_message, tl(update.effective_message, "Anda harus memberikan isi dalam pesan selamat datang!\nKetik `/welcomehelp` untuk beberapa bantuan pada welcome"), parse_mode="markdown")
+			send_message(update.effective_message, "You must provide the contents in the welcome message!\nType `/welcomehelp` to get some help on welcome", parse_mode="markdown")
 			return ""
 
 	text, data_type, content, buttons = get_welcome_type(msg)
 
 	if data_type is None:
-		send_message(update.effective_message, tl(update.effective_message, "Anda tidak menentukan apa yang harus dibalas!"))
+		send_message(update.effective_message, "You do not determine what must be returned!")
 		return ""
 
 	sql.set_custom_welcome(chat.id, content, text, data_type, buttons)
-	send_message(update.effective_message, tl(update.effective_message, "Berhasil mengatur pesan sambutan kustom!"))
+	send_message(update.effective_message, "Successfully set a custom welcome message!")
 
 	return "<b>{}:</b>" \
 		   "\n#SET_WELCOME" \
 		   "\n<b>Admin:</b> {}" \
-		   "\nSet a welcome message.".format(html.escape(chat.title),
-											   mention_html(user.id, user.first_name))
+		   "\nSet a welcome message.".format(html.escape(chat.title), mention_html(user.id, user.first_name))
 
 
 @run_async
-@spamcheck
 @user_admin
 @loggable
 def reset_welcome(update, context) -> str:
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	sql.set_custom_welcome(chat.id, None, sql.DEFAULT_WELCOME, sql.Types.TEXT)
-	send_message(update.effective_message, tl(update.effective_message, "Berhasil menyetel ulang pesan sambutan ke default!"))
+	send_message(update.effective_message, "Successfully reset the welcome message to default!")
 	return "<b>{}:</b>" \
 		   "\n#RESET_WELCOME" \
 		   "\n<b>Admin:</b> {}" \
-		   "\nReset the welcome message to default.".format(html.escape(chat.title),
-															mention_html(user.id, user.first_name))
+		   "\nReset the welcome message to default.".format(html.escape(chat.title), mention_html(user.id, user.first_name))
 
 
 @run_async
-@spamcheck
 @user_admin
 @loggable
 def set_goodbye(update, context) -> str:
@@ -869,42 +851,38 @@ def set_goodbye(update, context) -> str:
 	# If user is not set text and not reply a message
 	if not msg.reply_to_message:
 		if len(msg.text.split()) == 1:
-			send_message(update.effective_message, tl(update.effective_message, "Anda harus memberikan isi dalam pesan selamat datang!\nKetik `/welcomehelp` untuk beberapa bantuan pada welcome"), parse_mode="markdown")
+			send_message(update.effective_message, "You must provide the contents in the welcome message!\nType `/welcomehelp` to get some help on welcome", parse_mode="markdown")
 			return ""
 
 	text, data_type, content, buttons = get_welcome_type(msg)
 
 	if data_type is None:
-		send_message(update.effective_message, tl(update.effective_message, "Anda tidak menentukan apa yang harus dibalas!"))
+		send_message(update.effective_message, "You do not determine what must be returned!")
 		return ""
 
 	sql.set_custom_gdbye(chat.id, content, text, data_type, buttons)
-	send_message(update.effective_message, tl(update.effective_message, "Berhasil mengatur pesan selamat tinggal kustom!"))
+	send_message(update.effective_message, "Successfully set custom goodbye messages!")
 	return "<b>{}:</b>" \
 		   "\n#SET_GOODBYE" \
 		   "\n<b>Admin:</b> {}" \
-		   "\nSet a goodbye message.".format(html.escape(chat.title),
-											   mention_html(user.id, user.first_name))
+		   "\nSet a goodbye message.".format(html.escape(chat.title), mention_html(user.id, user.first_name))
 
 
 @run_async
-@spamcheck
 @user_admin
 @loggable
 def reset_goodbye(update, context) -> str:
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
 	sql.set_custom_gdbye(chat.id, sql.DEFAULT_GOODBYE, sql.Types.TEXT)
-	send_message(update.effective_message, tl(update.effective_message, "Berhasil me-reset pesan selamat tinggal ke default!"))
+	send_message(update.effective_message, "Successfully reset goodbye message to default!")
 	return "<b>{}:</b>" \
 		   "\n#RESET_GOODBYE" \
 		   "\n<b>Admin:</b> {}" \
-		   "\nSetel ulang pesan selamat tinggal.".format(html.escape(chat.title),
-												 mention_html(user.id, user.first_name))
+		   "\nReset goodbye messages.".format(html.escape(chat.title), mention_html(user.id, user.first_name))
 
 
 @run_async
-@spamcheck
 @user_admin
 @loggable
 def clean_welcome(update, context):
@@ -915,14 +893,14 @@ def clean_welcome(update, context):
 	if not args:
 		clean_pref = sql.get_clean_pref(chat.id)
 		if clean_pref:
-			send_message(update.effective_message, tl(update.effective_message, "Saya *akan* menghapus pesan selamat datang hingga dua hari."), parse_mode="markdown")
+			send_message(update.effective_message, "I should be deleting welcome messages up to two days old.", parse_mode="markdown")
 		else:
-			send_message(update.effective_message, tl(update.effective_message, "Saat ini saya *tidak akan* menghapus pesan selamat datang yang lama!"), parse_mode="markdown")
+			send_message(update.effective_message, "I'm currently not deleting old welcome messages!", parse_mode="markdown")
 		return ""
 
 	if args[0].lower() in ("on", "yes"):
 		sql.set_clean_welcome(str(chat.id), True)
-		send_message(update.effective_message, tl(update.effective_message, "Saya *akan* mencoba menghapus pesan selamat datang yang lama!"), parse_mode="markdown")
+		send_message(update.effective_message, "I'll try to delete old welcome messages!", parse_mode="markdown")
 		return "<b>{}:</b>" \
 			   "\n#CLEAN_WELCOME" \
 			   "\n<b>Admin:</b> {}" \
@@ -930,23 +908,21 @@ def clean_welcome(update, context):
 																							 mention_html(user.id, user.first_name))
 	elif args[0].lower() in ("off", "no"):
 		sql.set_clean_welcome(str(chat.id), False)
-		send_message(update.effective_message, tl(update.effective_message, "Saya *tidak akan* menghapus pesan selamat datang yang lama."), parse_mode="markdown")
+		send_message(update.effective_message, "I won't delete old welcome messages.", parse_mode="markdown")
 		return "<b>{}:</b>" \
 			   "\n#CLEAN_WELCOME" \
 			   "\n<b>Admin:</b> {}" \
-			   "\nHas toggled clean welcomes to <code>OFF</code>.".format(html.escape(chat.title),
-																		  mention_html(user.id, user.first_name))
+			   "\nHas toggled clean welcomes to <code>OFF</code>.".format(html.escape(chat.title), mention_html(user.id, user.first_name))
 	else:
 		# idk what you're writing, say yes or no
-		send_message(update.effective_message, tl(update.effective_message, "Saya hanya mengerti 'on/yes' or 'off/no' saja!"))
+		send_message(update.effective_message, "I can only understand 'on/yes' or 'off/no'")
 		return ""
 
 
 @run_async
-@spamcheck
 @user_admin
 def welcome_help(update, context):
-	send_message(update.effective_message, tl(update.effective_message, "WELC_HELP_TXT").format(dispatcher.bot.username), parse_mode=ParseMode.MARKDOWN)
+	send_message(update.effective_message, WELC_HELP_TXT.format(dispatcher.bot.username), parse_mode=ParseMode.MARKDOWN)
 
 
 # TODO: get welcome data from group butler snap
@@ -969,9 +945,7 @@ def __chat_settings__(chat_id, user_id):
 	welcome_pref, _, _, _ = sql.get_welc_pref(chat_id)
 	goodbye_pref, _, _, _ = sql.get_gdbye_pref(chat_id)
 	cleanserv = sql.clean_service(chat_id)
-	return tl(user_id, "Obrolan ini memiliki preferensi `{}` untuk pesan sambutan.\n" \
-		   "Untuk preferensi pesan selamat tinggal `{}`.\n" \
-		   "Bot `{}` menghapus notifikasi member masuk/keluar secara otomatis").format(welcome_pref, goodbye_pref, cleanserv)
+	return user_id, "This chat has it's welcome preference set to `{}`.\nIt's goodbye preference is `{}`.".format(welcome_pref, goodbye_pref, cleanserv)
 
 """
 def __chat_settings_btn__(chat_id, user_id):
@@ -1131,7 +1105,7 @@ def check_cas(bot: Bot, user_id, user, message):
 				context.bot.kickChatMember(message.chat.id, user_id)
 				is_success = True
 			except:
-				context.bot.sendMessage(message.chat.id, "*⚠️ WARNING!*\n{} is a spammer from [CAS ban](https://combot.org/cas/query?u={}) and has been added to fedban list of *Team Nusantara Disciplinary Circle*!\n\nIt's recommended to banned him/her!".format(mention_markdown(user_id, user.first_name), user_id), parse_mode="markdown", disable_web_page_preview=True)
+				context.bot.sendMessage(message.chat.id, "*⚠️ WARNING!*\n{} is a spammer from [CAS ban](https://combot.org/cas/query?u={}) and has been added to fedban list of *Team Nusantara Disciplinary Circle*!\n\nIt's recommended to banned him!".format(mention_markdown(user_id, user.first_name), user_id), parse_mode="markdown", disable_web_page_preview=True)
 			if is_success:
 				context.bot.sendMessage(message.chat.id, "{} has been banned and added to fedban list of *Team Nusantara Disciplinary Circle*!\nReason: [CAS ban](https://combot.org/cas/query?u={}).".format(mention_markdown(user_id, user.first_name), user_id), parse_mode="markdown", disable_web_page_preview=True)
 			fed_id = fedsql.get_fed_info("TeamNusantaraDevs")
@@ -1157,7 +1131,7 @@ def check_sw(bot: Bot, user_id, user, message):
 		context.bot.kickChatMember(message.chat.id, user_id)
 		is_success = True
 	except:
-		context.bot.sendMessage(message.chat.id, "*⚠️ WARNING!*\n{} is a spammer from SpamWatch and has been added to fedban list of *Team Nusantara Disciplinary Circle*!\n\nIt's recommended to banned him/her!".format(mention_markdown(user_id, user.first_name)), parse_mode="markdown", disable_web_page_preview=True)
+		context.bot.sendMessage(message.chat.id, "*⚠️ WARNING!*\n{} is a spammer from SpamWatch and has been added to fedban list of *Team Nusantara Disciplinary Circle*!\n\nIt's recommended to banned him!".format(mention_markdown(user_id, user.first_name)), parse_mode="markdown", disable_web_page_preview=True)
 	if is_success:
 		context.bot.sendMessage(message.chat.id, "{} has been banned and added to fedban list of *Team Nusantara Disciplinary Circle*!\nReason: {}.".format(mention_markdown(user_id, user.first_name), json.get('reason') if json.get('reason') else "Unknown reason"), parse_mode="markdown", disable_web_page_preview=True)
 	fed_id = fedsql.get_fed_info("TeamNusantaraDevs")
@@ -1172,7 +1146,37 @@ def check_sw(bot: Bot, user_id, user, message):
 
 
 
-__help__ = "welcome_help"
+__help__ = """
+*Admin only:*
+ - /welcome <on/off>: enable/disable the welcome message.
+ - /goodbye <on/off>: enable/disable goodbye message.
+ - /welcome: show current welcome settings, without formatting - useful for recycling your welcome message!
+ - /goodbye: same use and args as /welcome.
+ - /setwelcome <sometext>: set a custom welcome message. If used to reply to media, use that media.
+ - /setgoodbye <sometext>: set a custom goodbye message. If used to reply to media, use that media.
+ - /resetwelcome: reset to the default welcome message.
+ - /resetgoodbye: reset to the default goodbye message.
+ - /cleanwelcome <on/off>: deletes old welcome messages; when a new person joins, the old message is deleted.
+ - /cleanservice <on/off/yes/no>: deletes all service message; those are the annoying "x joined the group" you see when people join.
+ - /welcomemute <on/ya/off/ga>: all users that join, get muted; a button gets added to the welcome message for them to unmute themselves. This proves they aren't a bot!
+ - /welcomemutetime <Xw/d/h/m>: if a user hasnt pressed the "unmute" button in the welcome message after a certain this time, they'll get unmuted automatically after this period of time.
+ Note: if you want to reset the mute time to be forever, use /welcomemutetime 0m. 0 == eternal!
+ - /setmutetext <new text>: Customise the "Click here to unmute" button obtained from enabling welcomemutes.
+ - /resetmutetext: Reset teks tombol unmute menjadi default.
+
+ - /welcomeverify <on/off>: Enable welcome verification with images and buttons, best for anti bots
+ - /wtimeout <Xw/d/h/m>: Set welcome timeout, when user wasn't verify for X, then that user will be kicked/banned
+ - /wtmode <kick/ban>: Set welcome timeout should be kicked or banned
+
+Read /welcomehelp and /markdownhelp to learn about formatting your text and mentioning new users when the join!
+
+If you want to save an image, gif, or sticker, or any other data, do the following:
+/setwelcome while replying to a sticker or whatever data you'd like. This data will now be sent to welcome new users.
+
+Tip: use /welcome noformat to retrieve the unformatted welcome message.
+This will retrieve the welcome message and send it without formatting it; getting you the raw markdown, allowing you to make easy edits.
+This also works with /goodbye.
+"""
 
 __mod_name__ = "Greetings"
 

@@ -13,7 +13,6 @@ import pyowm
 from pyowm import timeutils, exceptions
 from googletrans import Translator
 import wikipedia
-from kbbi import KBBI
 import base64
 from bs4 import BeautifulSoup
 from emoji import UNICODE_EMOJI
@@ -25,36 +24,32 @@ from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import CommandHandler, run_async, Filters
 from telegram.utils.helpers import escape_markdown, mention_html, mention_markdown
 
-from emilia import dispatcher, OWNER_ID, SUDO_USERS, SUPPORT_USERS, WHITELIST_USERS, BAN_STICKER, API_WEATHER, spamcheck
+from emilia import dispatcher, OWNER_ID, SUDO_USERS, SUPPORT_USERS, WHITELIST_USERS, BAN_STICKER
 from emilia.__main__ import STATS, USER_INFO
 from emilia.modules.disable import DisableAbleCommandHandler
 from emilia.modules.helper_funcs.extraction import extract_user
 from emilia.modules.helper_funcs.filters import CustomFilters
-from emilia.modules.sql import languages_sql as langsql
 
-from emilia.modules.languages import tl
 from emilia.modules.helper_funcs.alternate import send_message
 
 @run_async
-@spamcheck
 def stickerid(update, context):
 	msg = update.effective_message
 	if msg.reply_to_message and msg.reply_to_message.sticker:
-		send_message(update.effective_message, tl(update.effective_message, "Hai {}, Id stiker yang anda balas adalah :\n```{}```").format(mention_markdown(msg.from_user.id, msg.from_user.first_name), msg.reply_to_message.sticker.file_id),
+		send_message(update.effective_message, "Hi {}, sticker id that you reply is :\n```{}```".format(mention_markdown(msg.from_user.id, msg.from_user.first_name), msg.reply_to_message.sticker.file_id),
 											parse_mode=ParseMode.MARKDOWN)
 	else:
-		send_message(update.effective_message, tl(update.effective_message, "Tolong balas pesan stiker untuk mendapatkan id stiker"),
+		send_message(update.effective_message, "Please reply to the sticker to get the ID sticker",
 											parse_mode=ParseMode.MARKDOWN)
 
 @run_async
-@spamcheck
 def getsticker(update, context):
 	msg = update.effective_message
 	chat_id = update.effective_chat.id
 	if msg.reply_to_message and msg.reply_to_message.sticker:
-		send_message(update.effective_message, "Hai " + "[{}](tg://user?id={})".format(msg.from_user.first_name,
-											msg.from_user.id) + ", Silahkan cek file yang anda minta dibawah ini."
-											"\nTolong gunakan fitur ini dengan bijak!",
+		send_message(update.effective_message, "Hi " + "[{}](tg://user?id={})".format(msg.from_user.first_name,
+											msg.from_user.id) + "Please check the file you requested below."
+                                                                                        "\nPlease use this feature wisely!",
 											parse_mode=ParseMode.MARKDOWN)
 		context.bot.sendChatAction(chat_id, "upload_document")
 		file_id = msg.reply_to_message.sticker.file_id
@@ -65,12 +60,11 @@ def getsticker(update, context):
 		context.bot.send_photo(chat_id, photo=open('sticker.png', 'rb'))
 		
 	else:
-		send_message(update.effective_message, "Hai " + "[{}](tg://user?id={})".format(msg.from_user.first_name,
-											msg.from_user.id) + ", Tolong balas pesan stiker untuk mendapatkan gambar stiker",
+		send_message(update.effective_message, "Hi " + "[{}](tg://user?id={})".format(msg.from_user.first_name,
+											msg.from_user.id) + ", Please reply to the sticker message to get the sticker image",
 											parse_mode=ParseMode.MARKDOWN)
 
 @run_async
-@spamcheck
 def stiker(update, context):
 	chat_id = update.effective_chat.id
 	args = update.effective_message.text.split(None, 1)
@@ -82,7 +76,6 @@ def stiker(update, context):
 		context.bot.sendSticker(chat_id, args[1])
 
 @run_async
-@spamcheck
 def file(update, context):
 	chat_id = update.effective_chat.id
 	args = update.effective_message.text.split(None, 1)
@@ -99,15 +92,15 @@ def getlink(update, context):
 	if args:
 		chat_id = int(args[0])
 	else:
-		send_message(update.effective_message, tl(update.effective_message, "Anda sepertinya tidak mengacu pada obrolan"))
+		send_message(update.effective_message, "You don't seem to be referring to chat")
 	chat = context.bot.getChat(chat_id)
 	bot_member = chat.get_member(context.bot.id)
 	if bot_member.can_invite_users:
 		titlechat = context.bot.get_chat(chat_id).title
 		invitelink = context.bot.get_chat(chat_id).invite_link
-		send_message(update.effective_message, tl(update.effective_message, "Sukses mengambil link invite di grup {}. \nInvite link : {}").format(titlechat, invitelink))
+		send_message(update.effective_message, "Successfully retrieve the invite link in the group {}. \nInvite link : {}".format(titlechat, invitelink))
 	else:
-		send_message(update.effective_message, tl(update.effective_message, "Saya tidak memiliki akses ke tautan undangan!"))
+		send_message(update.effective_message, "I don't have access to the invitation link!")
 	
 @run_async
 def leavechat(update, context):
@@ -115,42 +108,24 @@ def leavechat(update, context):
 	if args:
 		chat_id = int(args[0])
 	else:
-		send_message(update.effective_message, tl(update.effective_message, "Anda sepertinya tidak mengacu pada obrolan"))
+		send_message(update.effective_message, "You don't seem to be referring to chat")
 	try:
 		chat = context.bot.getChat(chat_id)
 		titlechat = context.bot.get_chat(chat_id).title
-		context.bot.sendMessage(chat_id, tl(update.effective_message, "Selamat tinggal semua 😁"))
+		context.bot.sendMessage(chat_id, "Goodbye everyone 😁")
 		context.bot.leaveChat(chat_id)
-		send_message(update.effective_message, tl(update.effective_message, "Saya telah keluar dari grup {}").format(titlechat))
+		send_message(update.effective_message, "I have left the group {}").format(titlechat)
 
 	except BadRequest as excp:
 		if excp.message == "Chat not found":
-			send_message(update.effective_message, tl(update.effective_message, "Sepertinya saya sudah keluar atau di tendang di grup tersebut"))
+			send_message(update.effective_message, "Looks like I have been out or kicked in the group")
 		else:
 			return
 
-@run_async
-@spamcheck
-def ping(update, context):
-	start_time = time.time()
-	test = send_message(update.effective_message, "Pong!")
-	end_time = time.time()
-	ping_time = float(end_time - start_time)
-	context.bot.editMessageText(chat_id=update.effective_chat.id, message_id=test.message_id,
-						text=tl(update.effective_message, "Pong!\nKecepatannya: {0:.2f} detik").format(round(ping_time, 2) % 60))
+
 
 @run_async
-@spamcheck
-def ramalan(update, context):
-	text = ""
-	if random.randint(1,10) >= 7:
-		text += random.choice(tl(update.effective_message, "RAMALAN_FIRST"))
-	text += random.choice(tl(update.effective_message, "RAMALAN_STRINGS"))
-	send_message(update.effective_message, text)    
-
-@run_async
-@spamcheck
-def terjemah(update, context):
+def trans_late(update, context):
 	msg = update.effective_message
 	chat_id = update.effective_chat.id
 	getlang = langsql.get_lang(update.effective_message.from_user.id)
@@ -181,10 +156,10 @@ def terjemah(update, context):
 			if target2 == None:
 				deteksibahasa = trl.detect(teks)
 				tekstr = trl.translate(teks, dest=target)
-				send_message(update.effective_message, tl(update.effective_message, "Diterjemahkan dari `{}` ke `{}`:\n`{}`").format(deteksibahasa.lang, target, tekstr.text), parse_mode=ParseMode.MARKDOWN)
+				send_message(update.effective_message, "Translated from `{}` to `{}`:\n`{}`".format(deteksibahasa.lang, target, tekstr.text), parse_mode=ParseMode.MARKDOWN)
 			else:
 				tekstr = trl.translate(teks, dest=target2, src=target)
-				send_message(update.effective_message, tl(update.effective_message, "Diterjemahkan dari `{}` ke `{}`:\n`{}`").format(target, target2, tekstr.text), parse_mode=ParseMode.MARKDOWN)
+				send_message(update.effective_message, "Translated from `{}` to `{}`:\n`{}`".format(target, target2, tekstr.text), parse_mode=ParseMode.MARKDOWN)
 			
 		else:
 			args = update.effective_message.text.split(None, 2)
@@ -208,23 +183,19 @@ def terjemah(update, context):
 			if target2 == None:
 				deteksibahasa = trl.detect(teks)
 				tekstr = trl.translate(teks, dest=target)
-				return send_message(update.effective_message, tl(update.effective_message, "Diterjemahkan dari `{}` ke `{}`:\n`{}`").format(deteksibahasa.lang, target, tekstr.text), parse_mode=ParseMode.MARKDOWN)
+				return send_message(update.effective_message, "Translated from `{}` to `{}`:\n`{}`".format(deteksibahasa.lang, target, tekstr.text), parse_mode=ParseMode.MARKDOWN)
 			else:
 				tekstr = trl.translate(teks, dest=target2, src=target)
-				send_message(update.effective_message, tl(update.effective_message, "Diterjemahkan dari `{}` ke `{}`:\n`{}`").format(target, target2, tekstr.text), parse_mode=ParseMode.MARKDOWN)
+				send_message(update.effective_message, "Translated from `{}` to `{}`:\n`{}`".format(target, target2, tekstr.text), parse_mode=ParseMode.MARKDOWN)
 	except IndexError:
-		send_message(update.effective_message, tl(update.effective_message, "Balas pesan atau tulis pesan dari bahasa lain untuk "
-											"diterjemahkan kedalam bahasa yang di dituju\n\n"
-											"Contoh: `/tr en-id` untuk menerjemahkan dari Bahasa inggris ke Bahasa Indonesia\n"
-											"Atau gunakan: `/tr id` untuk deteksi otomatis dan menerjemahkannya kedalam bahasa indonesia"), parse_mode="markdown")
+		send_message(update.effective_message, "Reply to messages or write messages from other languages ​​to translate into the intended language\n\nExample: `/tr en-id` to translate from English to Indonesian\nOr use: `/tr id` for automatic detection and translating it into Indonesian", parse_mode="markdown")
 	except ValueError:
-		send_message(update.effective_message, tl(update.effective_message, "Bahasa yang di tuju tidak ditemukan!"))
+		send_message(update.effective_message, "The destination language is not found!")
 	else:
 		return
 
 
 @run_async
-@spamcheck
 def wiki(update, context):
 	msg = update.effective_message
 	chat_id = update.effective_chat.id
@@ -239,7 +210,7 @@ def wiki(update, context):
 	try:
 		pagewiki = wikipedia.page(teks)
 	except wikipedia.exceptions.PageError:
-		send_message(update.effective_message, tl(update.effective_message, "Hasil tidak ditemukan"))
+		send_message(update.effective_message, "Results not found")
 		return
 	except wikipedia.exceptions.DisambiguationError as refer:
 		rujuk = str(refer).split("\n")
@@ -259,60 +230,23 @@ def wiki(update, context):
 		send_message(update.effective_message, teks, parse_mode="markdown")
 		return
 	except IndexError:
-		send_message(update.effective_message, tl(update.effective_message, "Tulis pesan untuk mencari dari sumber wikipedia"))
+		send_message(update.effective_message, "Write a message to search from the wikipedia source")
 		return
 	judul = pagewiki.title
 	summary = pagewiki.summary
 	if update.effective_message.chat.type == "private":
-		send_message(update.effective_message, tl(update.effective_message, "Hasil dari {} adalah:\n\n<b>{}</b>\n{}").format(teks, judul, summary), parse_mode=ParseMode.HTML)
+		send_message(update.effective_message, "Results of {} is:\n\n<b>{}</b>\n{}".format(teks, judul, summary), parse_mode=ParseMode.HTML)
 	else:
 		if len(summary) >= 200:
 			judul = pagewiki.title
 			summary = summary[:200]+"..."
-			button = InlineKeyboardMarkup([[InlineKeyboardButton(text=tl(update.effective_message, "Baca Lebih Lengkap"), url="t.me/{}?start=wiki-{}".format(context.bot.username, teks.replace(' ', '_')))]])
+			button = InlineKeyboardMarkup([[InlineKeyboardButton(text="Read on Wikipedia", url="t.me/{}?start=wiki-{}".format(context.bot.username, teks.replace(' ', '_')))]])
 		else:
 			button = None
-		send_message(update.effective_message, tl(update.effective_message, "Hasil dari {} adalah:\n\n<b>{}</b>\n{}").format(teks, judul, summary), parse_mode=ParseMode.HTML, reply_markup=button)
+		send_message(update.effective_message, "Results of {} is:\n\n<b>{}</b>\n{}".format(teks, judul, summary), parse_mode=ParseMode.HTML, reply_markup=button)
 
 
 @run_async
-@spamcheck
-def kamusbesarbahasaindonesia(update, context):
-	msg = update.effective_message
-	chat_id = update.effective_chat.id
-	try:
-		args = update.effective_message.text.split(None, 1)
-		teks = args[1]
-		message = update.effective_message
-		try:
-			api = requests.get('http://kateglo.com/api.php?format=json&phrase='+teks).json()
-		except json.decoder.JSONDecodeError:
-			send_message(update.effective_message, "Hasil tidak ditemukan!", parse_mode=ParseMode.MARKDOWN)
-			return
-		#kamusid = KBBI(teks)
-		parsing = "***Hasil dari kata {} ({}) di {}***\n\n".format(api['kateglo']['phrase'], api['kateglo']['lex_class_name'], api['kateglo']['ref_source_name'])
-		if len(api['kateglo']['definition']) >= 6:
-			jarak = 5
-		else:
-			jarak = len(api['kateglo']['definition'])
-		for x in range(jarak):
-			parsing += "*{}.* {}".format(x+1, api['kateglo']['definition'][x]['def_text'])
-			contoh = api['kateglo']['definition'][x]['sample']
-			if contoh:
-				parsing += "\nContoh: `{}`".format(str(BeautifulSoup(contoh, "lxml")).replace('<html><body><p>', '').replace('</p></body></html>', ''))
-			parsing += "\n\n"
-		send_message(update.effective_message, parsing, parse_mode=ParseMode.MARKDOWN)
-
-	except IndexError:
-		send_message(update.effective_message, "Tulis pesan untuk mencari dari kamus besar bahasa indonesia")
-	except KBBI.TidakDitemukan:
-		send_message(update.effective_message, "Hasil tidak ditemukan")
-	else:
-		return
-
-
-@run_async
-@spamcheck
 def urbandictionary(update, context):
 	args = context.args
 	msg = update.effective_message
@@ -350,21 +284,26 @@ def deEmojify(inputString):
     return inputString.encode('ascii', 'ignore').decode('ascii')
 
 
-__help__ = "exclusive_help"
+__help__ = """
+ - /stickerid: reply message sticker at PM to get ID sticker
+ - /ping: check the speed of the bot
+ - /fortune: give a fortune
+ - /tr <from>-<to> <text>: translate text written or reply for any language to the intended language, or
+ - /tr <to> <text>: translate text written or reply for any language to the intended language
+ - /wiki <text>: search for text written from the wikipedia source
+ - /ud <text>: search from urban dictionary
+"""
 
 __mod_name__ = "💖 Exclusive Emilia 💖"
 
 STICKERID_HANDLER = DisableAbleCommandHandler("stickerid", stickerid)
 #GETSTICKER_HANDLER = DisableAbleCommandHandler("getsticker", getsticker)
-PING_HANDLER = DisableAbleCommandHandler("ping", ping)
 STIKER_HANDLER = CommandHandler("stiker", stiker, filters=Filters.user(OWNER_ID))
 FILE_HANDLER = CommandHandler("file", file, filters=Filters.user(OWNER_ID))
 GETLINK_HANDLER = CommandHandler("getlink", getlink, pass_args=True, filters=Filters.user(OWNER_ID))
 LEAVECHAT_HANDLER = CommandHandler(["leavechat", "leavegroup", "leave"], leavechat, pass_args=True, filters=Filters.user(OWNER_ID))
-RAMALAN_HANDLER = DisableAbleCommandHandler(["ramalan", "fortune"], ramalan)
-TERJEMAH_HANDLER = DisableAbleCommandHandler(["tr", "tl"], terjemah)
+TERJEMAH_HANDLER = DisableAbleCommandHandler(["tr", "tl"], trans_late)
 WIKIPEDIA_HANDLER = DisableAbleCommandHandler("wiki", wiki)
-KBBI_HANDLER = DisableAbleCommandHandler("kbbi", kamusbesarbahasaindonesia)
 UD_HANDLER = DisableAbleCommandHandler("ud", urbandictionary, pass_args=True)
 LOG_HANDLER = DisableAbleCommandHandler("log", log, filters=Filters.user(OWNER_ID))
 
@@ -375,9 +314,7 @@ dispatcher.add_handler(STIKER_HANDLER)
 dispatcher.add_handler(FILE_HANDLER)
 dispatcher.add_handler(GETLINK_HANDLER)
 dispatcher.add_handler(LEAVECHAT_HANDLER)
-dispatcher.add_handler(RAMALAN_HANDLER)
 dispatcher.add_handler(TERJEMAH_HANDLER)
 dispatcher.add_handler(WIKIPEDIA_HANDLER)
-dispatcher.add_handler(KBBI_HANDLER)
 dispatcher.add_handler(UD_HANDLER)
 dispatcher.add_handler(LOG_HANDLER)

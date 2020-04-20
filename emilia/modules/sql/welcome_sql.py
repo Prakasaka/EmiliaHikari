@@ -7,8 +7,8 @@ from sqlalchemy import Column, String, Boolean, UnicodeText, Integer, BigInteger
 from emilia.modules.helper_funcs.msg_types import Types
 from emilia.modules.sql import SESSION, BASE
 
-DEFAULT_WELCOME = "Hai {first}, bagaimana kabarmu? 🙂"
-DEFAULT_GOODBYE = "Sampai jumpa! 😉"
+DEFAULT_WELCOME = "Hi {first}, how are you?"
+DEFAULT_GOODBYE = "See you later!"
 
 
 class Welcome(BASE):
@@ -86,9 +86,9 @@ class WelcomeSecurity(BASE):
 	mute_time = Column(UnicodeText, default="0")
 	timeout = Column(UnicodeText, default="0")
 	timeout_mode = Column(Integer, default=1)
-	custom_text = Column(UnicodeText, default="Klik disini untuk mensuarakan")
+	custom_text = Column(UnicodeText, default="Click here to unmute")
 
-	def __init__(self, chat_id, security=False, extra_verify=False, mute_time="0", timeout="0", timeout_mode=1, custom_text="Klik disini untuk mensuarakan"):
+	def __init__(self, chat_id, security=False, extra_verify=False, mute_time="0", timeout="0", timeout_mode=1, custom_text="Click here to unmute"):
 		self.chat_id = str(chat_id) # ensure string
 		self.security = security
 		self.extra_verify = extra_verify
@@ -218,7 +218,7 @@ def welcome_security(chat_id):
 		if security:
 			return security.security, security.extra_verify, security.mute_time, security.timeout, security.timeout_mode, security.custom_text
 		else:
-			return False, False, "0", "0", 1, "Klik disini untuk mensuarakan"
+			return False, False, "0", "0", 1, "Click here to unmute"
 	finally:
 		SESSION.close()
 

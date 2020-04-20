@@ -5,12 +5,11 @@ from telegram import MessageEntity
 from telegram.error import BadRequest
 from telegram.ext import Filters, MessageHandler, run_async
 
-from emilia import dispatcher, OWNER_ID, SUDO_USERS, SUPPORT_USERS, spamcheck
+from emilia import dispatcher, OWNER_ID, SUDO_USERS, SUPPORT_USERS
 from emilia.modules.disable import DisableAbleCommandHandler, DisableAbleMessageHandler
 from emilia.modules.sql import afk_sql as sql
 from emilia.modules.users import get_user_id
 
-from emilia.modules.languages import tl
 from emilia.modules.helper_funcs.alternate import send_message
 
 AFK_GROUP = 7
@@ -18,7 +17,6 @@ AFK_REPLY_GROUP = 8
 
 
 @run_async
-@spamcheck
 def afk(update, context):
     args = update.effective_message.text.split(None, 1)
     if len(args) >= 2:
@@ -27,7 +25,7 @@ def afk(update, context):
         reason = ""
 
     sql.set_afk(update.effective_user.id, reason)
-    send_message(update.effective_message, tl(update.effective_message, "{} sekarang AFK!").format(update.effective_user.first_name))
+    send_message(update.effective_message, "{} is now AFK!".format(update.effective_user.first_name))
 
 
 @run_async
@@ -39,7 +37,7 @@ def no_longer_afk(update, context):
 
     res = sql.rm_afk(user.id)
     if res:
-        send_message(update.effective_message, tl(update.effective_message, "{} sudah tidak AFK!").format(update.effective_user.first_name))
+        send_message(update.effective_message, "{} is no longer AFK!".format(update.effective_user.first_name))
 
 
 @run_async
@@ -72,13 +70,18 @@ def reply_afk(update, context):
                 valid, reason = sql.check_afk_status(user_id)
                 if valid:
                     if not reason:
-                        res = tl(update.effective_message, "{} sedang AFK!").format(fst_name)
+                        res = "{} is AFK!".format(fst_name)
                     else:
-                        res = tl(update.effective_message, "{} sedang AFK!\nKarena : {}").format(fst_name, reason)
+                        res = "{} is AFK! says its because of : {}".format(fst_name, reason)
                     send_message(update.effective_message, res)
 
 
-__help__ = "afk_help"
+__help__ = """
+ - /afk <reason>: mark yourself as AFK.
+ - brb <reason>: same as the afk command - but not a command.
+
+When marked as AFK, any mentions will be replied to with a message to say you're not available!
+"""
 
 __mod_name__ = "AFK"
 

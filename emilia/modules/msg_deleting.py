@@ -7,16 +7,14 @@ from telegram.ext import CommandHandler, Filters
 from telegram.ext.dispatcher import run_async
 from telegram.utils.helpers import mention_html
 
-from emilia import dispatcher, LOGGER, spamcheck
+from emilia import dispatcher, LOGGER
 from emilia.modules.helper_funcs.chat_status import user_admin, user_can_delete
 from emilia.modules.log_channel import loggable
 
-from emilia.modules.languages import tl
 from emilia.modules.helper_funcs.alternate import send_message
 
 
 @run_async
-@spamcheck
 @user_admin
 @loggable
 def purge(update, context):
@@ -36,8 +34,7 @@ def purge(update, context):
                     context.bot.deleteMessage(chat.id, m_id)
                 except BadRequest as err:
                     if err.message == "Message can't be deleted":
-                        send_message(update.effective_message, tl(update.effective_message, "Tidak dapat menghapus semua pesan. Pesannya mungkin terlalu lama, saya mungkin "
-                                                  "tidak memiliki hak menghapus, atau ini mungkin bukan supergrup."))
+                        send_message(update.effective_message, "Cannot delete all messages. The messages may be too old, I might not have delete rights, or this might not be a supergroup.")
 
                     elif err.message != "Message to delete not found":
                         LOGGER.exception("Error while purging chat messages.")
@@ -46,13 +43,12 @@ def purge(update, context):
                 msg.delete()
             except BadRequest as err:
                 if err.message == "Message can't be deleted":
-                    send_message(update.effective_message, tl(update.effective_message, "Tidak dapat menghapus semua pesan. Pesannya mungkin terlalu lama, saya mungkin "
-                                              "tidak memiliki hak menghapus, atau ini mungkin bukan supergrup."))
+                    send_message(update.effective_message, "Cannot delete all messages. The messages may be too old, I might not have delete rights, or this might not be a supergroup.")
 
                 elif err.message != "Message to delete not found":
                     LOGGER.exception("Error while purging chat messages.")
 
-            send_message(update.effective_message, tl(update.effective_message, "Pembersihan selesai."))
+            send_message(update.effective_message, "Purge complete.")
             return "<b>{}:</b>" \
                    "\n#PURGE" \
                    "\n<b>Admin:</b> {}" \
@@ -61,13 +57,12 @@ def purge(update, context):
                                                                delete_to - message_id)
 
     else:
-        send_message(update.effective_message, tl(update.effective_message, "Balas pesan untuk memilih tempat mulai membersihkan."))
+        send_message(update.effective_message, "Reply to a message to select where to start purging from.")
 
     return ""
 
 
 @run_async
-@spamcheck
 @user_admin
 @loggable
 def del_message(update, context) -> str:
@@ -83,12 +78,17 @@ def del_message(update, context) -> str:
                    "\nMessage deleted.".format(html.escape(chat.title),
                                                mention_html(user.id, user.first_name))
     else:
-        send_message(update.effective_message, tl(update.effective_message, "Apa yang ingin di hapus?"))
+        send_message(update.effective_message, "Whadya want to delete?")
 
     return ""
 
 
-__help__ = "msgdel_help"
+__help__ = """
+*Admin only:*
+ - /del: deletes the message you replied to
+ - /purge: deletes all messages between this and the replied to message.
+ - /purge <integer X>: deletes the replied message, and X messages following it.
+"""
 
 __mod_name__ = "Purges"
 

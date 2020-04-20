@@ -13,10 +13,6 @@ class Config(object):
     API_KEY = "YOUR KEY HERE"
     OWNER_ID = "YOUR ID HERE"  # If you dont know, run the bot and do /id in your private chat with it
     OWNER_USERNAME = "YOUR USERNAME HERE"
-    # Some API is required for more features
-    API_OPENWEATHER = ""
-    API_ACCUWEATHER = ""
-    MAPS_API = ""
 
     # RECOMMENDED
     SQLALCHEMY_DATABASE_URI = 'sqldbtype://username:pw@hostname:port/db_name'  # needed for any database modules
@@ -25,12 +21,10 @@ class Config(object):
     NO_LOAD = ['translation', 'rss', 'sed', 'weather']
     WEBHOOK = False
     URL = None
-
     # OPTIONAL
     SUDO_USERS = []  # List of id's (not usernames) for users which have sudo access to the bot.
     SUPPORT_USERS = []  # List of id's (not usernames) for users which are allowed to gban, but can also be banned.
     WHITELIST_USERS = []  # List of id's (not usernames) for users which WONT be banned/kicked by the bot.
-    DONATION_LINK = None  # EG, paypal
     CERT_PATH = None
     PORT = 5000
     DEL_CMDS = False  # Whether or not you should delete "blue text must click" commands
