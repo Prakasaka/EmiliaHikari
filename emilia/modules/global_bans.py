@@ -102,7 +102,9 @@ def gban(update, context):
             send_message(update.effective_message, "This user is already gbanned; I'd change the reason, but you haven't given me one...")
             return
 
-        old_reason = sql.update_gban_reason(user_id, user_chat.username or user_chat.first_name, full_reason) or "None"
+        old_reason = sql.update_gban_reason(
+                user_id, user_chat.username or user_chat.first_name, 
+                full_reason) or "None"
 
         try:
             context.bot.send_message(
@@ -117,7 +119,7 @@ def gban(update, context):
             pass
 
     send_message(update.effective_message, "This user has already been gbanned. I have updated the reason.\nPrevious reason: <code>{}</code>\nNew reason: <code>{}</code>".format(
-            html.escape(old_reason), html.escape(full_reason)),
+            html.escape(full_reason), html.escape(old_reason)),
                            parse_mode=ParseMode.HTML)
     return
 
@@ -290,7 +292,7 @@ def __user_info__(user_id, chat_id):
     else:
         text = text.format("No")
     return text
-    
+
 
 
 def __migrate__(old_chat_id, new_chat_id):
