@@ -26,19 +26,13 @@ from emilia.modules.helper_funcs.verifier import verify_welcome
 from emilia.modules.connection import connect_button
 
 PM_START_TEXT = """
-Hi {}, my name is {}! I am a group manager managed by [my master](tg://user?id={}).
-To get this bot status info and update, you can join our channel [Ayra's Bot News](https://t.me/AyraBotNews)
-
-Any issue or need more help?
-Join our group [Emilia Official Support](https://t.me/EmiliaOfficial)!
+Hi {}, my name is {}! I am a group manager bot.
 
 You can find the list of available commands with /help.
-
-If you're enjoying using me, and/or would like to help me survive in the wild, hit /donate to help fund/upgrade my VPS!
 """
 
 HELP_STRINGS = """
-Hey there! My name is *Emilia*.
+Hey there!
 I'm a modular group management bot with a few fun extras! Have a look at the following for an idea of some of \
 the things I can help you with.
 
@@ -168,15 +162,14 @@ def start(update, context):
             buttons = InlineKeyboardMarkup(
                 [[InlineKeyboardButton(text="🎉 Add me to your group", url="https://t.me/{}?startgroup=new".format(context.bot.username))],
                 [InlineKeyboardButton(text="⚙️ Connect Group", callback_data="main_connect")],
-                [InlineKeyboardButton(text="👥 Support Group", url="https://t.me/EmiliaOfficial"), InlineKeyboardButton(text="🔔 Update Channel", url="https://t.me/AyraBotNews")],
-                [InlineKeyboardButton(text="❓ Help", url="https://t.me/{}?start=help".format(context.bot.username)), InlineKeyboardButton(text="💖 Donate", url="http://ayrahikari.github.io/donations.html")]])
+                [InlineKeyboardButton(text="❓ Help", url="https://t.me/{}?start=help".format(context.bot.username))]])
             update.effective_message.reply_text(
-                PM_START_TEXT.format(escape_markdown(first_name), escape_markdown(context.bot.first_name), OWNER_ID),
+                PM_START_TEXT.format(escape_markdown(first_name), escape_markdown(context.bot.first_name)),
                 disable_web_page_preview=True,
                 parse_mode=ParseMode.MARKDOWN,
                 reply_markup=buttons)
     else:
-        update.effective_message.reply_text("Is there anything I can help? 😊")
+        update.effective_message.reply_text("I'm Alive")
 
 
 def m_connect_button(update, context):
@@ -245,8 +238,8 @@ def error_callback(update, context):
 def help_button(update, context):
     query = update.callback_query
     mod_match = re.match(r"help_module\((.+?)\)", query.data)
-    prev_match = re.match(r"help_prev\((.+?)\)", query.data)
-    next_match = re.match(r"help_next\((.+?)\)", query.data)
+    # prev_match = re.match(r"help_prev\((.+?)\)", query.data)
+    # next_match = re.match(r"help_next\((.+?)\)", query.data)
     back_match = re.match(r"help_back", query.data)
 
     print(query.message.chat.id)
@@ -262,19 +255,19 @@ def help_button(update, context):
                                   reply_markup=InlineKeyboardMarkup(
                                         [[InlineKeyboardButton(text="Back", callback_data="help_back")]]))
 
-        elif prev_match:
-            curr_page = int(prev_match.group(1))
-            query.message.edit_text(text=HELP_STRINGS,
-                                  parse_mode=ParseMode.MARKDOWN,
-                                  reply_markup=InlineKeyboardMarkup(
-                                        paginate_modules(curr_page - 1, HELPABLE, "help")))
+        # elif prev_match:
+        #     curr_page = int(prev_match.group(1))
+        #     query.message.edit_text(text=HELP_STRINGS,
+        #                           parse_mode=ParseMode.MARKDOWN,
+        #                           reply_markup=InlineKeyboardMarkup(
+        #                                 paginate_modules(curr_page - 1, HELPABLE, "help")))
 
-        elif next_match:
-            next_page = int(next_match.group(1))
-            query.message.edit_text(text=HELP_STRINGS,
-                                  parse_mode=ParseMode.MARKDOWN,
-                                  reply_markup=InlineKeyboardMarkup(
-                                        paginate_modules(next_page + 1, HELPABLE, "help")))
+        # elif next_match:
+        #     next_page = int(next_match.group(1))
+        #     query.message.edit_text(text=HELP_STRINGS,
+        #                           parse_mode=ParseMode.MARKDOWN,
+        #                           reply_markup=InlineKeyboardMarkup(
+        #                                 paginate_modules(next_page + 1, HELPABLE, "help")))
 
         elif back_match:
             query.message.edit_text(text=HELP_STRINGS,
