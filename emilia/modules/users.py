@@ -102,7 +102,6 @@ def log_user(update, context):
         sql.update_user(msg.forward_from.id,
                         msg.forward_from.username)
 
-
 @run_async
 def chats(update, context):
     all_chats = sql.get_all_chats() or []
