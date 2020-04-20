@@ -143,7 +143,7 @@ def gban(update, context):
                   full_reason)
 
     try:
-        chat.kick_member(user_chat.id)
+        context.bot.kick_chat_member(user_chat.id)
     except Exception:
         print("Meh")
 
