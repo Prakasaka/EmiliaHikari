@@ -118,10 +118,10 @@ def gban(update, context):
         except Exception:
             pass
 
-    send_message(update.effective_message, "This user has already been gbanned. I have updated the reason.\nPrevious reason: <code>{}</code>\nNew reason: <code>{}</code>".format(
-            html.escape(full_reason), html.escape(old_reason)),
-                           parse_mode=ParseMode.HTML)
-    return
+    # send_message(update.effective_message, "This user has already been gbanned. I have updated the reason.\nPrevious reason: <code>{}</code>\nNew reason: <code>{}</code>".format(
+    #         html.escape(old_reason), html.escape(full_reason)),
+    #                        parse_mode=ParseMode.HTML)
+    # return
 
     starting = "Global Banning {} with the id <code>{}</code>...".format(
         mention_html(user_chat.id, user_chat.first_name or "Deleted Account"),
