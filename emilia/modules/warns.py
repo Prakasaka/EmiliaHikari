@@ -736,7 +736,7 @@ def set_warn_mode(update, context):
 
 
 def __stats__():
-    return OWNER_ID, "{} overall warns, across {} chats.\n{} warn filters, across {} chats.".format(sql.num_warns(), sql.num_warn_chats(),
+    return "{} overall warns, across {} chats.\n{} warn filters, across {} chats.".format(sql.num_warns(), sql.num_warn_chats(),
                                                                                              sql.num_warn_filters(), sql.num_warn_filter_chats())
 
 
@@ -753,7 +753,7 @@ def __migrate__(old_chat_id, new_chat_id):
 def __chat_settings__(chat_id, user_id):
     num_warn_filters = sql.num_warn_chat_filters(chat_id)
     limit, soft_warn, warn_mode = sql.get_warn_setting(chat_id)
-    return user_id, "This chat has `{}` warn filters. It takes `{}` warns before the user gets *{}*.".format(num_warn_filters, limit, "kick" if soft_warn else "ban")
+    return "This chat has `{}` warn filters. It takes `{}` warns before the user gets *{}*.".format(num_warn_filters, limit, "kick" if soft_warn else "ban")
 
 """
 def __chat_settings_btn__(chat_id, user_id):

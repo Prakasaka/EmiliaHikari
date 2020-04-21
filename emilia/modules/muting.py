@@ -45,6 +45,7 @@ def mute(update, context):
             update.effective_send_message(update.effective_message, "You can do this command in groups, not PM")
             return ""
         chat = update.effective_chat
+        member = chat.get_member(int(user_id))
         chat_id = update.effective_chat.id
         chat_name = update.effective_message.chat.title
         text = "Admin {} Muted user {}\n<b>Reason:</b> {}".format(mention_html(user.id, user.first_name),
@@ -60,7 +61,7 @@ def mute(update, context):
         send_message(update.effective_message, "You have no right to restrict someone.")
         return ""
 
-    member = chat.get_member(int(user_id))
+    
 
     if member:
         if is_user_admin(chat, user_id, member=member):
@@ -111,6 +112,7 @@ def unmute(update, context):
             update.effective_send_message(update.effective_message, "You can do this command in groups, not PM")
             return ""
         chat = update.effective_chat
+        member = chat.get_member(int(user_id))
         chat_id = update.effective_chat.id
         chat_name = update.effective_message.chat.title
         text = "This user already has the right to speak."
@@ -121,7 +123,6 @@ def unmute(update, context):
         send_message(update.effective_message, "You have no right to restrict someone.")
         return ""
 
-    member = chat.get_member(int(user_id))
 
     if member:
         if is_user_admin(chat, user_id, member=member):
