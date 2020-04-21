@@ -40,8 +40,8 @@ ENUM_FUNC_MAP = {
 
 @run_async
 def list_handlers(update, context):
-	chat = update.effective_chat  # type: Optional[Chat]
-	user = update.effective_user  # type: Optional[User]
+        chat = update.effective_chat  # type: Optional[Chat]
+        user = update.effective_user  # type: Optional[User]
 	
 	conn = connected(context.bot, update, chat, user.id, need_admin=False)
 	if not conn == False:
@@ -73,7 +73,6 @@ def list_handlers(update, context):
 			filter_list += entry
 
 	send_message(update.effective_message, filter_list.format(chat_name), parse_mode=telegram.ParseMode.MARKDOWN)
-
 
 # NOT ASYNC BECAUSE DISPATCHER HANDLER RAISED
 @user_admin
