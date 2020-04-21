@@ -45,19 +45,19 @@ def warn(user: User, chat: Chat, reason: str, message: Message, warner: User = N
         if not soft_warn:
             if not warn_mode:
                 chat.unban_member(user.id)
-                reply = chat.id, "{} warnings, {} has been kicked!".format(limit, mention_html(user.id, user.first_name))
+                reply = "{} warnings, {} has been kicked!".format(limit, mention_html(user.id, user.first_name))
             elif warn_mode == 1:
                 chat.unban_member(user.id)
-                reply = chat.id, "{} warnings, {} has been kicked!".format(limit, mention_html(user.id, user.first_name))
+                reply = "{} warnings, {} has been kicked!".format(limit, mention_html(user.id, user.first_name))
             elif warn_mode == 2:
                 chat.kick_member(user.id)
-                reply = chat.id, "{} warnings, {} has been banned!".format(limit, mention_html(user.id, user.first_name))
+                reply = "{} warnings, {} has been banned!".format(limit, mention_html(user.id, user.first_name))
             elif warn_mode == 3:
                 message.bot.restrict_chat_member(chat.id, user.id, can_send_messages=False)
-                reply = chat.id, "{} warnings, {} has been muted!".format(limit, mention_html(user.id, user.first_name))
+                reply = "{} warnings, {} has been muted!".format(limit, mention_html(user.id, user.first_name))
         else:
             chat.kick_member(user.id)
-            reply = chat.id, "{} warnings, {} has been banned!".format(limit, mention_html(user.id, user.first_name))
+            reply = "{} warnings, {} has been banned!".format(limit, mention_html(user.id, user.first_name))
             
         for warn_reason in reasons:
             reply += "\n - {}".format(html.escape(warn_reason))
@@ -94,11 +94,11 @@ def warn(user: User, chat: Chat, reason: str, message: Message, warner: User = N
                 action_mode = "ban"
             elif warn_mode == 3:
                 action_mode = "mute"
-            reply = chat.id, "{} has {}/{} warnings... If you are warned again, you will be {}!".format(mention_html(user.id, user.first_name), num_warns, limit, action_mode)
+            reply = "{} has {}/{} warnings... If you are warned again, you will be {}!".format(mention_html(user.id, user.first_name), num_warns, limit, action_mode)
         else:
-            reply = chat.id, "{} has {}/{} warnings... watch out!".format(mention_html(user.id, user.first_name), num_warns, limit)
+            reply = "{} has {}/{} warnings... watch out!".format(mention_html(user.id, user.first_name), num_warns, limit)
         if reason:
-            reply += chat.id, "\nReason for last warn:\n{}".format(html.escape(reason))
+            reply += "\nReason for last warn:\n{}".format(html.escape(reason))
 
         log_reason = "<b>{}:</b>" \
                      "\n#WARN" \
@@ -112,9 +112,9 @@ def warn(user: User, chat: Chat, reason: str, message: Message, warner: User = N
 
     try:
         if conn:
-            send_message_raw(chat.id, reply, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.HTML)
+            send_message_raw(reply, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.HTML)
         else:
-            send_message_raw(chat.id, reply, reply_to_message_id=message.message_id, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.HTML)
+            send_message_raw(reply, reply_to_message_id=message.message_id, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.HTML)
         #send_message(update.effective_message, reply, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.HTML)
     except BadRequest as excp:
         if excp.message == "Reply message not found":
