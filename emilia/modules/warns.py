@@ -112,9 +112,9 @@ def warn(user: User, chat: Chat, reason: str, message: Message, warner: User = N
 
     try:
         if conn:
-            send_message_raw(reply, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.HTML)
+            send_message_raw(chat.id, reply, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.HTML)
         else:
-            send_message_raw(reply, reply_to_message_id=message.message_id, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.HTML)
+            send_message_raw(chat.id, reply, reply_to_message_id=message.message_id, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.HTML)
         #send_message(update.effective_message, reply, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.HTML)
     except BadRequest as excp:
         if excp.message == "Reply message not found":
@@ -252,12 +252,12 @@ def reset_warns(update, context):
         return ""
     
     if user_id and user_id != "error":
+        warned = chat.get_member(user_id).user
         sql.reset_warns(user_id, chat.id)
         if conn:
             send_message(update.effective_message, "Warnings have been reset in *{}*!".format(chat_name), parse_mode="markdown")
         else:
             send_message(update.effective_message, "User {} warnings have been reset!".format(mention_html(warned.id, warned.first_name)))
-        warned = chat.get_member(user_id).user
         return "<b>{}:</b>" \
                "\n#RESETWARNS" \
                "\n<b>Admin:</b> {}" \
