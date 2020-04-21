@@ -72,10 +72,7 @@ def list_handlers(update, context):
 		else:
 			filter_list += entry
 
-        try:
-            send_message(update.effective_message, filter_list.format(chat_name), parse_mode=telegram.ParseMode.MARKDOWN)
-        except KeyError:
-            pass
+	send_message(update.effective_message, filter_list.format(chat_name), parse_mode=telegram.ParseMode.MARKDOWN)
 
 
 # NOT ASYNC BECAUSE DISPATCHER HANDLER RAISED
