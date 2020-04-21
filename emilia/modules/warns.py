@@ -19,6 +19,7 @@ from emilia.modules.helper_funcs.misc import split_message
 from emilia.modules.helper_funcs.string_handling import split_quotes
 from emilia.modules.log_channel import loggable
 from emilia.modules.sql import warns_sql as sql
+import emilia.modules.sql.rules_sql as rules_sql
 from emilia.modules.connection import connected
 
 from emilia.modules.helper_funcs.alternate import send_message, send_message_raw
@@ -73,8 +74,15 @@ def warn(user: User, chat: Chat, reason: str, message: Message, warner: User = N
                                                                   user.id, reason, num_warns, limit)
 
     else:
-        keyboard = InlineKeyboardMarkup(
-            [[InlineKeyboardButton(text="Remove warn", callback_data="rm_warn({})".format(user.id)), InlineKeyboardButton(text="Rules", url="t.me/{}?start={}".format(dispatcher.bot.username, chat.id))]])
+        keyboard = [[
+            InlineKeyboardButton("Remove warn", callback_data="rm_warn({})".format(user.id))
+        ]]
+        rules = rules_sql.get_rules(chat.id)
+        if rules:
+            keyboard[0].append(
+                InlineKeyboardButton("Rules",
+                                     url="t.me/{}?start={}".format(
+                                         dispatcher.bot.username, chat.id)))
 
         if num_warns+1 == limit:
             if not warn_mode:
@@ -103,21 +111,21 @@ def warn(user: User, chat: Chat, reason: str, message: Message, warner: User = N
 
     try:
         if conn:
-            send_message_raw(chat.id, reply, reply_markup=keyboard, parse_mode=ParseMode.HTML)
+            send_message_raw(chat.id, reply, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.HTML)
         else:
-            send_message_raw(chat.id, reply, reply_to_message_id=message.message_id, reply_markup=keyboard, parse_mode=ParseMode.HTML)
-        #send_message(update.effective_message, reply, reply_markup=keyboard, parse_mode=ParseMode.HTML)
+            send_message_raw(chat.id, reply, reply_to_message_id=message.message_id, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.HTML)
+        #send_message(update.effective_message, reply, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.HTML)
     except BadRequest as excp:
         if excp.message == "Reply message not found":
             # Do not reply
             if conn:
-                message.bot.sendMessage(chat.id, reply, reply_markup=keyboard, parse_mode=ParseMode.HTML)
+                message.bot.sendMessage(chat.id, reply, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.HTML)
             else:
                 try:
-                    message.bot.sendMessage(chat.id, reply, reply_to_message_id=message.message_id, reply_markup=keyboard, parse_mode=ParseMode.HTML, quote=False)
+                    message.bot.sendMessage(chat.id, reply, reply_to_message_id=message.message_id, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.HTML, quote=False)
                 except BadRequest:
-                    message.bot.sendMessage(chat.id, reply, reply_markup=keyboard, parse_mode=ParseMode.HTML, quote=False)
-            #send_message(update.effective_message, reply, reply_markup=keyboard, parse_mode=ParseMode.HTML, quote=False)
+                    message.bot.sendMessage(chat.id, reply, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.HTML, quote=False)
+            #send_message(update.effective_message, reply, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.HTML, quote=False)
         else:
             raise
     return log_reason

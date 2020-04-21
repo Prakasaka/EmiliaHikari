@@ -29,7 +29,7 @@ def mute(update, context):
     message = update.effective_message  # type: Optional[Message]
     args = context.args
 
-    user_id = extract_user(message, args)
+    user_id, reason = extract_user_and_text(message, args)
     if not user_id or user_id == "error":
         send_message(update.effective_message, "You'll need to either give me a username to mute, or reply to someone to be muted.")
         return ""
