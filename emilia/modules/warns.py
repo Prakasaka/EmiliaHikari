@@ -199,13 +199,13 @@ def warn_user(update, context):
             text = "I can't restrect people on {}! Make sure I'm already an admin.".format(chat_name)
         else:
             text = "I can't restrect people in here! Make sure I'm already an admin."
-        send_message(update.effective_message, text, parse_mode="markdown")
+        send_message(update.effective_message, text, parse_mode=ParseMode.HTML)
         return ""
 
     if user_id:
         if conn:
             warning = warn(chat.get_member(user_id).user, chat, reason, message, warner, conn=True)
-            send_message(update.effective_message, "That user has been warned in *{}*".format(chat_name), parse_mode="markdown")
+            send_message(update.effective_message, "That user has been warned in *{}*".format(chat_name), parse_mode=ParseMode.HTML)
             return warning
         else:
             if message.reply_to_message and message.reply_to_message.from_user.id == user_id:
@@ -248,16 +248,16 @@ def reset_warns(update, context):
             text = "I can't restrect people on {}! Make sure I'm already an admin.".format(chat_name)
         else:
             text = "I can't restrect people in here! Make sure I'm already an admin."
-        send_message(update.effective_message, text, parse_mode="markdown")
+        send_message(update.effective_message, text, parse_mode=ParseMode.HTML)
         return ""
     
     if user_id and user_id != "error":
         warned = chat.get_member(user_id).user
         sql.reset_warns(user_id, chat.id)
         if conn:
-            send_message(update.effective_message, "Warnings have been reset in *{}*!".format(chat_name), parse_mode="markdown")
+            send_message(update.effective_message, "Warnings have been reset in *{}*!".format(chat_name), parse_mode=ParseMode.HTML)
         else:
-            send_message(update.effective_message, "User {} warnings have been reset!".format(mention_html(warned.id, warned.first_name)))
+            send_message(update.effective_message, "User {} warnings have been reset!".format(mention_html(warned.id, warned.first_name)), parse_mode=ParseMode.HTML)
         return "<b>{}:</b>" \
                "\n#RESETWARNS" \
                "\n<b>Admin:</b> {}" \
@@ -307,17 +307,17 @@ def warns(update, context):
 
             msgs = split_message(text)
             for msg in msgs:
-                send_message(update.effective_message, msg, parse_mode="markdown")
+                send_message(update.effective_message, msg, parse_mode=ParseMode.HTML)
         else:
             if conn:
                 send_message(update.effective_message, 
-                    "User has {}/{} warnings at *{}*, but no reasons for any of them.".format(num_warns, limit, chat_name), parse_mode="markdown")
+                    "User has {}/{} warnings at *{}*, but no reasons for any of them.".format(num_warns, limit, chat_name), parse_mode=ParseMode.HTML)
             else:
                 send_message(update.effective_message, 
                     "User has {}/{} warnings, but no reasons for any of them.".format(num_warns, limit))
     else:
         if conn:
-            send_message(update.effective_message, "This user hasn't got any warnings in *{}*!".format(chat_name), parse_mode="markdown")
+            send_message(update.effective_message, "This user hasn't got any warnings in *{}*!".format(chat_name), parse_mode=ParseMode.HTML)
         else:
             send_message(update.effective_message, "This user hasn't got any warnings!")
 
@@ -368,7 +368,7 @@ def add_warn_filter(update, context):
         text = "Warn handler added for '{}' at *{}*!".format(keyword, chat_name)
     else:
         text = "Warn handler added for '{}'!".format(keyword)
-    send_message(update.effective_message, text, parse_mode="markdown")
+    send_message(update.effective_message, text, parse_mode=ParseMode.HTML)
     raise DispatcherHandlerStop
 
 
@@ -463,7 +463,7 @@ def remove_warn_filter(update, context):
         text = "That's not a current warning filter - run /warnlist for all active warning filters on *{}*."
     else:
         text = "That's not a current warning filter - run /warnlist for all active warning filters."
-    send_message(update.effective_message, text, parse_mode="markdown")
+    send_message(update.effective_message, text, parse_mode=ParseMode.HTML)
 
 
 @run_async
@@ -491,7 +491,7 @@ def list_warn_filters(update, context):
             text = "No warning filters are active in *{}*!".format(chat_name)
         else:
             text = "No warning filters are active here!"
-        send_message(update.effective_message, text, parse_mode="markdown")
+        send_message(update.effective_message, text, parse_mode=ParseMode.HTML)
         return
 
     filter_list = "CURRENT_WARNING_FILTER_STRING"
@@ -561,7 +561,7 @@ def set_warn_limit(update, context) -> str:
                     text = "Updated the warn limit to {} at *{}*".format(args[0], chat_name)
                 else:
                     text = "Updated the warn limit to {}".format(args[0])
-                send_message(update.effective_message, text, parse_mode="markdown")
+                send_message(update.effective_message, text, parse_mode=ParseMode.HTML)
                 return "<b>{}:</b>" \
                        "\n#SET_WARN_LIMIT" \
                        "\n<b>Admin:</b> {}" \
@@ -575,7 +575,7 @@ def set_warn_limit(update, context) -> str:
             text = "The current warn limit is {} at *{}*".format(limit, chat_name)
         else:
             text = "The current warn limit is {}".format(limit)
-        send_message(update.effective_message, text, parse_mode="markdown")
+        send_message(update.effective_message, text, parse_mode=ParseMode.HTML)
     return ""
 
 
@@ -607,7 +607,7 @@ def set_warn_strength(update, context):
                 text = "Too many warns will now result in a ban on *{}*!".format(chat_name)
             else:
                 text = "Too many warns will now result in a ban!"
-            send_message(update.effective_message, text, parse_mode="markdown")
+            send_message(update.effective_message, text, parse_mode=ParseMode.HTML)
             return "<b>{}:</b>\n" \
                    "<b>Admin:</b> {}\n" \
                    "activated a strong warning. Users will be banned.".format(html.escape(chat.title),
@@ -619,7 +619,7 @@ def set_warn_strength(update, context):
                 text = "Too many warns will now result in a kick on *{}*! Users will be able to join again.".format(chat_name)
             else:
                 text = "Too many warns will now result in a kick Users will be able to join again."
-            send_message(update.effective_message, text, parse_mode="markdown")
+            send_message(update.effective_message, text, parse_mode=ParseMode.HTML)
             return "<b>{}:</b>\n" \
                    "<b>Admin:</b> {}\n" \
                    "disabled strong warning. Users will only be kicked.".format(html.escape(chat.title),
@@ -675,7 +675,7 @@ def set_warn_mode(update, context):
                 text = "Too many warns will now result in a kick in *{}*! Users will be able to join again after.".format(chat_name)
             else:
                 text = "Too many warns will now result in a kick! Users will be able to join again after."
-            send_message(update.effective_message, text, parse_mode="markdown")
+            send_message(update.effective_message, text, parse_mode=ParseMode.HTML)
             return "<b>{}:</b>\n" \
                    "<b>Admin:</b> {}\n" \
                    "Has changed the final warning to kick.".format(html.escape(chat.title),
@@ -687,7 +687,7 @@ def set_warn_mode(update, context):
                 text = "Too many warns will now result in a ban on *{}*!".format(chat_name)
             else:
                 text = "Too many warns will now result in a ban!"
-            send_message(update.effective_message, text, parse_mode="markdown")
+            send_message(update.effective_message, text, parse_mode=ParseMode.HTML)
             return "<b>{}:</b>\n" \
                    "<b>Admin:</b> {}\n" \
                    "Has changed the final warning to banned.".format(html.escape(chat.title),
@@ -700,7 +700,7 @@ def set_warn_mode(update, context):
                 text = "Too many warns will now result in a ban on *{}*!".format(chat_name)
             else:
                 text = "Too many warns will now result in a ban!"
-            send_message(update.effective_message, text, parse_mode="markdown")
+            send_message(update.effective_message, text, parse_mode=ParseMode.HTML)
             return "<b>{}:</b>\n" \
                    "<b>Admin:</b> {}\n" \
                    "Has changed the final warning to mute.".format(html.escape(chat.title),
