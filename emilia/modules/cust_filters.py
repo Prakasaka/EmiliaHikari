@@ -40,37 +40,37 @@ ENUM_FUNC_MAP = {
 
 @run_async
 def list_handlers(update, context):
-	chat = update.effective_chat  # type: Optional[Chat]
-	user = update.effective_user  # type: Optional[User]
+        chat = update.effective_chat  # type: Optional[Chat]
+        user = update.effective_user  # type: Optional[User]
 	
-	conn = connected(context.bot, update, chat, user.id, need_admin=False)
-	if not conn == False:
-		chat_id = conn
-		chat_name = dispatcher.bot.getChat(conn).title
-		filter_list = "*Filters in {}:*\n"
-	else:
-		chat_id = update.effective_chat.id
-		if chat.type == "private":
-			chat_name = "local filters"
-			filter_list = "*local filters:*\n"
-		else:
-			chat_name = chat.title
-			filter_list = "*Filters in {}*:\n"
+        conn = connected(context.bot, update, chat, user.id, need_admin=False)
+        if not conn == False:
+                chat_id = conn
+                chat_name = dispatcher.bot.getChat(conn).title
+                filter_list = "*Filters in {}:*\n"
+        else:
+                chat_id = update.effective_chat.id
+                if chat.type == "private":
+                        chat_name = "local filters"
+                        filter_list = "*local filters:*\n"
+                else:
+                        chat_name = chat.title
+                        filter_list = "*Filters in {}*:\n"
 
-	all_handlers = sql.get_chat_triggers(chat_id)
+        all_handlers = sql.get_chat_triggers(chat_id)
 
 
-	if not all_handlers:
-		send_message(update.effective_message, "There is no filter in {}!".format(chat_name))
-		return
+        if not all_handlers:
+                send_message(update.effective_message, "There is no filter in {}!".format(chat_name))
+                return
 
-	for keyword in all_handlers:
-		entry = " - {}\n".format(escape_markdown(keyword))
-		if len(entry) + len(filter_list) > telegram.MAX_MESSAGE_LENGTH:
-			send_message(update.effective_message, filter_list.format(chat_name), parse_mode=telegram.ParseMode.MARKDOWN)
-			filter_list = entry
-		else:
-			filter_list += entry
+        for keyword in all_handlers:
+                entry = " - {}\n".format(escape_markdown(keyword))
+                if len(entry) + len(filter_list) > telegram.MAX_MESSAGE_LENGTH:
+                        send_message(update.effective_message, filter_list.format(chat_name), parse_mode=telegram.ParseMode.MARKDOWN)
+                        filter_list = entry
+                else:
+                        filter_list += entry
         try:
 		send_message(update.effective_message, filter_list.format(chat_name), parse_mode=telegram.ParseMode.MARKDOWN)
 	except KeyError:
