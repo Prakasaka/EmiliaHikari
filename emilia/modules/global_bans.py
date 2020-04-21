@@ -113,19 +113,19 @@ def gban(update, context):
                     mention_html(user_chat.id, user_chat.first_name
                                  or "Deleted Account"), user_chat.id,
                     old_reason, full_reason),
-                parse_mode=ParseMode.HTML)
+                parse_mode="markdown")
         except Exception:
             pass
 
     # send_message(update.effective_message, "This user has already been gbanned. I have updated the reason.\nPrevious reason: <code>{}</code>\nNew reason: <code>{}</code>".format(
     #         html.escape(old_reason), html.escape(full_reason)),
-    #                        parse_mode=ParseMode.HTML)
+    #                        parse_mode="markdown")
     # return
 
     starting = "Global Banning {} with the id <code>{}</code>...".format(
         mention_html(user_chat.id, user_chat.first_name or "Deleted Account"),
         user_chat.id)
-    send_message(update.effective_message, starting, parse_mode=ParseMode.HTML)
+    send_message(update.effective_message, starting, parse_mode="markdown")
 
     try:
         context.bot.send_message("{} is gbanning user {} with the following reason: <code>{}</code>.".format(
@@ -133,7 +133,7 @@ def gban(update, context):
                              mention_html(user_chat.id, user_chat.first_name), 
                              full_reason
                              or "No reason given"),
-                         parse_mode=ParseMode.HTML)
+                         parse_mode="markdown")
     except Exception:
         print("nut")
 

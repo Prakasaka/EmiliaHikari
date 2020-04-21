@@ -68,7 +68,7 @@ def mute(update, context):
 
         elif member.can_send_messages is None or member.can_send_messages:
             context.bot.restrict_chat_member(chat.id, user_id, permissions=ChatPermissions(can_send_messages=False))
-            send_message(update.effective_message, text, parse_mode=ParseMode.HTML)
+            send_message(update.effective_message, text, parse_mode="markdown")
             return "<b>{}:</b>" \
                    "\n#MUTE" \
                    "\n<b>Admin:</b> {}" \

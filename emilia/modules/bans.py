@@ -115,7 +115,7 @@ def ban(update, context):
                 send_message(update.effective_message, "Admin {} Banned user {}\n<b>Reason:</b> {}".format(mention_html(user.id, user.first_name),
                                                                                                     mention_html(member.user.id, member.user.first_name),
                                                                                                     reason or "No reason given"),
-                                                                                                    parse_mode=ParseMode.HTML)
+                                                                                                    parse_mode="markdown")
 
     except BadRequest as excp:
         if excp.message == "Reply message not found":
@@ -123,7 +123,7 @@ def ban(update, context):
             send_message(update.effective_message, "Admin {} Banned user {}\n<b>Reason:</b> {}".format(mention_html(user.id, user.first_name),
                                                                                                     mention_html(member.user.id, member.user.first_name),
                                                                                                     reason or "No reason given"),
-                                                                                                    parse_mode=ParseMode.HTML)
+                                                                                                    parse_mode="markdown")
             return log
         elif excp.message == "Message can't be deleted":
             pass
@@ -245,14 +245,14 @@ def temp_ban(update, context):
             send_message(update.effective_message, "Admin {} Temporary Banned user {} for {} at {}\n<b>Reason:</b> {}".format(mention_html(user.id, user.first_name),
                                                                                                     mention_html(member.user.id, member.user.first_name),
                                                                                                     time_val, chat_name, reason or "No reason given"),
-                                                                                                    parse_mode=ParseMode.HTML)
+                                                                                                    parse_mode="markdown")
         else:
             chat.kick_member(user_id, until_date=bantime)
             context.bot.send_sticker(chat.id, BAN_STICKER)  # banhammer marie sticker
             send_message(update.effective_message, "Admin {} Temporary Banned user {} for {}\n<b>Reason:</b> {}".format(mention_html(user.id, user.first_name),
                                                                                                     mention_html(member.user.id, member.user.first_name),
                                                                                                     time_val, reason or "No reason given"),
-                                                                                                    parse_mode=ParseMode.HTML)
+                                                                                                    parse_mode="markdown")
         return log
 
     except BadRequest as excp:
@@ -261,7 +261,7 @@ def temp_ban(update, context):
             send_message(update.effective_message,"Admin {} Temporary Banned user {} for {}\n<b>Reason:</b> {}".format(mention_html(user.id, user.first_name),
                                                                                                     mention_html(member.user.id, member.user.first_name),
                                                                                                     time_val, reason),
-                                                                                                    parse_mode=ParseMode.HTML)
+                                                                                                    parse_mode="markdown")
             return log
         else:
             LOGGER.warning(update)
@@ -370,7 +370,7 @@ def kick(update, context):
                 send_message(update.effective_message, "Admin {} Kicked user {}\n<b>Reason:</b> {}".format(mention_html(user.id, user.first_name),
                                                                                                     mention_html(member.user.id, member.user.first_name),
                                                                                                     reason or "No reason given"),
-                                                                                                    parse_mode=ParseMode.HTML)
+                                                                                                    parse_mode="markdown")
         log = "<b>{}:</b>" \
               "\n#KICKED" \
               "\n<b>Admin:</b> {}" \
