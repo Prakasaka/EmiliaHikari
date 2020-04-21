@@ -29,6 +29,7 @@ WARN_HANDLER_GROUP = 9
 
 # Not async
 def warn(user: User, chat: Chat, reason: str, message: Message, warner: User = None, conn=False) -> str:
+    bot = dispatcher.bot
     if is_user_admin(chat, user.id):
         return ""
 
@@ -75,14 +76,14 @@ def warn(user: User, chat: Chat, reason: str, message: Message, warner: User = N
 
     else:
         keyboard = [[
-            InlineKeyboardButton("Remove warn", callback_data="rm_warn({})".format(user.id))
+            InlineKeyboardButton(text="Remove warn", callback_data="rm_warn({})".format(user.id))
         ]]
         rules = rules_sql.get_rules(chat.id)
         if rules:
             keyboard[0].append(
-                InlineKeyboardButton("Rules",
-                                     url="t.me/{}?start={}".format(
-                                         dispatcher.bot.username, chat.id)))
+                InlineKeyboardButton(text="Rules",
+                                     url="t.me/{}?start={}".format(bot.username,
+                                     chat_id)))
 
         if num_warns+1 == limit:
             if not warn_mode:
@@ -255,7 +256,7 @@ def reset_warns(update, context):
         if conn:
             send_message(update.effective_message, "Warnings have been reset in *{}*!".format(chat_name), parse_mode="markdown")
         else:
-            send_message(update.effective_message, "Warnings have been reset!")
+            send_message(update.effective_message, "User {} warnings have been reset!".format(mention_html(warned.id, warned.first_name)))
         warned = chat.get_member(user_id).user
         return "<b>{}:</b>" \
                "\n#RESETWARNS" \
