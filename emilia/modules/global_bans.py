@@ -161,8 +161,8 @@ def gban(update, context):
         except TelegramError:
             pass
 
-    send_to_list(context.bot, SUDO_USERS + SUPPORT_USERS, "{} has been gbanned".format(mention_html(user_chat.id, user_chat.first_name)))
-    send_message(update.effective_message, "{} has been gbanned".format(mention_html(user_chat.id, user_chat.first_name)))
+    send_to_list(context.bot, SUDO_USERS + SUPPORT_USERS, "{} has been gbanned".format(mention_html(user_chat.id, user_chat.first_name)), parse_mode=ParseMode.HTML)
+    send_message(update.effective_message, "{} has been gbanned".format(mention_html(user_chat.id, user_chat.first_name)), parse_mode=ParseMode.HTML)
 
 
 @run_async
