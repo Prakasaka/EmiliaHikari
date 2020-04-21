@@ -8,7 +8,7 @@ from telegram.ext.dispatcher import run_async
 from telegram.utils.helpers import mention_html
 
 from emilia import dispatcher, LOGGER
-from emilia.modules.helper_funcs.chat_status import user_admin, user_can_delete
+from emilia.modules.helper_funcs.chat_status import user_admin, can_delete
 from emilia.modules.log_channel import loggable
 
 from emilia.modules.helper_funcs.alternate import send_message
@@ -23,9 +23,11 @@ def purge(update, context):
     if msg.reply_to_message:
         user = update.effective_user  # type: Optional[User]
         chat = update.effective_chat  # type: Optional[Chat]
-        if user_can_delete(chat, user, context.bot.id):
+        if can_delete(chat, context.bot.id):
             message_id = msg.reply_to_message.message_id
             if args and args[0].isdigit():
+                if int(args[0]) < int(1):
+                    return
                 delete_to = message_id + int(args[0])
             else:
                 delete_to = msg.message_id - 1
@@ -66,15 +68,15 @@ def purge(update, context):
 @user_admin
 @loggable
 def del_message(update, context) -> str:
+    chat = update.effective_chat
     if update.effective_message.reply_to_message:
-        user = update.effective_user  # type: Optional[User]
-        chat = update.effective_chat  # type: Optional[Chat]
-        if user_can_delete(chat, user, context.bot.id):
+        user = update.effective_user
+        if can_delete(chat, bot.id):
             update.effective_message.reply_to_message.delete()
             update.effective_message.delete()
             return "<b>{}:</b>" \
                    "\n#DEL" \
-                   "\n<b>Admin:</b> {}" \
+                   "\n<b>• Admin:</b> {}" \
                    "\nMessage deleted.".format(html.escape(chat.title),
                                                mention_html(user.id, user.first_name))
     else:
