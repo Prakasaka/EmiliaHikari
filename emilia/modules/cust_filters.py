@@ -72,7 +72,7 @@ def list_handlers(update, context):
 		else:
 			filter_list += entry
 
-	try:
+        try:
                 send_message(update.effective_message, filter_list.format(chat_name), parse_mode=telegram.ParseMode.MARKDOWN)
         except KeyError:
                 pass
