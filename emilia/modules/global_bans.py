@@ -70,15 +70,15 @@ def gban(update, context):
         return
 
     if int(user_id) in SUDO_USERS:
-        send_message(update.effective_message, "I spy, with my little eye... a sudo user war! Why are you guys turning on each other? 😱")
+        send_message(update.effective_message, "I spy, with my little eye... a sudo user war! Why are you guys turning on each other?")
         return
 
     if int(user_id) in SUPPORT_USERS:
-        send_message(update.effective_message, "OOOH someone's trying to gban a support user! 😎 *grabs popcorn*")
+        send_message(update.effective_message, "OOOH someone's trying to gban a support user! *grabs popcorn*")
         return
 
     if user_id == context.bot.id:
-        send_message(update.effective_message, "😑 So funny, lets gban myself why don't I? Nice try. 😒")
+        send_message(update.effective_message, "So funny, lets gban myself why don't I? Nice try.")
         return
 
     try:
@@ -113,19 +113,19 @@ def gban(update, context):
                     mention_html(user_chat.id, user_chat.first_name
                                  or "Deleted Account"), user_chat.id,
                     old_reason, full_reason),
-                parse_mode="markdown")
+                parse_mode=ParseMode.HTML)
         except Exception:
             pass
 
     # send_message(update.effective_message, "This user has already been gbanned. I have updated the reason.\nPrevious reason: <code>{}</code>\nNew reason: <code>{}</code>".format(
     #         html.escape(old_reason), html.escape(full_reason)),
-    #                        parse_mode="markdown")
+    #                        parse_mode=ParseMode.HTML)
     # return
 
     starting = "Global Banning {} with the id <code>{}</code>...".format(
         mention_html(user_chat.id, user_chat.first_name or "Deleted Account"),
         user_chat.id)
-    send_message(update.effective_message, starting, parse_mode="markdown")
+    send_message(update.effective_message, starting, parse_mode=ParseMode.HTML)
 
     try:
         context.bot.send_message("{} is gbanning user {} with the following reason: <code>{}</code>.".format(
@@ -133,7 +133,7 @@ def gban(update, context):
                              mention_html(user_chat.id, user_chat.first_name), 
                              full_reason
                              or "No reason given"),
-                         parse_mode="markdown")
+                         parse_mode=ParseMode.HTML)
     except Exception:
         print("nut")
 

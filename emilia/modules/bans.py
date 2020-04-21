@@ -1,7 +1,7 @@
 import html
 from typing import Optional, List
 
-from telegram import Message, Chat, Update, Bot, User
+from telegram import Message, Chat, Update, Bot, User, ParseMode
 from telegram.error import BadRequest
 from telegram.ext import run_async, CommandHandler, Filters
 from telegram.utils.helpers import mention_html
@@ -52,7 +52,7 @@ def ban(update, context):
             text = "I can't restrict people in {}! Make sure I'm admin and can appoint new admins.".format(chat_name)
         else:
             text = "I can't restrict people here! Make sure I'm admin and can appoint new admins."
-        send_message(update.effective_message, text, parse_mode="markdown")
+        send_message(update.effective_message, text, parse_mode=ParseMode.HTML)
         return ""
 
     if not user_id:
@@ -70,7 +70,7 @@ def ban(update, context):
                 text = "I can't find this user on *{}*".format(chat_name)
             else:
                 text = "I can't find this user"
-            send_message(update.effective_message, text, parse_mode="markdown")
+            send_message(update.effective_message, text, parse_mode=ParseMode.HTML)
             return ""
         else:
             raise
@@ -88,7 +88,7 @@ def ban(update, context):
             text = "You have no right to restrict someone in *{}*.".format(chat_name)
         else:
             text = "You have no right to restrict someone."
-        send_message(update.effective_message, text, parse_mode="markdown")
+        send_message(update.effective_message, text, parse_mode=ParseMode.HTML)
         return ""
 
     log = "<b>{}:</b>" \
@@ -105,7 +105,7 @@ def ban(update, context):
         if conn:
             context.bot.kickChatMember(chat_id, user_id)
             context.bot.send_sticker(currentchat.id, BAN_STICKER)  # banhammer marie sticker
-            send_message(update.effective_message, "Banned at *{}*! 😝".format(chat_name), parse_mode="markdown")
+            send_message(update.effective_message, "Banned at *{}*! 😝".format(chat_name), parse_mode=ParseMode.HTML)
         else:
             chat.kick_member(user_id)
             if message.text.split(None, 1)[0][1:] == "sban":
@@ -115,7 +115,7 @@ def ban(update, context):
                 send_message(update.effective_message, "Admin {} Banned user {}\n<b>Reason:</b> {}".format(mention_html(user.id, user.first_name),
                                                                                                     mention_html(member.user.id, member.user.first_name),
                                                                                                     reason or "No reason given"),
-                                                                                                    parse_mode="markdown")
+                                                                                                    parse_mode=ParseMode.HTML)
 
     except BadRequest as excp:
         if excp.message == "Reply message not found":
@@ -123,7 +123,7 @@ def ban(update, context):
             send_message(update.effective_message, "Admin {} Banned user {}\n<b>Reason:</b> {}".format(mention_html(user.id, user.first_name),
                                                                                                     mention_html(member.user.id, member.user.first_name),
                                                                                                     reason or "No reason given"),
-                                                                                                    parse_mode="markdown")
+                                                                                                    parse_mode=ParseMode.HTML)
             return log
         elif excp.message == "Message can't be deleted":
             pass
@@ -170,7 +170,7 @@ def temp_ban(update, context):
             text = "I can't restrict people in {}! Make sure I'm admin and can appoint new admins.".format(chat_name)
         else:
             text = "I can't restrict people here! Make sure I'm admin and can appoint new admins."
-        send_message(update.effective_message, text, parse_mode="markdown")
+        send_message(update.effective_message, text, parse_mode=ParseMode.HTML)
         return ""
     else:
         if check['can_restrict_members'] == False:
@@ -178,7 +178,7 @@ def temp_ban(update, context):
                 text = "I can't restrict people in {}! Make sure I'm admin and can appoint new admins.".format(chat_name)
             else:
                 text = "I can't restrict people here! Make sure I'm admin and can appoint new admins."
-            send_message(update.effective_message, text, parse_mode="markdown")
+            send_message(update.effective_message, text, parse_mode=ParseMode.HTML)
             return ""
 
     if not user_id:
@@ -245,14 +245,14 @@ def temp_ban(update, context):
             send_message(update.effective_message, "Admin {} Temporary Banned user {} for {} at {}\n<b>Reason:</b> {}".format(mention_html(user.id, user.first_name),
                                                                                                     mention_html(member.user.id, member.user.first_name),
                                                                                                     time_val, chat_name, reason or "No reason given"),
-                                                                                                    parse_mode="markdown")
+                                                                                                    parse_mode=ParseMode.HTML)
         else:
             chat.kick_member(user_id, until_date=bantime)
             context.bot.send_sticker(chat.id, BAN_STICKER)  # banhammer marie sticker
             send_message(update.effective_message, "Admin {} Temporary Banned user {} for {}\n<b>Reason:</b> {}".format(mention_html(user.id, user.first_name),
                                                                                                     mention_html(member.user.id, member.user.first_name),
                                                                                                     time_val, reason or "No reason given"),
-                                                                                                    parse_mode="markdown")
+                                                                                                    parse_mode=ParseMode.HTML)
         return log
 
     except BadRequest as excp:
@@ -261,7 +261,7 @@ def temp_ban(update, context):
             send_message(update.effective_message,"Admin {} Temporary Banned user {} for {}\n<b>Reason:</b> {}".format(mention_html(user.id, user.first_name),
                                                                                                     mention_html(member.user.id, member.user.first_name),
                                                                                                     time_val, reason),
-                                                                                                    parse_mode="markdown")
+                                                                                                    parse_mode=ParseMode.HTML)
             return log
         else:
             LOGGER.warning(update)
@@ -310,7 +310,7 @@ def kick(update, context):
             text = "I can't restrict people in {}! Make sure I'm admin and can appoint new admins.".format(chat_name)
         else:
             text = "I can't restrict people here! Make sure I'm admin and can appoint new admins."
-        send_message(update.effective_message, text, parse_mode="markdown")
+        send_message(update.effective_message, text, parse_mode=ParseMode.HTML)
         return ""
     else:
         if check['can_restrict_members'] == False:
@@ -318,7 +318,7 @@ def kick(update, context):
                 text = "I can't restrict people in {}! Make sure I'm admin and can appoint new admins.".format(chat_name)
             else:
                 text = "I can't restrict people here! Make sure I'm admin and can appoint new admins."
-            send_message(update.effective_message, text, parse_mode="markdown")
+            send_message(update.effective_message, text, parse_mode=ParseMode.HTML)
             return ""
 
     if not user_id:
@@ -361,7 +361,7 @@ def kick(update, context):
         if conn:
             context.bot.send_sticker(currentchat.id, BAN_STICKER)  # banhammer marie sticker
             text = "Kicked at *{}*!".format(chat_name)
-            send_message(update.effective_message, text, parse_mode="markdown")
+            send_message(update.effective_message, text, parse_mode=ParseMode.HTML)
         else:
             if message.text.split(None, 1)[0][1:] == "skick":
                 update.effective_message.delete()
@@ -370,7 +370,7 @@ def kick(update, context):
                 send_message(update.effective_message, "Admin {} Kicked user {}\n<b>Reason:</b> {}".format(mention_html(user.id, user.first_name),
                                                                                                     mention_html(member.user.id, member.user.first_name),
                                                                                                     reason or "No reason given"),
-                                                                                                    parse_mode="markdown")
+                                                                                                    parse_mode=ParseMode.HTML)
         log = "<b>{}:</b>" \
               "\n#KICKED" \
               "\n<b>Admin:</b> {}" \
@@ -440,7 +440,7 @@ def unban(update, context):
             text = "I can't restrict people in {}! Make sure I'm admin and can appoint new admins.".format(chat_name)
         else:
             text = "I can't restrict people here! Make sure I'm admin and can appoint new admins."
-        send_message(update.effective_message, text, parse_mode="markdown")
+        send_message(update.effective_message, text, parse_mode=ParseMode.HTML)
         return ""
     else:
         if check['can_restrict_members'] == False:
@@ -448,7 +448,7 @@ def unban(update, context):
                 text = "I can't restrict people in {}! Make sure I'm admin and can appoint new admins.".format(chat_name)
             else:
                 text = "I can't restrict people here! Make sure I'm admin and can appoint new admins."
-            send_message(update.effective_message, text, parse_mode="markdown")
+            send_message(update.effective_message, text, parse_mode=ParseMode.HTML)
             return ""
 
     try:

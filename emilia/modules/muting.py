@@ -1,7 +1,7 @@
 import html
 from typing import Optional, List
 
-from telegram import Message, Chat, Update, Bot, User
+from telegram import Message, Chat, Update, Bot, User, ParseMode
 from telegram import ChatPermissions
 from telegram.error import BadRequest
 from telegram.ext import CommandHandler, Filters
@@ -68,7 +68,7 @@ def mute(update, context):
 
         elif member.can_send_messages is None or member.can_send_messages:
             context.bot.restrict_chat_member(chat.id, user_id, permissions=ChatPermissions(can_send_messages=False))
-            send_message(update.effective_message, text, parse_mode="markdown")
+            send_message(update.effective_message, text, parse_mode=ParseMode.HTML)
             return "<b>{}:</b>" \
                    "\n#MUTE" \
                    "\n<b>Admin:</b> {}" \
@@ -131,7 +131,7 @@ def unmute(update, context):
         elif member.status != 'kicked' and member.status != 'left':
             if member.can_send_messages and member.can_send_media_messages \
                     and member.can_send_other_messages and member.can_add_web_page_previews:
-                send_message(update.effective_message, text, parse_mode="markdown")
+                send_message(update.effective_message, text, parse_mode=ParseMode.HTML)
                 return ""
             else:
                 context.bot.restrict_chat_member(chat.id, int(user_id),
@@ -141,7 +141,7 @@ def unmute(update, context):
                                          can_send_other_messages=True,
                                          can_add_web_page_previews=True)
                                         )
-                send_message(update.effective_message, text2, parse_mode="markdown")
+                send_message(update.effective_message, text2, parse_mode=ParseMode.HTML)
                 return "<b>{}:</b>" \
                        "\n#UNMUTE" \
                        "\n<b>Admin:</b> {}" \
@@ -244,7 +244,7 @@ def temp_mute(update, context):
                 text = "Admin {} Temporary Muted user {} for {}\n<b>Reason:</b> {}".format(mention_html(user.id, user.first_name),
                                                                 mention_html(member.user.id, member.user.first_name),
                                                                 time_val, reason or "No reason given")
-            send_message(update.effective_message, text, parse_mode="markdown")
+            send_message(update.effective_message, text, parse_mode=ParseMode.HTML)
             return log
         else:
             send_message(update.effective_message, "This user is already muted.")
@@ -254,7 +254,7 @@ def temp_mute(update, context):
             # Do not reply
             send_message(update.effective_message, "Admin {} Temporary Muted user {} for {}\n<b>Reason:</b> {}".format(mention_html(user.id, user.first_name),
                                                                 mention_html(member.user.id, member.user.first_name),
-                                                                time_val, reason or "No reason given"), parse_mode="markdown")
+                                                                time_val, reason or "No reason given"), parse_mode=ParseMode.HTML)
             return log
         else:
             LOGGER.warning(update)
