@@ -39,7 +39,7 @@ def mute(update, context):
         chat = dispatcher.bot.getChat(conn)
         chat_id = conn
         chat_name = dispatcher.bot.getChat(conn).title
-        text = "Muted on *{}*! 😆".format(chat_name)
+        text = "Muted on *{}*!".format(chat_name)
     else:
         if update.effective_message.chat.type == "private":
             update.effective_send_message(update.effective_message, "You can do this command in groups, not PM")
@@ -47,7 +47,9 @@ def mute(update, context):
         chat = update.effective_chat
         chat_id = update.effective_chat.id
         chat_name = update.effective_message.chat.title
-        text = "Muted! 😆"
+        text = "Admin {} Muted user {}\n<b>Reason:</b> {}".format(mention_html(user.id, user.first_name),
+                                                                mention_html(member.user.id, member.user.first_name),
+                                                                reason or "No reason given")
 
     if user_id == context.bot.id:
         send_message(update.effective_message, "I'm not muting myself!")
@@ -66,7 +68,7 @@ def mute(update, context):
 
         elif member.can_send_messages is None or member.can_send_messages:
             context.bot.restrict_chat_member(chat.id, user_id, permissions=ChatPermissions(can_send_messages=False))
-            send_message(update.effective_message, text, parse_mode="markdown")
+            send_message(update.effective_message, text, parse_mode=ParseMode.HTML)
             return "<b>{}:</b>" \
                    "\n#MUTE" \
                    "\n<b>Admin:</b> {}" \
@@ -112,7 +114,7 @@ def unmute(update, context):
         chat_id = update.effective_chat.id
         chat_name = update.effective_message.chat.title
         text = "This user already has the right to speak."
-        text2 = "Unmuted"
+        text2 = "{} can talk now".format(mention_html(member.user.id, member.user.first_name))
 
     check = context.bot.getChatMember(chat.id, user.id)
     if check['can_restrict_members'] == False:
@@ -189,7 +191,7 @@ def temp_mute(update, context):
         member = chat.get_member(user_id)
     except BadRequest as excp:
         if excp.message == "User not found":
-            send_message(update.effective_message, "I can't find this user 😣")
+            send_message(update.effective_message, "I can't find this user")
             return ""
         else:
             raise
@@ -239,7 +241,9 @@ def temp_mute(update, context):
             if conn:
                 text = "Muted for *{}* in *{}*!".format(time_val, chat_name)
             else:
-                text = "Muted for *{}*!".format(time_val)
+                text = "Admin {} Temporary Muted user {} for {}\n<b>Reason:</b> {}".format(mention_html(user.id, user.first_name),
+                                                                mention_html(member.user.id, member.user.first_name),
+                                                                time_val, reason or "No reason given")
             send_message(update.effective_message, text, parse_mode="markdown")
             return log
         else:
@@ -248,7 +252,9 @@ def temp_mute(update, context):
     except BadRequest as excp:
         if excp.message == "Reply message not found":
             # Do not reply
-            send_message(update.effective_message, "Muted for *{}*!".format(time_val), quote=False)
+            send_message(update.effective_message, "Admin {} Temporary Muted user {} for {}\n<b>Reason:</b> {}".format(mention_html(user.id, user.first_name),
+                                                                mention_html(member.user.id, member.user.first_name),
+                                                                time_val, reason or "No reason given"), parse_mode="markdown")
             return log
         else:
             LOGGER.warning(update)

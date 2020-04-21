@@ -95,7 +95,7 @@ def gban(update, context):
         send_message(update.effective_message, "That's a deleted account! Why even bother gbanning them?")
         return
 
-    full_reason = f"{reason} // GBanned by {banner.first_name} id {banner.id}"
+    full_reason = f"{reason} // GBanned by {banner.first_name}"
 
     if sql.is_user_gbanned(user_id):
         if not reason:
@@ -108,7 +108,6 @@ def gban(update, context):
 
         try:
             context.bot.send_message(
-                context.bot,
                     UPDATE_GBAN.format(
                     mention_html(banner.id, banner.first_name),
                     mention_html(user_chat.id, user_chat.first_name
@@ -129,11 +128,10 @@ def gban(update, context):
     send_message(update.effective_message, starting, parse_mode=ParseMode.HTML)
 
     try:
-        context.bot.send_message(context.bot,
-                         "{} is gbanning user {} with the id <code>{}</code> with the following reason: <code>{}</code>.".format(
+        context.bot.send_message("{} is gbanning user {} with the following reason: <code>{}</code>.".format(
                              mention_html(banner.id, banner.first_name),
-                             mention_html(user_chat.id, user_chat.first_name),
-                             user_chat.id, full_reason
+                             mention_html(user_chat.id, user_chat.first_name), 
+                             full_reason
                              or "No reason given"),
                          parse_mode=ParseMode.HTML)
     except Exception:
@@ -163,8 +161,8 @@ def gban(update, context):
         except TelegramError:
             pass
 
-    send_to_list(context.bot, SUDO_USERS + SUPPORT_USERS, "Person has been gbanned.")
-    send_message(update.effective_message, "This user is not gbanned!")
+    send_to_list(context.bot, SUDO_USERS + SUPPORT_USERS, "{} has been gbanned".format(mention_html(user_chat.id, user_chat.first_name)))
+    send_message(update.effective_message, "{} has been gbanned".format(mention_html(user_chat.id, user_chat.first_name)))
 
 
 @run_async
