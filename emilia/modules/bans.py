@@ -105,7 +105,7 @@ def ban(update, context):
         if conn:
             context.bot.kickChatMember(chat_id, user_id)
             context.bot.send_sticker(currentchat.id, BAN_STICKER)  # banhammer marie sticker
-            send_message(update.effective_message, "Banned at *{}*! 😝".format(chat_name), parse_mode=ParseMode.HTML)
+            send_message(update.effective_message, "Banned at *{}*!".format(chat_name), parse_mode=ParseMode.HTML)
         else:
             chat.kick_member(user_id)
             if message.text.split(None, 1)[0][1:] == "sban":
