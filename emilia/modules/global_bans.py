@@ -221,9 +221,9 @@ def ungban(update, context):
         except TelegramError:
             pass
 
-    send_to_list(context.bot, SUDO_USERS + SUPPORT_USERS, "un-gban complete!")
+    # send_to_list(context.bot, SUDO_USERS + SUPPORT_USERS, "un-gban complete!")
 
-    send_message(update.effective_message, "Person has been un-gbanned.")
+    # send_message(update.effective_message, "Person has been un-gbanned.")
 
 
 @run_async
