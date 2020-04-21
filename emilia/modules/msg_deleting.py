@@ -50,7 +50,11 @@ def purge(update, context):
                 elif err.message != "Message to delete not found":
                     LOGGER.exception("Error while purging chat messages.")
 
-            send_message(update.effective_message, "Purge complete.")
+            a = send_message(update.effective_message, "Purge complete.")
+            try:
+                a.delete()
+            except BadRequest as err:
+                pass
             return "<b>{}:</b>" \
                    "\n#PURGE" \
                    "\n<b>Admin:</b> {}" \
