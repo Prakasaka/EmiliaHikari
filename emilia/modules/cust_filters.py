@@ -37,52 +37,7 @@ ENUM_FUNC_MAP = {
 }
 
 
-
 @run_async
-
-import re
-from typing import Optional
-
-import telegram
-from telegram import ParseMode, InlineKeyboardMarkup, Message, Chat
-from telegram import Update, Bot
-from telegram.error import BadRequest
-from telegram.ext import CommandHandler, MessageHandler, DispatcherHandlerStop, run_async, Filters
-from telegram.utils.helpers import escape_markdown, mention_markdown
-
-from emilia import dispatcher, LOGGER, spamcheck, OWNER_ID
-from emilia.modules.disable import DisableAbleCommandHandler
-from emilia.modules.helper_funcs.chat_status import user_admin
-from emilia.modules.helper_funcs.extraction import extract_text
-from emilia.modules.helper_funcs.filters import CustomFilters
-from emilia.modules.helper_funcs.misc import build_keyboard_parser
-from emilia.modules.helper_funcs.msg_types import get_filter_type
-from emilia.modules.helper_funcs.string_handling import split_quotes, button_markdown_parser, escape_invalid_curly_brackets
-from emilia.modules.sql import cust_filters_sql as sql
-
-from emilia.modules.connection import connected
-
-from emilia.modules.languages import tl
-from emilia.modules.helper_funcs.alternate import send_message
-
-HANDLER_GROUP = 10
-
-ENUM_FUNC_MAP = {
-	sql.Types.TEXT.value: dispatcher.bot.send_message,
-	sql.Types.BUTTON_TEXT.value: dispatcher.bot.send_message,
-	sql.Types.STICKER.value: dispatcher.bot.send_sticker,
-	sql.Types.DOCUMENT.value: dispatcher.bot.send_document,
-	sql.Types.PHOTO.value: dispatcher.bot.send_photo,
-	sql.Types.AUDIO.value: dispatcher.bot.send_audio,
-	sql.Types.VOICE.value: dispatcher.bot.send_voice,
-	sql.Types.VIDEO.value: dispatcher.bot.send_video,
-	sql.Types.VIDEO_NOTE.value: dispatcher.bot.send_video_note
-}
-
-
-
-@run_async
-@spamcheck
 def list_handlers(update, context):
 	chat = update.effective_chat  # type: Optional[Chat]
 	user = update.effective_user  # type: Optional[User]
