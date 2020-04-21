@@ -478,10 +478,10 @@ def unban(update, context):
 
     if conn:
         context.bot.unbanChatMember(chat_id, user_id)
-        send_message(update.effective_message, "Yep, {} can join in {}!".format(mention_html(member.user.id, member.user.first_name), chat_name))
+        send_message(update.effective_message, "Yep, {} can join in {}!".format(mention_html(member.user.id, member.user.first_name), chat_name), parse_mode=ParseMode.HTML)
     else:
         chat.unban_member(user_id)
-        send_message(update.effective_message, "Yep, {} can join!".format(mention_html(member.user.id, member.user.first_name)))
+        send_message(update.effective_message, "Yep, {} can join!".format(mention_html(member.user.id, member.user.first_name)), parse_mode=ParseMode.HTML)
 
     log = "<b>{}:</b>" \
           "\n#UNBANNED" \
