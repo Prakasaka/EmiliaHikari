@@ -248,11 +248,11 @@ def reply_filter(update, context):
 								context.bot.send_message(chat.id, filtext, parse_mode="markdown", disable_web_page_preview=True, reply_markup=keyboard)
 							except BadRequest as excp:
 								LOGGER.exception("Failed to send message: " + excp.message)
-								send_message(update.effective_message, tl(update.effective_message, get_exception(excp, filt, chat)))
+								send_message(update.effective_message, get_exception(excp, filt, chat))
 								pass
 						else:
 							try:
-								send_message(update.effective_message, tl(update.effective_message, get_exception(excp, filt, chat)))
+								send_message(update.effective_message, get_exception(excp, filt, chat))
 							except BadRequest as excp:
 								LOGGER.exception("Failed to send message: " + excp.message)
 								pass
