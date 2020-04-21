@@ -50,17 +50,17 @@ def list_handlers(update, context):
 	else:
 		chat_id = update.effective_chat.id
 		if chat.type == "private":
-			chat_name = "Local Filters")
-			filter_list = "*Local Filters:*\n")
+			chat_name = "Local Filters"
+			filter_list = "*Local Filters:*\n"
 		else:
 			chat_name = chat.title
-			filter_list = "*Filters in {}*:\n")
+			filter_list = "*Filters in {}*:\n"
 
 	all_handlers = sql.get_chat_triggers(chat_id)
 
 
 	if not all_handlers:
-		send_message(update.effective_message, "There's no Filters in {}!").format(chat_name))
+		send_message(update.effective_message, "There's no Filters in {}!".format(chat_name))
 		return
 
 	for keyword in all_handlers:
