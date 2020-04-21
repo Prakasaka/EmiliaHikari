@@ -125,7 +125,7 @@ def gban(update, context):
     starting = "Global Banning {} with the id <code>{}</code>...".format(
         mention_html(user_chat.id, user_chat.first_name or "Deleted Account"),
         user_chat.id)
-    send_message(update.effective_message, starting, parse_mode=ParseMode.HTML)
+    send_message(update.effective_message, starting, html=True)
 
     try:
         context.bot.send_message("{} is gbanning user {} with the following reason: <code>{}</code>.".format(
@@ -133,7 +133,7 @@ def gban(update, context):
                              mention_html(user_chat.id, user_chat.first_name), 
                              full_reason
                              or "No reason given"),
-                         parse_mode=ParseMode.HTML)
+                             html=True)
     except Exception:
         print("nut")
 
@@ -161,8 +161,8 @@ def gban(update, context):
         except TelegramError:
             pass
 
-    send_to_list(context.bot, SUDO_USERS + SUPPORT_USERS, "{} has been gbanned".format(mention_html(user_chat.id, user_chat.first_name)), parse_mode=ParseMode.HTML)
-    send_message(update.effective_message, "{} has been gbanned".format(mention_html(user_chat.id, user_chat.first_name)), parse_mode=ParseMode.HTML)
+    send_to_list(context.bot, SUDO_USERS + SUPPORT_USERS, "{} has been gbanned".format(mention_html(user_chat.id, user_chat.first_name)), html=True)
+    send_message(update.effective_message, "{} has been gbanned".format(mention_html(user_chat.id, user_chat.first_name)), html=True)
 
 
 @run_async
