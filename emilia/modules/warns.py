@@ -145,10 +145,11 @@ def button(update, context):
         chat = update.effective_chat  # type: Optional[Chat]
         res = sql.remove_warn(user_id, chat.id)
         if res:
-            update.effective_message.edit_text(
-                "Warn removed by {}.".format(mention_html(user.id, user.first_name)),
-                parse_mode=ParseMode.HTML)
             user_member = chat.get_member(user_id)
+            update.effective_message.edit_text(
+                "Admin {} removed {}'s warning.".format(mention_html(user.id, user.first_name),
+                                                        mention_html(user_member.user.id, user_member.user.first_name)),
+                                                        parse_mode=ParseMode.HTML)
             return "<b>{}:</b>" \
                    "\n#UNWARN" \
                    "\n<b>Admin:</b> {}" \
