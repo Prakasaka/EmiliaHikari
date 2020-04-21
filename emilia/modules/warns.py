@@ -83,7 +83,7 @@ def warn(user: User, chat: Chat, reason: str, message: Message, warner: User = N
             keyboard[0].append(
                 InlineKeyboardButton(text="Rules",
                                      url="t.me/{}?start={}".format(bot.username,
-                                     chat_id)))
+                                     chat.id)))
 
         if num_warns+1 == limit:
             if not warn_mode:
