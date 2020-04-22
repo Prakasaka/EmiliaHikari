@@ -130,7 +130,7 @@ def set_flood(update, context) -> str:
                 if conn:
                     text = "Antiflood has been updated and set to *{}* in *{}*".format(amount, chat_name)
                 else:
-                    text = tl(update.effective_message, "Antiflood has been updated and set to *{}*").format(amount)
+                    text = "Antiflood has been updated and set to *{}*".format(amount)
                 send_message(update.effective_message, text, parse_mode="markdown")
                 return "<b>{}:</b>" \
                        "\n#SETFLOOD" \
