@@ -269,25 +269,26 @@ def phh(update, context):
 
 
 @run_async
-def getaex(update, context, args: List[str]):
-    message = update.effective_message
+def getaex(update, context):
+    args = context.args
 
     AEX_OTA_API = "https://api.aospextended.com/ota/"
+    message = update.effective_message
 
     if len(args) != 2:
         reply_text = "Please type your device **codename** and **Android Version**!\nFor example, `/aex pie tissot`"
-        message.reply_text(reply_text,
+        send_message(update.effective_message, reply_text,
                            parse_mode=ParseMode.MARKDOWN,
                            disable_web_page_preview=True)
         return
 
-    device = args[0]
-    version = args[1]
+    version = args[0]
+    device = args[1]
     res = get(AEX_OTA_API + device + '/' + version.lower())
     if res.status_code == 200:
         apidata = json.loads(res.text)
         if apidata.get('error'):
-            message.reply_text("Couldn't find any results matching your query.")
+            send_message(update.effective_message, "Couldn't find any results matching your query.")
             return
         else:
             developer = apidata.get('developer')
@@ -307,13 +308,13 @@ def getaex(update, context, args: List[str]):
             keyboard = [[
                 InlineKeyboardButton(text="Click here to Download", url=f"{url}")
             ]]
-            update.effective_message.reply_text(reply_text,
+            send_message(update.effective_message, reply_text,
                                reply_markup=InlineKeyboardMarkup(keyboard),
                                parse_mode=ParseMode.MARKDOWN,
                                disable_web_page_preview=True)
             return
     else:
-        message.reply_text("Couldn't find any results matching your query.")
+        send_message(update.effective_message, "Couldn't find any results matching your query.")
 
 
 @run_async
