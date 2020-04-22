@@ -95,14 +95,14 @@ def promote(update, context):
 			send_message(update.effective_message, "Cannot promote users, maybe I am not admin or do not have permission to promote users.")
 		return
 
-	send_message(update.effective_message, "Successfully promoted!")
+	send_message(update.effective_message, f"Admin {mention_html(user.id, user.first_name)} promoted {mention_html(user_member.user.id, user_member.user.first_name)}", parse_mode=ParseMode.HTML)
 	
 	return "<b>{}:</b>" \
 		   "\n#PROMOTED" \
 		   "\n<b>Admin:</b> {}" \
 		   "\n<b>User:</b> {}".format(html.escape(chat.title),
-									  mention_html(user.id, user.first_name),
-									  mention_html(user_member.user.id, user_member.user.first_name))
+					mention_html(user.id, user.first_name),
+					mention_html(user_member.user.id, user_member.user.first_name))
 
 
 @run_async
@@ -161,7 +161,7 @@ def demote(update, context):
 							  can_pin_messages=False,
 							  can_promote_members=False
 							)
-		send_message(update.effective_message, "💔 Successfully demoted!")
+		send_message(update.effective_message, f"Admin {mention_html(user.id, user.first_name)} demoted {mention_html(user_member.user.id, user_member.user.first_name)}", parse_mode=ParseMode.HTML)
 		return "<b>{}:</b>" \
 			   "\n#DEMOTED" \
 			   "\n<b>Admin:</b> {}" \
@@ -270,38 +270,38 @@ def unpin(update, context):
 					mention_html(user.id, user.first_name))
 
 
-@run_async
-@bot_admin
-@user_admin
-def invite(update, context):
-	chat = update.effective_chat  # type: Optional[Chat]
-	user = update.effective_user  # type: Optional[User]
-	args = context.args
+# @run_async
+# @bot_admin
+# @user_admin
+# def invite(update, context):
+# 	chat = update.effective_chat  # type: Optional[Chat]
+# 	user = update.effective_user  # type: Optional[User]
+# 	args = context.args
 
-	conn = connected(context.bot, update, chat, user.id, need_admin=True)
-	if conn:
-		chat = dispatcher.bot.getChat(conn)
-		chat_id = conn
-		chat_name = dispatcher.bot.getChat(conn).title
-	else:
-		if update.effective_message.chat.type == "private":
-			send_message(update.effective_message, "You can do this command in groups, not PM")
-			return ""
-		chat = update.effective_chat
-		chat_id = update.effective_chat.id
-		chat_name = update.effective_message.chat.title
+# 	conn = connected(context.bot, update, chat, user.id, need_admin=True)
+# 	if conn:
+# 		chat = dispatcher.bot.getChat(conn)
+# 		chat_id = conn
+# 		chat_name = dispatcher.bot.getChat(conn).title
+# 	else:
+# 		if update.effective_message.chat.type == "private":
+# 			send_message(update.effective_message, "You can do this command in groups, not PM")
+# 			return ""
+# 		chat = update.effective_chat
+# 		chat_id = update.effective_chat.id
+# 		chat_name = update.effective_message.chat.title
 
-	if chat.username:
-		send_message(update.effective_message, chat.username)
-	elif chat.type == chat.SUPERGROUP or chat.type == chat.CHANNEL:
-		bot_member = chat.get_member(context.bot.id)
-		if bot_member.can_invite_users:
-			invitelink = context.bot.exportChatInviteLink(chat.id)
-			send_message(update.effective_message, invitelink)
-		else:
-			send_message(update.effective_message, "I don't have access to the invite link, try changing my permissions!")
-	else:
-		send_message(update.effective_message, "I can only give you invite links for supergroups and channels, sorry!")
+# 	if chat.username:
+# 		send_message(update.effective_message, chat.username)
+# 	elif chat.type == chat.SUPERGROUP or chat.type == chat.CHANNEL:
+# 		bot_member = chat.get_member(context.bot.id)
+# 		if bot_member.can_invite_users:
+# 			invitelink = context.bot.exportChatInviteLink(chat.id)
+# 			send_message(update.effective_message, invitelink)
+# 		else:
+# 			send_message(update.effective_message, "I don't have access to the invite link, try changing my permissions!")
+# 	else:
+# 		send_message(update.effective_message, "I can only give you invite links for supergroups and channels, sorry!")
 
 
 @run_async
@@ -534,7 +534,6 @@ __help__ = """
  - /unpin: unpins the currently pinned message
  - /permapin <text>: Pin a custom messages via bots. This message can contain markdown, and can be used in replies to the media include additional buttons and text.
  - /permanentpin: Set a permanent pin for supergroup chat, when an admin or telegram channel change pinned message, bot will change pinned message immediatelly
- - /invitelink: gets invitelink
  - /promote: promotes the user replied to
  - /demote: demotes the user replied to
 """
@@ -545,7 +544,7 @@ PIN_HANDLER = CommandHandler("pin", pin, pass_args=True, filters=Filters.group)
 UNPIN_HANDLER = CommandHandler("unpin", unpin, filters=Filters.group)
 PERMAPIN_HANDLER = CommandHandler("permapin", permapin, filters=Filters.group)
 
-INVITE_HANDLER = CommandHandler("invitelink", invite, filters=Filters.group)
+# INVITE_HANDLER = CommandHandler("invitelink", invite, filters=Filters.group)
 
 PROMOTE_HANDLER = CommandHandler("promote", promote, pass_args=True, filters=Filters.group)
 DEMOTE_HANDLER = CommandHandler("demote", demote, pass_args=True, filters=Filters.group)
@@ -558,7 +557,7 @@ ADMINLIST_HANDLER = DisableAbleCommandHandler(["adminlist", "admins"], adminlist
 dispatcher.add_handler(PIN_HANDLER)
 dispatcher.add_handler(UNPIN_HANDLER)
 dispatcher.add_handler(PERMAPIN_HANDLER)
-dispatcher.add_handler(INVITE_HANDLER)
+# dispatcher.add_handler(INVITE_HANDLER)
 dispatcher.add_handler(PROMOTE_HANDLER)
 dispatcher.add_handler(DEMOTE_HANDLER)
 dispatcher.add_handler(PERMANENT_PIN_SET_HANDLER)

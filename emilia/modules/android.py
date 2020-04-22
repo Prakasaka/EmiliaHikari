@@ -72,50 +72,167 @@ def havoc(update, context):
                        disable_web_page_preview=True)
 
 
-# @run_async
-# def posp(update, context):
-#     cmd_name = "posp"
-#     message = update.effective_message
-#     chat = update.effective_chat  # type: Optional[Chat]
-#     device = message.text[len(f'/{cmd_name} '):]
+@run_async
+def pixys(update, context):
+    message = update.effective_message
+    device = message.text[len('/pixys '):]
 
-#     if device == '':
-#         reply_text = "Please type your device **codename**!\nFor example, `/{} tissot`".format(cmd_name)
-#         send_message(update.effective_message, reply_text,
-#                            parse_mode=ParseMode.MARKDOWN,
-#                            disable_web_page_preview=True)
-#         return
+    if device == '':
+        reply_text = "Please type your device **codename** into it!\nFor example, `/pixys tissot`"
+       send_message(update.effective_message, reply_text, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
+        return
 
-#     fetch = get(
-#         f'https://api.potatoproject.co/checkUpdate?device={device}&type=weekly'
-#     )
-#     if fetch.status_code == 200 and len(fetch.json()['response']) != 0:
-#         usr = fetch.json()
-#         response = usr['response'][0]
-#         filename = response['filename']
-#         url = response['url']
-#         buildsize_a = response['size']
-#         buildsize_b = sizee(int(buildsize_a))
-#         version = response['version']
+    fetch = get(f'https://raw.githubusercontent.com/PixysOS-Devices/official_devices/master/{device}/build.json')
+    if fetch.status_code == 200:
+        usr = fetch.json()
+        response = usr['response'][0]
+        filename = response['filename']
+        url = response['url']
+        buildsize_a = response['size']
+        buildsize_b = sizee(int(buildsize_a))
+        romtype = response['romtype']
+        version = response['version']
 
-#         reply_text = "*Download:* [{}]({})\n".format(filename, url)
-#         reply_text += "*Build Size:* `{}`\n".format(buildsize_b)
-#         reply_text += "*Version:* `{}`\n".format(version)
+        reply_text = (f"*Download:* [{filename}]({url})\n"
+                      f"*Build size:* `{buildsize_b}`\n"
+                      f"*Version:* `{version}`\n"
+                      f"*Rom Type:* `{romtype}`")
 
-#         keyboard = [[
-#             InlineKeyboardButton(text="Click here to Download", url=f"{url}")
-#         ]]
-#         send_message(update.effective_message, reply_text,
-#                            reply_markup=InlineKeyboardMarkup(keyboard),
-#                            parse_mode=ParseMode.MARKDOWN,
-#                            disable_web_page_preview=True)
-#         return
+        keyboard = [[InlineKeyboardButton(text="Click to Download", url=f"{url}")]]
+       send_message(update.effective_message, reply_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
+        return
 
-#     else:
-#         reply_text = "Couldn't find any results matching your query."
-#     send_message(update.effective_message, reply_text,
-#                        parse_mode=ParseMode.MARKDOWN,
-#                        disable_web_page_preview=True)
+    elif fetch.status_code == 404:
+        reply_text = "Device not found."
+   send_message(update.effective_message, reply_text, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
+
+
+@run_async
+def dotos(update, context):
+    message = update.effective_message
+    device = message.text[len('/dotos '):]
+
+    if device == '':
+        reply_text = "Please type your device **codename** into it!\nFor example, `/dotos tissot`"
+       send_message(update.effective_message, reply_text, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
+        return
+
+    fetch = get(f'https://raw.githubusercontent.com/DotOS/ota_config/dot-p/{device}.json')
+    if fetch.status_code == 200:
+        usr = fetch.json()
+        response = usr['response'][0]
+        filename = response['filename']
+        url = response['url']
+        buildsize_a = response['size']
+        buildsize_b = sizee(int(buildsize_a))
+        version = response['version']
+        changelog = response['changelog_device']
+
+        reply_text = (f"*Download:* [{filename}]({url})\n"
+                      f"*Build size:* `{buildsize_b}`\n"
+                      f"*Version:* `{version}`\n"
+                      f"*Device Changelog:* `{changelog}`")
+
+        keyboard = [[InlineKeyboardButton(text="Click to Download", url=f"{url}")]]
+       send_message(update.effective_message, reply_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
+        return
+
+    elif fetch.status_code == 404:
+        reply_text="Device not found"
+   send_message(update.effective_message, reply_text, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
+
+
+@run_async
+def viper(update, context):
+    message = update.effective_message
+    device = message.text[len('/viper '):]
+
+    if device == '':
+        reply_text = "Please type your device **codename** into it!\nFor example, `/viper tissot`"
+       send_message(update.effective_message, reply_text, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
+        return
+
+    fetch = get(f'https://raw.githubusercontent.com/Viper-Devices/official_devices/master/{device}/build.json')
+    if fetch.status_code == 200:
+        usr = fetch.json()
+        response = usr['response'][0]
+        filename = response['filename']
+        url = response['url']
+        buildsize_a = response['size']
+        buildsize_b = sizee(int(buildsize_a))
+        version = response['version']
+
+        reply_text = (f"*Download:* [{filename}]({url})\n"
+                      f"*Build size:* `{buildsize_b}`\n"
+                      f"*Version:* `{version}`")
+
+        keyboard = [[InlineKeyboardButton(text="Click to Download", url=f"{url}")]]
+       send_message(update.effective_message, reply_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
+        return
+
+    elif fetch.status_code == 404:
+        reply_text="Device not found"
+   send_message(update.effective_message, reply_text, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
+
+
+def enesrelease(update, context):
+    args = context.args
+    message = update.effective_message
+    usr = get(f'https://api.github.com/repos/EnesSastim/Downloads/releases/latest').json()
+    reply_text = "*Enes Sastim's lastest upload(s)*\n"
+    for i in range(len(usr)):
+        try:
+            name = usr['assets'][i]['name']
+            url = usr['assets'][i]['browser_download_url']
+            reply_text += f"[{name}]({url})\n"
+        except IndexError:
+            continue
+   send_message(update.effective_message, reply_text, parse_mode=ParseMode.MARKDOWN)
+
+
+def descendant(update, context):
+    args = context.args
+    message = update.effective_message
+    usr = get(f'https://api.github.com/repos/Descendant/InOps/releases/latest').json()
+    reply_text = "*Descendant GSI Download(s)*\n"
+    for i in range(len(usr)):
+        try:
+            name = usr['assets'][i]['name']
+            url = usr['assets'][i]['browser_download_url']
+            download_count = usr['assets'][i]['download_count']
+            reply_text += f"[{name}]({url}) - Downloaded `{download_count}` Times\n\n"
+        except IndexError:
+            continue
+   send_message(update.effective_message, reply_text, parse_mode=ParseMode.MARKDOWN)
+
+
+def miui(update, context):
+    giturl = "https://raw.githubusercontent.com/XiaomiFirmwareUpdater/miui-updates-tracker/master/"
+    message = update.effective_message
+    device = message.text[len('/miui '):]
+
+    if device == '':
+        reply_text = "Please type your device **codename** into it!\nFor example, `/miui whyred`!"
+       send_message(update.effective_message, reply_text, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
+        return
+
+    result = "*Recovery ROM*\n\n"
+    result += "*Stable*\n"
+    stable_all = json.loads(get(giturl + "stable_recovery/stable_recovery.json").content)
+    data = [i for i in stable_all if device == i['codename']]
+    if len(data) != 0:
+        for i in data:
+            result += "[" + i['filename'] + "](" + i['download'] + ")\n\n"
+
+        result += "*Weekly*\n"
+        weekly_all = json.loads(get(giturl + "weekly_recovery/weekly_recovery.json").content)
+        data = [i for i in weekly_all if device == i['codename']]
+        for i in data:
+            result += "[" + i['filename'] + "](" + i['download'] + ")"
+    else:
+        result = "Couldn't find any device matching your query."
+
+   send_message(update.effective_message, result, parse_mode=ParseMode.MARKDOWN)
 
 
 @run_async
@@ -268,56 +385,6 @@ def phh(update, context):
     send_message(update.effective_message, reply_text, parse_mode=ParseMode.MARKDOWN)
 
 
-# @run_async
-# def getaex(update, context):
-#     args = context.args
-#     message = update.effective_message
-#     chat = update.effective_chat  # type: Optional[Chat]
-
-#     AEX_OTA_API = "https://api.aospextended.com/ota/"
-
-#     if len(args) != 2:
-#         reply_text = "Please type your device **codename** and **Android Version**!\nFor example, `/aex pie tissot`"
-#         send_message(update.effective_message, reply_text,
-#                            parse_mode=ParseMode.MARKDOWN,
-#                            disable_web_page_preview=True)
-#         return
-
-#     version = args[0]
-#     device = args[1]
-#     res = get(AEX_OTA_API + device + '/' + version.lower())
-#     if res.status_code == 200:
-#         apidata = json.loads(res.text)
-#         if apidata.get('error'):
-#             send_message(update.effective_message, "Couldn't find any results matching your query.")
-#             return
-#         else:
-#             developer = apidata.get('developer')
-#             developer_url = apidata.get('developer_url')
-#             filename = apidata.get('filename')
-#             url = "https://downloads.aospextended.com/download/" + device + "/" + version + "/" + apidata.get(
-#                 'filename')
-#             builddate = datetime.strptime(apidata.get('build_date'),
-#                                           "%Y%m%d-%H%M").strftime("%d %B %Y")
-#             buildsize = sizee(int(apidata.get('filesize')))
-
-#             reply_text = "*Download:* [{}]({})\n".format(filename, url)
-#             reply_text += "*Build Size:* `{}`\n".format(buildsize)
-#             reply_text += "build_date".format(builddate)
-#             reply_text += "*Maintainer:* {}\n".format(f"[{developer}]({developer_url})")
-
-#             keyboard = [[
-#                 InlineKeyboardButton(text="Click here to Download", url=f"{url}")
-#             ]]
-#             send_message(update.effective_message, reply_text,
-#                                reply_markup=InlineKeyboardMarkup(keyboard),
-#                                parse_mode=ParseMode.MARKDOWN,
-#                                disable_web_page_preview=True)
-#             return
-#     else:
-#         send_message(update.effective_message, "Couldn't find any results matching your query.")
-
-
 @run_async
 def bootleggers(update, context):
     cmd_name = "bootleggers"
@@ -386,6 +453,22 @@ def bootleggers(update, context):
                        disable_web_page_preview=True)
 
 
+__help__ = """
+*This module is made with love by* @peaktogoo *and code beauty by* @kandnub
+ *Device Specific Rom*
+ - /havoc <device>: Get the Havoc Rom
+ - /viper <device>: Get the Viper Rom
+ - /evo <device>: Get the Evolution X Rom
+ - /dotos <device>: Get the DotOS Rom
+ - /pixys <device>: Get the Pixy Rom
+ - /los <device>: Get the LineageOS Rom
+ - /bootleggers <device>: Get the Bootleggers Rom
+ *GSI*
+ - /phh: Get the lastest Phh AOSP Oreo GSI!
+ - /descendant: Get the lastest Descendant GSI!
+ - /enesrelease: Get the lastest Enes upload
+"""
+
 __mod_name__ = "Android"
 
 # GETAEX_HANDLER = DisableAbleCommandHandler("aex",
@@ -393,6 +476,12 @@ __mod_name__ = "Android"
 #                                            pass_args=True,
 #                                            admin_ok=True)
 EVO_HANDLER = DisableAbleCommandHandler("evo", evo, admin_ok=True)
+MIUI_HANDLER = DisableAbleCommandHandler("miui", miui, admin_ok=True)
+DOTOS_HANDLER = DisableAbleCommandHandler("dotos", dotos, admin_ok=True)
+PIXYS_HANDLER = DisableAbleCommandHandler("pixys", pixys, admin_ok=True)
+DESCENDANT_HANDLER = DisableAbleCommandHandler("descendant", descendant, pass_args=True, admin_ok=True)
+ENES_HANDLER = DisableAbleCommandHandler("enesrelease", enesrelease, pass_args=True, admin_ok=True)
+VIPER_HANDLER = DisableAbleCommandHandler("viper", viper, admin_ok=True)
 HAVOC_HANDLER = DisableAbleCommandHandler("havoc", havoc, admin_ok=True)
 PHH_HANDLER = DisableAbleCommandHandler("phh",
                                         phh,
@@ -407,6 +496,12 @@ BOOTLEGGERS_HANDLER = DisableAbleCommandHandler("bootleggers",
 # dispatcher.add_handler(GETAEX_HANDLER)
 dispatcher.add_handler(EVO_HANDLER)
 dispatcher.add_handler(HAVOC_HANDLER)
+dispatcher.add_handler(MIUI_HANDLER)
+dispatcher.add_handler(VIPER_HANDLER)
+dispatcher.add_handler(DOTOS_HANDLER)
+dispatcher.add_handler(PIXYS_HANDLER)
+dispatcher.add_handler(DESCENDANT_HANDLER)
+dispatcher.add_handler(ENES_HANDLER)
 dispatcher.add_handler(PHH_HANDLER)
 # dispatcher.add_handler(POSP_HANDLER)
 dispatcher.add_handler(LOS_HANDLER)
