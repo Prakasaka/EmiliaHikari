@@ -69,11 +69,10 @@ def broadcast(update, context):
 
 def slist(update, context):
     message = update.effective_message
-    user = update.effective_user
+    user_id = extract_user(update.effective_message, args)
     # user_id = extract_user(message, args)
-    if int(user_id) == OWNER_ID:
+    if user.id == OWNER_ID:
         text = f"👑 Bot Owner:\n {mention_html(user.id, user.first_name)}"
-        return
     for user_id in SUDO_USERS:
         try:
             user = context.bot.get_chat(user_id)
