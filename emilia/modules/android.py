@@ -72,50 +72,50 @@ def havoc(update, context):
                        disable_web_page_preview=True)
 
 
-@run_async
-def posp(update, context):
-    cmd_name = "posp"
-    message = update.effective_message
-    chat = update.effective_chat  # type: Optional[Chat]
-    device = message.text[len(f'/{cmd_name} '):]
+# @run_async
+# def posp(update, context):
+#     cmd_name = "posp"
+#     message = update.effective_message
+#     chat = update.effective_chat  # type: Optional[Chat]
+#     device = message.text[len(f'/{cmd_name} '):]
 
-    if device == '':
-        reply_text = "Please type your device **codename**!\nFor example, `/{} tissot`".format(cmd_name)
-        send_message(update.effective_message, reply_text,
-                           parse_mode=ParseMode.MARKDOWN,
-                           disable_web_page_preview=True)
-        return
+#     if device == '':
+#         reply_text = "Please type your device **codename**!\nFor example, `/{} tissot`".format(cmd_name)
+#         send_message(update.effective_message, reply_text,
+#                            parse_mode=ParseMode.MARKDOWN,
+#                            disable_web_page_preview=True)
+#         return
 
-    fetch = get(
-        f'https://api.potatoproject.co/checkUpdate?device={device}&type=weekly'
-    )
-    if fetch.status_code == 200 and len(fetch.json()['response']) != 0:
-        usr = fetch.json()
-        response = usr['response'][0]
-        filename = response['filename']
-        url = response['url']
-        buildsize_a = response['size']
-        buildsize_b = sizee(int(buildsize_a))
-        version = response['version']
+#     fetch = get(
+#         f'https://api.potatoproject.co/checkUpdate?device={device}&type=weekly'
+#     )
+#     if fetch.status_code == 200 and len(fetch.json()['response']) != 0:
+#         usr = fetch.json()
+#         response = usr['response'][0]
+#         filename = response['filename']
+#         url = response['url']
+#         buildsize_a = response['size']
+#         buildsize_b = sizee(int(buildsize_a))
+#         version = response['version']
 
-        reply_text = "*Download:* [{}]({})\n".format(filename, url)
-        reply_text += "*Build Size:* `{}`\n".format(buildsize_b)
-        reply_text += "*Version:* `{}`\n".format(version)
+#         reply_text = "*Download:* [{}]({})\n".format(filename, url)
+#         reply_text += "*Build Size:* `{}`\n".format(buildsize_b)
+#         reply_text += "*Version:* `{}`\n".format(version)
 
-        keyboard = [[
-            InlineKeyboardButton(text="Click here to Download", url=f"{url}")
-        ]]
-        send_message(update.effective_message, reply_text,
-                           reply_markup=InlineKeyboardMarkup(keyboard),
-                           parse_mode=ParseMode.MARKDOWN,
-                           disable_web_page_preview=True)
-        return
+#         keyboard = [[
+#             InlineKeyboardButton(text="Click here to Download", url=f"{url}")
+#         ]]
+#         send_message(update.effective_message, reply_text,
+#                            reply_markup=InlineKeyboardMarkup(keyboard),
+#                            parse_mode=ParseMode.MARKDOWN,
+#                            disable_web_page_preview=True)
+#         return
 
-    else:
-        reply_text = "Couldn't find any results matching your query."
-    send_message(update.effective_message, reply_text,
-                       parse_mode=ParseMode.MARKDOWN,
-                       disable_web_page_preview=True)
+#     else:
+#         reply_text = "Couldn't find any results matching your query."
+#     send_message(update.effective_message, reply_text,
+#                        parse_mode=ParseMode.MARKDOWN,
+#                        disable_web_page_preview=True)
 
 
 @run_async
@@ -277,14 +277,14 @@ def getaex(update, context):
     AEX_OTA_API = "https://api.aospextended.com/ota/"
 
     if len(args) != 2:
-        reply_text = "Please type your device **codename** and **Android Version**!\nFor example, `/aex tissot pie`"
+        reply_text = "Please type your device **codename** and **Android Version**!\nFor example, `/aex pie tissot`"
         send_message(update.effective_message, reply_text,
                            parse_mode=ParseMode.MARKDOWN,
                            disable_web_page_preview=True)
         return
 
-    device = args[0]
-    version = args[1]
+    version = args[0]
+    device = args[1]
     res = get(AEX_OTA_API + device + '/' + version.lower())
     if res.status_code == 200:
         apidata = json.loads(res.text)
@@ -398,7 +398,7 @@ PHH_HANDLER = DisableAbleCommandHandler("phh",
                                         phh,
                                         pass_args=True,
                                         admin_ok=True)
-POSP_HANDLER = DisableAbleCommandHandler("posp", posp, admin_ok=True)
+# POSP_HANDLER = DisableAbleCommandHandler("posp", posp, admin_ok=True)
 LOS_HANDLER = DisableAbleCommandHandler("los", los, admin_ok=True)
 BOOTLEGGERS_HANDLER = DisableAbleCommandHandler("bootleggers",
                                                 bootleggers,
@@ -408,6 +408,6 @@ dispatcher.add_handler(GETAEX_HANDLER)
 dispatcher.add_handler(EVO_HANDLER)
 dispatcher.add_handler(HAVOC_HANDLER)
 dispatcher.add_handler(PHH_HANDLER)
-dispatcher.add_handler(POSP_HANDLER)
+# dispatcher.add_handler(POSP_HANDLER)
 dispatcher.add_handler(LOS_HANDLER)
 dispatcher.add_handler(BOOTLEGGERS_HANDLER)
