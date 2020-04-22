@@ -269,27 +269,25 @@ def phh(update, context):
 
 
 @run_async
-def getaex(update, context):
-    args = context.args
+def getaex(update, context, args: List[str]):
     message = update.effective_message
-    chat = update.effective_chat  # type: Optional[Chat]
 
     AEX_OTA_API = "https://api.aospextended.com/ota/"
 
     if len(args) != 2:
         reply_text = "Please type your device **codename** and **Android Version**!\nFor example, `/aex pie tissot`"
-        send_message(update.effective_message, reply_text,
+        message.reply_text(reply_text,
                            parse_mode=ParseMode.MARKDOWN,
                            disable_web_page_preview=True)
         return
 
-    version = args[0]
-    device = args[1]
+    device = args[0]
+    version = args[1]
     res = get(AEX_OTA_API + device + '/' + version.lower())
     if res.status_code == 200:
         apidata = json.loads(res.text)
         if apidata.get('error'):
-            send_message(update.effective_message, "Couldn't find any results matching your query.")
+            message.reply_text("Couldn't find any results matching your query.")
             return
         else:
             developer = apidata.get('developer')
@@ -309,13 +307,13 @@ def getaex(update, context):
             keyboard = [[
                 InlineKeyboardButton(text="Click here to Download", url=f"{url}")
             ]]
-            send_message(update.effective_message, reply_text,
+            update.effective_message.reply_text(reply_text,
                                reply_markup=InlineKeyboardMarkup(keyboard),
                                parse_mode=ParseMode.MARKDOWN,
                                disable_web_page_preview=True)
             return
     else:
-        send_message(update.effective_message, "Couldn't find any results matching your query.")
+        message.reply_text("Couldn't find any results matching your query.")
 
 
 @run_async
@@ -386,7 +384,7 @@ def bootleggers(update, context):
                        disable_web_page_preview=True)
 
 
-__help__ = True
+__mod_name__ = "Android"
 
 GETAEX_HANDLER = DisableAbleCommandHandler("aex",
                                            getaex,
