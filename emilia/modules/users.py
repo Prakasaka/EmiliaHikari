@@ -80,8 +80,8 @@ def slist(update, context):
             if user.username:
                 name = escape_markdown("@" + user.username)
             text1 += "\n\nSudo Users:\n`{}`".format(name)
-        except BadRequest as excp:
-            if excp.message == 'Chat not found':
+        except BadRequest:
+            pass
     send_message(update.effective_message, text + "\n" + text1 + "\n", parse_mode=ParseMode.MARKDOWN)
 
 
