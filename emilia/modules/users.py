@@ -11,8 +11,6 @@ from telegram.ext.dispatcher import run_async
 import emilia.modules.sql.users_sql as sql
 from emilia import dispatcher, OWNER_ID, LOGGER
 from emilia.modules.helper_funcs.filters import CustomFilters
-from emilia.modules.helper_funcs.extraction import extract_user
-
 import emilia.modules.sql.feds_sql as fedsql
 from emilia.modules.helper_funcs.alternate import send_message
 
@@ -70,8 +68,6 @@ def broadcast(update, context):
 
 def slist(update, context):
     message = update.effective_message
-    user = update.effective_user
-    user_id = extract_user(message, args)
     if user_id == OWNER_ID:
         text = f"👑 Bot Owner:\n `{mention_html(user.id, user.first_name)}`"
     for user_id in SUDO_USERS:
