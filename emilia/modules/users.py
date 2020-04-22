@@ -70,7 +70,7 @@ def broadcast(update, context):
 def slist(update, context):
     message = update.effective_message
     user = update.effective_user
-    user_id = extract_user(message, args)
+    # user_id = extract_user(message, args)
     if int(user_id) == OWNER_ID:
         text = f"👑 Bot Owner:\n {mention_html(user.id, user.first_name)}"
         return
