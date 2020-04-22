@@ -9,7 +9,7 @@ from telegram.ext import MessageHandler, Filters, CommandHandler
 from telegram.ext.dispatcher import run_async
 
 import emilia.modules.sql.users_sql as sql
-from emilia import dispatcher, OWNER_ID, LOGGER
+from emilia import dispatcher, OWNER_ID, SUDO_USERS, LOGGER
 from emilia.modules.helper_funcs.filters import CustomFilters
 import emilia.modules.sql.feds_sql as fedsql
 from emilia.modules.helper_funcs.alternate import send_message
