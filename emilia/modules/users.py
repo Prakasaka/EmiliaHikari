@@ -67,6 +67,31 @@ def broadcast(update, context):
         send_message(update.effective_message, "Broadcast complete. {} group failed to receive message, maybe because it was kicked".format(failed))
 
 
+def slist(update, context):
+    message = update.effective_message
+    for user_id in OWNER_ID:
+        try:
+            owner = context.bot.get_chat(user_id)
+            name = "[{}](tg://user?id={})".format(owner.first_name + (owner.last_name or ""), owner.id)
+            if owner.username:
+                name = escape_markdown("@" + owner.username)
+            text = "👑 Bot Owner:\n`{}`".format(name)
+        except BadRequest as excp:
+            if excp.message == 'Chat not found':
+                text += "\n - ({}) - not found".format(user_id)
+    for user_id in SUDO_USERS:
+        try:
+            user = context.bot.get_chat(user_id)
+            name = "[{}](tg://user?id={})".format(user.first_name + (user.last_name or ""), user.id)
+            if user.username:
+                name = escape_markdown("@" + user.username)
+            text1 += "\n\nSudo Users:\n`{}`".format(name)
+        except BadRequest as excp:
+            if excp.message == 'Chat not found':
+                text1 += "\n - ({}) - not found".format(user_id)
+    send_message(update.effective_message, text + "\n" + text1 + "\n", parse_mode=ParseMode.MARKDOWN)
+
+
 @run_async
 def log_user(update, context):
     chat = update.effective_chat  # type: Optional[Chat]
@@ -135,9 +160,11 @@ __help__ = ""  # no help string
 __mod_name__ = "Users"
 
 BROADCAST_HANDLER = CommandHandler("broadcast", broadcast, filters=Filters.user(OWNER_ID))
+SLIST_HANDLER = CommandHandler("slist", slist, filters=Filters.user(OWNER_ID))
 USER_HANDLER = MessageHandler(Filters.all & Filters.group, log_user)
 CHATLIST_HANDLER = CommandHandler("chatlist", chats, filters=CustomFilters.sudo_filter)
 
 dispatcher.add_handler(USER_HANDLER, USERS_GROUP)
 dispatcher.add_handler(BROADCAST_HANDLER)
+dispatcher.add_handler(SLIST_HANDLER)
 dispatcher.add_handler(CHATLIST_HANDLER)
