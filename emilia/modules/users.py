@@ -69,16 +69,11 @@ def broadcast(update, context):
 
 def slist(update, context):
     message = update.effective_message
-    for user_id in OWNER_ID:
-        try:
-            owner = context.bot.get_chat(user_id)
-            name = "[{}](tg://user?id={})".format(owner.first_name + (owner.last_name or ""), owner.id)
-            if owner.username:
-                name = escape_markdown("@" + owner.username)
-            text = "👑 Bot Owner:\n`{}`".format(name)
-        except BadRequest as excp:
-            if excp.message == 'Chat not found':
-                text += "\n - ({}) - not found".format(user_id)
+    user = update.effective_user
+    user_id = extract_user(message, args)
+    if int(user_id) == OWNER_ID:
+        text = f"👑 Bot Owner:\n {mention_html(user.id, user.first_name)}"
+        return
     for user_id in SUDO_USERS:
         try:
             user = context.bot.get_chat(user_id)
