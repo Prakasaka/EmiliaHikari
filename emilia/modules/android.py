@@ -9,7 +9,7 @@ from telegram.ext import run_async
 
 from emilia import dispatcher, LOGGER
 from emilia.modules.disable import DisableAbleCommandHandler
-from emilia.modules.helper_funcs.alternate import send_message, send_message_raw
+from emilia.modules.helper_funcs.alternate import send_message
 
 from requests import get
 
@@ -268,54 +268,54 @@ def phh(update, context):
     send_message(update.effective_message, reply_text, parse_mode=ParseMode.MARKDOWN)
 
 
-@run_async
-def getaex(update, context):
-    args = context.args
-    message = update.effective_message
-    chat = update.effective_chat  # type: Optional[Chat]
+# @run_async
+# def getaex(update, context):
+#     args = context.args
+#     message = update.effective_message
+#     chat = update.effective_chat  # type: Optional[Chat]
 
-    AEX_OTA_API = "https://api.aospextended.com/ota/"
+#     AEX_OTA_API = "https://api.aospextended.com/ota/"
 
-    if len(args) != 2:
-        reply_text = "Please type your device **codename** and **Android Version**!\nFor example, `/aex pie tissot`"
-        send_message(update.effective_message, reply_text,
-                           parse_mode=ParseMode.MARKDOWN,
-                           disable_web_page_preview=True)
-        return
+#     if len(args) != 2:
+#         reply_text = "Please type your device **codename** and **Android Version**!\nFor example, `/aex pie tissot`"
+#         send_message(update.effective_message, reply_text,
+#                            parse_mode=ParseMode.MARKDOWN,
+#                            disable_web_page_preview=True)
+#         return
 
-    version = args[0]
-    device = args[1]
-    res = get(AEX_OTA_API + device + '/' + version.lower())
-    if res.status_code == 200:
-        apidata = json.loads(res.text)
-        if apidata.get('error'):
-            send_message(update.effective_message, "Couldn't find any results matching your query.")
-            return
-        else:
-            developer = apidata.get('developer')
-            developer_url = apidata.get('developer_url')
-            filename = apidata.get('filename')
-            url = "https://downloads.aospextended.com/download/" + device + "/" + version + "/" + apidata.get(
-                'filename')
-            builddate = datetime.strptime(apidata.get('build_date'),
-                                          "%Y%m%d-%H%M").strftime("%d %B %Y")
-            buildsize = sizee(int(apidata.get('filesize')))
+#     version = args[0]
+#     device = args[1]
+#     res = get(AEX_OTA_API + device + '/' + version.lower())
+#     if res.status_code == 200:
+#         apidata = json.loads(res.text)
+#         if apidata.get('error'):
+#             send_message(update.effective_message, "Couldn't find any results matching your query.")
+#             return
+#         else:
+#             developer = apidata.get('developer')
+#             developer_url = apidata.get('developer_url')
+#             filename = apidata.get('filename')
+#             url = "https://downloads.aospextended.com/download/" + device + "/" + version + "/" + apidata.get(
+#                 'filename')
+#             builddate = datetime.strptime(apidata.get('build_date'),
+#                                           "%Y%m%d-%H%M").strftime("%d %B %Y")
+#             buildsize = sizee(int(apidata.get('filesize')))
 
-            reply_text = "*Download:* [{}]({})\n".format(filename, url)
-            reply_text += "*Build Size:* `{}`\n".format(buildsize)
-            reply_text += "build_date".format(builddate)
-            reply_text += "*Maintainer:* {}\n".format(f"[{developer}]({developer_url})")
+#             reply_text = "*Download:* [{}]({})\n".format(filename, url)
+#             reply_text += "*Build Size:* `{}`\n".format(buildsize)
+#             reply_text += "build_date".format(builddate)
+#             reply_text += "*Maintainer:* {}\n".format(f"[{developer}]({developer_url})")
 
-            keyboard = [[
-                InlineKeyboardButton(text="Click here to Download", url=f"{url}")
-            ]]
-            send_message_raw(update.effective_message, reply_text,
-                               reply_markup=InlineKeyboardMarkup(keyboard),
-                               parse_mode=ParseMode.MARKDOWN,
-                               disable_web_page_preview=True)
-            return
-    else:
-        send_message(update.effective_message, "Couldn't find any results matching your query.")
+#             keyboard = [[
+#                 InlineKeyboardButton(text="Click here to Download", url=f"{url}")
+#             ]]
+#             send_message(update.effective_message, reply_text,
+#                                reply_markup=InlineKeyboardMarkup(keyboard),
+#                                parse_mode=ParseMode.MARKDOWN,
+#                                disable_web_page_preview=True)
+#             return
+#     else:
+#         send_message(update.effective_message, "Couldn't find any results matching your query.")
 
 
 @run_async
@@ -388,10 +388,10 @@ def bootleggers(update, context):
 
 __mod_name__ = "Android"
 
-GETAEX_HANDLER = DisableAbleCommandHandler("aex",
-                                           getaex,
-                                           pass_args=True,
-                                           admin_ok=True)
+# GETAEX_HANDLER = DisableAbleCommandHandler("aex",
+#                                            getaex,
+#                                            pass_args=True,
+#                                            admin_ok=True)
 EVO_HANDLER = DisableAbleCommandHandler("evo", evo, admin_ok=True)
 HAVOC_HANDLER = DisableAbleCommandHandler("havoc", havoc, admin_ok=True)
 PHH_HANDLER = DisableAbleCommandHandler("phh",
@@ -404,7 +404,7 @@ BOOTLEGGERS_HANDLER = DisableAbleCommandHandler("bootleggers",
                                                 bootleggers,
                                                 admin_ok=True)
 
-dispatcher.add_handler(GETAEX_HANDLER)
+# dispatcher.add_handler(GETAEX_HANDLER)
 dispatcher.add_handler(EVO_HANDLER)
 dispatcher.add_handler(HAVOC_HANDLER)
 dispatcher.add_handler(PHH_HANDLER)
