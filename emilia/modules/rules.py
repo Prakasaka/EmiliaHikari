@@ -179,7 +179,7 @@ def private_rules(update, context):
 
 
 def __stats__():
-    return OWNER_ID, "{} chats have rules set.".format(sql.num_chats())
+    return "{} chats have rules set.".format(sql.num_chats())
 
 
 def __import_data__(chat_id, data):
