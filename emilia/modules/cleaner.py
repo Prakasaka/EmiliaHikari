@@ -36,7 +36,7 @@ for handler_list in dispatcher.handlers:
 
 @run_async
 def clean_blue_text_must_click(update, context):
-	chat = update.effective_chat
+        chat = update.effective_chat
         message = update.effective_message
 
         if chat.get_member(bot.id).can_delete_messages:
@@ -53,50 +53,50 @@ def clean_blue_text_must_click(update, context):
                                         return
 
                                 if command[0] not in command_list:
-                                message.delete()
+                                        message.delete()
 
 @run_async
 @user_admin
 def set_blue_text_must_click(update, context):
-	chat = update.effective_chat  # type: Optional[Chat]
-	user = update.effective_user  # type: Optional[User]
-	message = update.effective_message  # type: Optional[Message]
-	args = context.args
+        chat = update.effective_chat  # type: Optional[Chat]
+        user = update.effective_user  # type: Optional[User]
+        message = update.effective_message  # type: Optional[Message]
+        args = context.args
 
-	conn = connected(context.bot, update, chat, user.id, need_admin=True)
-	if conn:
-		chat_id = conn
-		chat_name = dispatcher.bot.getChat(conn).title
-	else:
-		if update.effective_message.chat.type == "private":
-			send_message(update.effective_message, "You can do this command in groups, not PM")
-			return ""
-		chat_id = update.effective_chat.id
+        conn = connected(context.bot, update, chat, user.id, need_admin=True)
+        if conn:
+                chat_id = conn
+                chat_name = dispatcher.bot.getChat(conn).title
+        else:
+                if update.effective_message.chat.type == "private":
+                        send_message(update.effective_message, "You can do this command in groups, not PM")
+                        return ""
+                chat_id = update.effective_chat.id
                 message = update.effective_message
-		chat_name = update.effective_message.chat.title
+                chat_name = update.effective_message.chat.title
 
-	if len(args) >= 1:
-		val = args[0].lower()
-		if val == "off" or val == "no":
-			sql.set_cleanbt(chat_id, False)
-			if conn:
-				text = "Blue text cleaner was *disabled* in *{}*.".format(chat_name)
-			else:
-				text = "Blue text cleaner was *disabled*."
-			send_message(update.effective_message, text, parse_mode="markdown")
+        if len(args) >= 1:
+                val = args[0].lower()
+                if val == "off" or val == "no":
+                        sql.set_cleanbt(chat_id, False)
+                        if conn:
+                                text = "Blue text cleaner was *disabled* in *{}*.".format(chat_name)
+                        else:
+                                text = "Blue text cleaner was *disabled*."
+                        send_message(update.effective_message, text, parse_mode="markdown")
 
-		elif val == "yes" or val == "ya" or val == "on":
-			sql.set_cleanbt(chat_id, True)
-			if conn:
-				text = "Blue text cleaner was *enabled* in *{}*.".format(chat_name)
-			else:
-				text = "Blue text cleaner was *enabled*."
-			send_message(update.effective_message, text, parse_mode="markdown")
+                elif val == "yes" or val == "ya" or val == "on":
+                        sql.set_cleanbt(chat_id, True)
+                        if conn:
+                                text = "Blue text cleaner was *enabled* in *{}*.".format(chat_name)
+                        else:
+                                text = "Blue text cleaner was *enabled*."
+                        send_message(update.effective_message, text, parse_mode="markdown")
 
-		else:
-			send_message(update.effective_message, "Unknown argument - please use 'yes', or 'no'.")
-	else:
-		send_message(update.effective_message, "Curent settings for Blue text cleaner at {}: *{}*".format(chat_name, "Enabled" if sql.is_enable(chat_id) else "Disabled"), parse_mode="markdown")
+                else:
+                        send_message(update.effective_message, "Unknown argument - please use 'yes', or 'no'.")
+        else:
+                send_message(update.effective_message, "Curent settings for Blue text cleaner at {}: *{}*".format(chat_name, "Enabled" if sql.is_enable(chat_id) else "Disabled"), parse_mode="markdown")
 
 @run_async
 @user_admin
@@ -109,9 +109,9 @@ def add_bluetext_ignore(update, context):
                 val = args[0].lower()
                 added = sql.chat_ignore_command(chat.id, val)
                 if added:
-                reply = "<b>{}</b> has been added to bluetext cleaner ignore list.".format(args[0])
+                        reply = "<b>{}</b> has been added to bluetext cleaner ignore list.".format(args[0])
                 else:
-                reply = "Command is already ignored."
+                        reply = "Command is already ignored."
                 send_message(update.effective_message, reply, parse_mode=ParseMode.HTML)
         
         else:
