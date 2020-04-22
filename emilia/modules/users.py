@@ -6,6 +6,7 @@ from telegram import TelegramError, Chat, Message
 from telegram import Update, Bot
 from telegram.error import BadRequest
 from telegram.ext import MessageHandler, Filters, CommandHandler
+from telegram.utils.helpers import escape_markdown
 from telegram.ext.dispatcher import run_async
 
 import emilia.modules.sql.users_sql as sql
