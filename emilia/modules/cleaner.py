@@ -6,7 +6,7 @@ from telegram.error import BadRequest
 from telegram.ext import Filters, MessageHandler, CommandHandler, run_async
 from telegram.utils.helpers import mention_html, escape_markdown
 
-from emilia import ALLOW_EXCL, dispatcher, CustomCommandHandler
+from emilia import CUSTOM_CMD, dispatcher, CustomCommandHandler
 from emilia.modules.helper_funcs.chat_status import is_user_admin, user_admin, can_restrict, bot_can_delete
 from emilia.modules.helper_funcs.string_handling import extract_time
 from emilia.modules.disable import DisableAbleCommandHandler
@@ -17,7 +17,7 @@ from emilia.modules.connection import connected
 from emilia.modules.helper_funcs.alternate import send_message
 
 
-if ALLOW_EXCL:
+if CUSTOM_CMD:
     CMD_STARTERS = ('/', '!')
 else:
     CMD_STARTERS = ('/')
