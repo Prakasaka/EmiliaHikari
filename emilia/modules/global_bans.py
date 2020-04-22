@@ -137,19 +137,7 @@ def gban(update, context):
     except Exception:
         print("nut")
 
-    if chat.type != 'private':
-        chat_origin = "<b>{} ({})</b>\n".format(html.escape(chat.title), chat.id)
-    else:
-        chat_origin = "<b>{}</b>\n".format(chat.id)
-
-    log_message = (f"#GBANNED\n"
-                  f"<b>Originated from:</b> {chat_origin}\n"
-                  f"<b>Admin:</b> {mention_html(user.id, user.first_name)}\n"
-                  f"<b>Banned User:</b> {mention_html(user_chat.id, user_chat.first_name)}\n"
-                  f"<b>Banned User ID:</b> {user_chat.id}")
-
-    if GBAN_LOGS:
-        context.bot.send_message(GBAN_LOGS, log_message, parse_mode=ParseMode.HTML)
+    
 
     sql.gban_user(user_id, user_chat.username or user_chat.first_name,
                   full_reason)
@@ -175,6 +163,19 @@ def gban(update, context):
         except TelegramError:
             pass
 
+    if chat.type != 'private':
+        chat_origin = "<b>{} ({})</b>\n".format(html.escape(chat.title), chat.id)
+    else:
+        chat_origin = "<b>{}</b>\n".format(chat.id)
+
+    log_message = (f"#GBANNED\n"
+                  f"<b>Originated from:</b> {chat_origin}\n"
+                  f"<b>Admin:</b> {mention_html(user.id, user.first_name)}\n"
+                  f"<b>Banned User:</b> {mention_html(user_chat.id, user_chat.first_name)}\n"
+                  f"<b>Banned User ID:</b> {user_chat.id}")
+
+    if GBAN_LOGS:
+        context.bot.send_message(GBAN_LOGS, log_message, parse_mode=ParseMode.HTML)
     send_to_list(context.bot, SUDO_USERS + SUPPORT_USERS, "{} has been gbanned".format(mention_html(user_chat.id, user_chat.first_name)), html=True)
     send_message(update.effective_message, "{} has been gbanned".format(mention_html(user_chat.id, user_chat.first_name)), parse_mode=ParseMode.HTML)
 
@@ -212,19 +213,7 @@ def ungban(update, context):
 
     sql.ungban_user(user_id)
 
-    if chat.type != 'private':
-        chat_origin = "<b>{} ({})</b>\n".format(html.escape(chat.title), chat.id)
-    else:
-        chat_origin = "<b>{}</b>\n".format(chat.id)
-
-    log_message = (f"#UNGBANNED\n"
-                  f"<b>Originated from:</b> {chat_origin}\n"
-                  f"<b>Admin:</b> {mention_html(user.id, user.first_name)}\n"
-                  f"<b>Banned User:</b> {mention_html(user_chat.id, user_chat.first_name)}\n"
-                  f"<b>Banned User ID:</b> {user_chat.id}")
-
-    if GBAN_LOGS:
-        context.bot.send_message(GBAN_LOGS, log_message, parse_mode=ParseMode.HTML)
+    
 
     chats = get_all_chats()
     for chat in chats:
@@ -249,6 +238,19 @@ def ungban(update, context):
         except TelegramError:
             pass
 
+    if chat.type != 'private':
+        chat_origin = "<b>{} ({})</b>\n".format(html.escape(chat.title), chat.id)
+    else:
+        chat_origin = "<b>{}</b>\n".format(chat.id)
+
+    log_message = (f"#UNGBANNED\n"
+                  f"<b>Originated from:</b> {chat_origin}\n"
+                  f"<b>Admin:</b> {mention_html(user.id, user.first_name)}\n"
+                  f"<b>Banned User:</b> {mention_html(user_chat.id, user_chat.first_name)}\n"
+                  f"<b>Banned User ID:</b> {user_chat.id}")
+
+    if GBAN_LOGS:
+        context.bot.send_message(GBAN_LOGS, log_message, parse_mode=ParseMode.HTML)
     # send_to_list(context.bot, SUDO_USERS + SUPPORT_USERS, "un-gban complete!")
 
     # send_message(update.effective_message, "Person has been un-gbanned.")
