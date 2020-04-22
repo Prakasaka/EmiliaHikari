@@ -66,6 +66,8 @@ if ENV:
 	WEBHOOK = bool(os.environ.get('WEBHOOK', False))
 	URL = os.environ.get('URL', "")  # Does not contain token
 	PORT = int(os.environ.get('PORT', 5000))
+        FED_LOGS = os.environ.get('FED_LOGS', None)
+        GBAN_LOGS = os.environ.get('GBAN_LOGS', None)
 	CERT_PATH = os.environ.get("CERT_PATH")
 
 	DB_URI = os.environ.get('DATABASE_URL')
@@ -123,6 +125,8 @@ else:
 	WEBHOOK = Config.WEBHOOK
 	URL = Config.URL
 	PORT = Config.PORT
+        FED_LOGS = Config.FED_LOGS
+        GBAN_LOGS = Config.GBAN_LOGS
 	CERT_PATH = Config.CERT_PATH
 
 	DB_URI = Config.SQLALCHEMY_DATABASE_URI

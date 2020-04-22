@@ -16,7 +16,7 @@ from telegram import ParseMode, Update, Bot, Chat, User, MessageEntity, InlineKe
 from telegram.ext import run_async, CommandHandler, MessageHandler, Filters, CallbackQueryHandler
 from telegram.utils.helpers import escape_markdown, mention_html, mention_markdown
 
-from emilia import dispatcher, OWNER_ID, SUDO_USERS, WHITELIST_USERS, TEMPORARY_DATA, LOGGER
+from emilia import dispatcher, OWNER_ID, SUDO_USERS, WHITELIST_USERS, TEMPORARY_DATA, LOGGER, FED_LOGS
 from emilia.modules.helper_funcs.handlers import CMD_STARTERS
 from emilia.modules.helper_funcs.misc import is_module_loaded, send_to_list
 from emilia.modules.helper_funcs.chat_status import is_user_admin
@@ -264,6 +264,7 @@ def user_join_fed(update, context):
 			LOGGER.warning('error')
 		getuser = sql.search_user_in_fed(fed_id, user_id)
 		fed_id = sql.get_fed_id(chat.id)
+                fed_info = sql.get_fed_info(fed_id)
 		info = sql.get_fed_info(fed_id)
 		get_owner = eval(info['fusers'])['owner']
 		get_owner = context.bot.get_chat(get_owner).id
@@ -277,10 +278,23 @@ def user_join_fed(update, context):
 			send_message(update.effective_message, "I have become a federation admin and managed it!")
 			return
 		res = sql.user_join_fed(fed_id, user_id)
+                owner = context.bot.get_chat(info['owner'])
+                try:
+                        owner_name = owner.first_name + " " + owner.last_name
+                except:
+                        owner_name = owner.first_name
+                FEDADMIN = sql.all_fed_users(fed_id)
+                FEDADMIN.append(int(owner.id))
+                admin = FEDADMIN
 		if res:
-			send_message(update.effective_message, "💖 Successfully Promoted!")
+			send_message(update.effective_message, f"{admin} promoted {mention_html(user.id, user.first_name)} in {fed_info['fname']}")
 		else:
 			send_message(update.effective_message, "Failed to promote!")
+                if FED_LOGS:
+                        context.bot.send_message(FED_LOGS,
+                                        f"{admin} promoted {mention_html(user.id, user.first_name)} in {fed_info['fname']}", parse_mode=ParseMode.HTML)
+                else:
+                        update.effective_message.reply_text("Set FED_LOGS (var) for Federation Logs.")
 	else:
 		send_message(update.effective_message, "Only fed owner can do this!")
 
@@ -296,6 +310,7 @@ def user_demote_fed(update, context):
 		return
 
 	fed_id = sql.get_fed_id(chat.id)
+        fed_info = sql.get_fed_info(fed_id)
 
 	if is_user_fed_owner(fed_id, user.id):
 		msg = update.effective_message  # type: Optional[Message]
@@ -323,10 +338,23 @@ def user_demote_fed(update, context):
 			return
 
 		res = sql.user_demote_fed(fed_id, user_id)
+                owner = context.bot.get_chat(info['owner'])
+                try:
+                        owner_name = owner.first_name + " " + owner.last_name
+                except:
+                        owner_name = owner.first_name
+                FEDADMIN = sql.all_fed_users(fed_id)
+                FEDADMIN.append(int(owner.id))
+                admin = FEDADMIN
 		if res == True:
-			send_message(update.effective_message, "💔 Demoted from your federation!")
+			send_message(update.effective_message, f"{admin} demoted {mention_html(user.id, user.first_name)} in current federation")
 		else:
 			send_message(update.effective_message, "I can't demote, I'm helpless!")
+                if FED_LOGS:
+                        context.bot.send_message(FED_LOGS,
+                                        f"{admin} demoted {mention_html(user.id, user.first_name)} in {fed_info['fname']}", parse_mode=ParseMode.HTML)
+                else:
+                        update.effective_message.reply_text("Set FED_LOGS (var) for Federation Logs.")
 	else:
 		send_message(update.effective_message, "Only fed owner can do this!")
 		return
@@ -524,6 +552,13 @@ def fed_ban(update, context):
 		# Will send to current chat
 		context.bot.send_message(chat.id, "<b>FedBan Reason is updated</b>\n<b>Fed:</b> {}\n<b>Fed Admin:</b> {}\n<b>User:</b> {}\n<b>User ID:</b> <code>{}</code>\n<b>Reason:</b> {}".format(fed_name, mention_html(user.id, user.first_name), user_target, fban_user_id, reason), parse_mode="HTML")
 		# Send message to owner if fednotif is enabled
+                if FED_LOGS:
+                        context.bot.send_message(FED_LOGS, "<b>#FBANNED</b>" \
+                                                         "\n<b>Federation:</b> {}" \
+                                                         "\n<b>Federation Admin:</b> {}" \
+                                                         "\n<b>User:</b> {}" \
+                                                         "\n<b>User ID:</b> <code>{}</code>" \
+                                                         "\n<b>Reason:</b> {}".format(fed_name, mention_html(user.id, user.first_name), user_target, fban_user_id, reason), parse_mode="HTML")
 		if getfednotif:
 			context.bot.send_message(info['owner'], "<b>FedBan Reason is updated</b>\n<b>Fed:</b> {}\n<b>Fed Admin:</b> {}\n<b>User:</b> {}\n<b>User ID:</b> <code>{}</code>\n<b>Reason:</b> {}".format(fed_name, mention_html(user.id, user.first_name), user_target, fban_user_id, reason), parse_mode="HTML")
 		# If fedlog is set, then send message, except fedlog is current chat
@@ -751,6 +786,12 @@ def unfban(update, context):
 	# Will send to current chat
 	context.bot.send_message(chat.id, "<b>Un-FedBan</b>\n<b>Fed:</b> {}\n<b>Fed Admin:</b> {}\n<b>User:</b> {}\n<b>User ID:</b> <code>{}</code>".format(info['fname'], mention_html(user.id, user.first_name), user_target, fban_user_id), parse_mode="HTML")
 	# Send message to owner if fednotif is enabled
+        if FED_LOGS:
+                context.bot.send_message(FED_LOGS, "<b>#UN-FBANNED</b>" \
+                                                 "\n<b>Federation:</b> {}" \
+                                                 "\n<b>Federation Admin:</b> {}" \
+                                                 "\n<b>User:</b> {}" \
+                                                 "\n<b>User ID:</b> <code>{}</code>".format(info['fname'], mention_html(user.id, user.first_name), user_target, fban_user_id), parse_mode="HTML")
 	if getfednotif:
 		context.bot.send_message(info['owner'], "<b>Un-FedBan</b>\n<b>Fed:</b> {}\n<b>Fed Admin:</b> {}\n<b>User:</b> {}\n<b>User ID:</b> <code>{}</code>".format(info['fname'], mention_html(user.id, user.first_name), user_target, fban_user_id), parse_mode="HTML")
 	# If fedlog is set, then send message, except fedlog is current chat

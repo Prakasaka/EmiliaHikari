@@ -96,6 +96,15 @@ RUN_STRINGS = (
     "Han shot first. So will I.",
     "What are you running after, a white rabbit?",
     "As The Doctor would say... RUN!",
+    "Run Barry run",
+    "Don't you want VoLTE ?",
+    "Oh! Someone wants to be The Flash",
+    "Nani the F***!",
+    "You run, you lose.",
+    "Go watch POGO!",
+    "Pew Pew Pew...",
+    "You think speed is your ally? I was born on treadmill.",
+    "A shinigami is coming after you.",
 )
 
 SLAP_TEMPLATES = (
@@ -110,6 +119,12 @@ SLAP_TEMPLATES = (
     "{user1} grabs up a {item} and {hits} {user2} with it.",
     "{user1} ties {user2} to a chair and {throws} a {item} at them.",
     "{user1} gave a friendly push to help {user2} learn to swim in lava."
+    "{user1} says HAKAI,{user2} gets destroyed. No one can escape from power of the god of destruction.",
+    "{user1} blasts {user2} with a spirit bomb.",
+    "{user1} throws a Kamehameha wave at {user2}.",
+    "{user1} cuts {user2} into pieces using Destructo Discs.",
+    "{user1} snaps his fingers causing {user2} to disintegrate from the universe.",
+    "{user1} craves {user2} in the Death Note.",
 )
 
 ITEMS = (

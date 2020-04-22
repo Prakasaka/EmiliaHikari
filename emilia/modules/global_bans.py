@@ -8,7 +8,7 @@ from telegram.ext import run_async, CommandHandler, MessageHandler, Filters, Cal
 from telegram.utils.helpers import mention_html, escape_markdown
 
 import emilia.modules.sql.global_bans_sql as sql
-from emilia import dispatcher, OWNER_ID, SUDO_USERS, SUPPORT_USERS, STRICT_GBAN
+from emilia import dispatcher, OWNER_ID, SUDO_USERS, SUPPORT_USERS, STRICT_GBAN, GBAN_LOGS
 from emilia.modules.helper_funcs.chat_status import user_admin, is_user_admin
 from emilia.modules.helper_funcs.extraction import extract_user, extract_user_and_text
 from emilia.modules.helper_funcs.filters import CustomFilters
@@ -137,6 +137,20 @@ def gban(update, context):
     except Exception:
         print("nut")
 
+    if chat.type != 'private':
+        chat_origin = "<b>{} ({})</b>\n".format(html.escape(chat.title), chat.id)
+    else:
+        chat_origin = "<b>{}</b>\n".format(chat.id)
+
+    log_message = (f"#GBANNED\n"
+                  f"<b>Originated from:</b> {chat_origin}\n"
+                  f"<b>Admin:</b> {mention_html(user.id, user.first_name)}\n"
+                  f"<b>Banned User:</b> {mention_html(user_chat.id, user_chat.first_name)}\n"
+                  f"<b>Banned User ID:</b> {user_chat.id}")
+
+    if GBAN_LOGS:
+        context.bot.send_message(GBAN_LOGS, log_message, parse_mode=ParseMode.HTML)
+
     sql.gban_user(user_id, user_chat.username or user_chat.first_name,
                   full_reason)
 
@@ -197,6 +211,20 @@ def ungban(update, context):
                  html=True)
 
     sql.ungban_user(user_id)
+
+    if chat.type != 'private':
+        chat_origin = "<b>{} ({})</b>\n".format(html.escape(chat.title), chat.id)
+    else:
+        chat_origin = "<b>{}</b>\n".format(chat.id)
+
+    log_message = (f"#UNGBANNED\n"
+                  f"<b>Originated from:</b> {chat_origin}\n"
+                  f"<b>Admin:</b> {mention_html(user.id, user.first_name)}\n"
+                  f"<b>Banned User:</b> {mention_html(user_chat.id, user_chat.first_name)}\n"
+                  f"<b>Banned User ID:</b> {user_chat.id}")
+
+    if GBAN_LOGS:
+        context.bot.send_message(GBAN_LOGS, log_message, parse_mode=ParseMode.HTML)
 
     chats = get_all_chats()
     for chat in chats:
