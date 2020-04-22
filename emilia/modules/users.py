@@ -68,8 +68,11 @@ def broadcast(update, context):
 
 def slist(update, context):
     message = update.effective_message
-    for user_id in OWNER_ID:
-        text = f"👑 Bot Owner:\n `{mention_html(user.id, user.first_name)}`"
+    try:
+        for user_id in OWNER_ID:
+            text = f"👑 Bot Owner:\n `{mention_html(user.id, user.first_name)}`"
+    except TypeError:
+        pass
     for user_id in SUDO_USERS:
         try:
             user = context.bot.get_chat(user_id)
