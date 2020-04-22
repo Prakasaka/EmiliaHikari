@@ -39,7 +39,7 @@ def clean_blue_text_must_click(update, context):
         chat = update.effective_chat
         message = update.effective_message
 
-        if chat.get_member(bot.id).can_delete_messages:
+        if chat.get_member(context.bot.id).can_delete_messages:
                 if sql.is_enabled(chat.id):
                         fst_word = message.text.strip().split(None, 1)[0]
 
