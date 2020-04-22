@@ -79,7 +79,7 @@ def pixys(update, context):
 
     if device == '':
         reply_text = "Please type your device **codename** into it!\nFor example, `/pixys tissot`"
-       send_message(update.effective_message, reply_text, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
+        send_message(update.effective_message, reply_text, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
         return
 
     fetch = get(f'https://raw.githubusercontent.com/PixysOS-Devices/official_devices/master/{device}/build.json')
@@ -99,12 +99,12 @@ def pixys(update, context):
                       f"*Rom Type:* `{romtype}`")
 
         keyboard = [[InlineKeyboardButton(text="Click to Download", url=f"{url}")]]
-       send_message(update.effective_message, reply_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
+        send_message(update.effective_message, reply_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
         return
 
     elif fetch.status_code == 404:
         reply_text = "Device not found."
-   send_message(update.effective_message, reply_text, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
+    send_message(update.effective_message, reply_text, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
 
 
 @run_async
@@ -114,7 +114,7 @@ def dotos(update, context):
 
     if device == '':
         reply_text = "Please type your device **codename** into it!\nFor example, `/dotos tissot`"
-       send_message(update.effective_message, reply_text, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
+        send_message(update.effective_message, reply_text, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
         return
 
     fetch = get(f'https://raw.githubusercontent.com/DotOS/ota_config/dot-p/{device}.json')
@@ -134,12 +134,12 @@ def dotos(update, context):
                       f"*Device Changelog:* `{changelog}`")
 
         keyboard = [[InlineKeyboardButton(text="Click to Download", url=f"{url}")]]
-       send_message(update.effective_message, reply_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
+        send_message(update.effective_message, reply_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
         return
 
     elif fetch.status_code == 404:
         reply_text="Device not found"
-   send_message(update.effective_message, reply_text, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
+    send_message(update.effective_message, reply_text, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
 
 
 @run_async
@@ -149,7 +149,7 @@ def viper(update, context):
 
     if device == '':
         reply_text = "Please type your device **codename** into it!\nFor example, `/viper tissot`"
-       send_message(update.effective_message, reply_text, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
+        send_message(update.effective_message, reply_text, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
         return
 
     fetch = get(f'https://raw.githubusercontent.com/Viper-Devices/official_devices/master/{device}/build.json')
@@ -167,12 +167,12 @@ def viper(update, context):
                       f"*Version:* `{version}`")
 
         keyboard = [[InlineKeyboardButton(text="Click to Download", url=f"{url}")]]
-       send_message(update.effective_message, reply_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
+        send_message(update.effective_message, reply_text, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
         return
 
     elif fetch.status_code == 404:
         reply_text="Device not found"
-   send_message(update.effective_message, reply_text, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
+    send_message(update.effective_message, reply_text, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
 
 
 def enesrelease(update, context):
@@ -187,7 +187,7 @@ def enesrelease(update, context):
             reply_text += f"[{name}]({url})\n"
         except IndexError:
             continue
-   send_message(update.effective_message, reply_text, parse_mode=ParseMode.MARKDOWN)
+    send_message(update.effective_message, reply_text, parse_mode=ParseMode.MARKDOWN)
 
 
 def descendant(update, context):
@@ -203,7 +203,7 @@ def descendant(update, context):
             reply_text += f"[{name}]({url}) - Downloaded `{download_count}` Times\n\n"
         except IndexError:
             continue
-   send_message(update.effective_message, reply_text, parse_mode=ParseMode.MARKDOWN)
+    send_message(update.effective_message, reply_text, parse_mode=ParseMode.MARKDOWN)
 
 
 def miui(update, context):
@@ -213,7 +213,7 @@ def miui(update, context):
 
     if device == '':
         reply_text = "Please type your device **codename** into it!\nFor example, `/miui whyred`!"
-       send_message(update.effective_message, reply_text, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
+        send_message(update.effective_message, reply_text, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
         return
 
     result = "*Recovery ROM*\n\n"
@@ -232,7 +232,7 @@ def miui(update, context):
     else:
         result = "Couldn't find any device matching your query."
 
-   send_message(update.effective_message, result, parse_mode=ParseMode.MARKDOWN)
+    send_message(update.effective_message, result, parse_mode=ParseMode.MARKDOWN)
 
 
 @run_async
