@@ -205,36 +205,6 @@ def descendant(update, context):
             continue
     send_message(update.effective_message, reply_text, parse_mode=ParseMode.MARKDOWN)
 
-
-def miui(update, context):
-    giturl = "https://raw.githubusercontent.com/XiaomiFirmwareUpdater/miui-updates-tracker/master/"
-    message = update.effective_message
-    device = message.text[len('/miui '):]
-
-    if device == '':
-        reply_text = "Please type your device **codename** into it!\nFor example, `/miui whyred`!"
-        send_message(update.effective_message, reply_text, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
-        return
-
-    result = "*Recovery ROM*\n\n"
-    result += "*Stable*\n"
-    stable_all = json.loads(get(giturl + "stable_recovery/stable_recovery.json").content)
-    data = [i for i in stable_all if device == i['codename']]
-    if len(data) != 0:
-        for i in data:
-            result += "[" + i['filename'] + "](" + i['download'] + ")\n\n"
-
-        result += "*Weekly*\n"
-        weekly_all = json.loads(get(giturl + "weekly_recovery/weekly_recovery.json").content)
-        data = [i for i in weekly_all if device == i['codename']]
-        for i in data:
-            result += "[" + i['filename'] + "](" + i['download'] + ")"
-    else:
-        result = "Couldn't find any device matching your query."
-
-    send_message(update.effective_message, result, parse_mode=ParseMode.MARKDOWN)
-
-
 @run_async
 def los(update, context):
     cmd_name = "los"
@@ -471,12 +441,8 @@ __help__ = """
 
 __mod_name__ = "Android"
 
-# GETAEX_HANDLER = DisableAbleCommandHandler("aex",
-#                                            getaex,
-#                                            pass_args=True,
-#                                            admin_ok=True)
+
 EVO_HANDLER = DisableAbleCommandHandler("evo", evo, admin_ok=True)
-MIUI_HANDLER = DisableAbleCommandHandler("miui", miui, admin_ok=True)
 DOTOS_HANDLER = DisableAbleCommandHandler("dotos", dotos, admin_ok=True)
 PIXYS_HANDLER = DisableAbleCommandHandler("pixys", pixys, admin_ok=True)
 DESCENDANT_HANDLER = DisableAbleCommandHandler("descendant", descendant, pass_args=True, admin_ok=True)
@@ -487,22 +453,18 @@ PHH_HANDLER = DisableAbleCommandHandler("phh",
                                         phh,
                                         pass_args=True,
                                         admin_ok=True)
-# POSP_HANDLER = DisableAbleCommandHandler("posp", posp, admin_ok=True)
 LOS_HANDLER = DisableAbleCommandHandler("los", los, admin_ok=True)
 BOOTLEGGERS_HANDLER = DisableAbleCommandHandler("bootleggers",
                                                 bootleggers,
                                                 admin_ok=True)
 
-# dispatcher.add_handler(GETAEX_HANDLER)
 dispatcher.add_handler(EVO_HANDLER)
 dispatcher.add_handler(HAVOC_HANDLER)
-dispatcher.add_handler(MIUI_HANDLER)
 dispatcher.add_handler(VIPER_HANDLER)
 dispatcher.add_handler(DOTOS_HANDLER)
 dispatcher.add_handler(PIXYS_HANDLER)
 dispatcher.add_handler(DESCENDANT_HANDLER)
 dispatcher.add_handler(ENES_HANDLER)
 dispatcher.add_handler(PHH_HANDLER)
-# dispatcher.add_handler(POSP_HANDLER)
 dispatcher.add_handler(LOS_HANDLER)
 dispatcher.add_handler(BOOTLEGGERS_HANDLER)
