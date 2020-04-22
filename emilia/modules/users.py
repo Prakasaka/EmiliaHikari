@@ -80,7 +80,7 @@ def slist(update, context):
             name = "[{}](tg://user?id={})".format(user.first_name + (user.last_name or ""), user.id)
             if user.username:
                 name = escape_markdown("@" + user.username)
-            text1 += "\n\nSudo Users:\n`{}`".format(name)
+            text1 = "\n\nSudo Users:\n`{}`".format(name)
         except BadRequest:
             pass
     send_message(update.effective_message, text + "\n" + text1 + "\n", parse_mode=ParseMode.MARKDOWN)
