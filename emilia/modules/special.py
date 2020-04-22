@@ -111,7 +111,7 @@ def leavechat(update, context):
 	try:
 		chat = context.bot.getChat(chat_id)
 		titlechat = context.bot.get_chat(chat_id).title
-		context.bot.sendMessage(chat_id, "Goodbye everyone 😁")
+		context.bot.sendMessage(chat_id, "Goodbye everyone")
 		context.bot.leaveChat(chat_id)
 		send_message(update.effective_message, "I have left the group {}").format(titlechat)
 
@@ -126,8 +126,13 @@ def leavechat(update, context):
 def wiki(update, context):
     args = context.args
     reply = " ".join(args)
-    summary = f"{wikipedia.summary(reply, sentences=3)} [More]({wikipedia.page(reply).url})"
-    send_message(update.effective_message, summary, parse_mode=ParseMode.MARKDOWN)
+    summary = f"{wikipedia.summary(reply, sentences=3)}"
+    keyboard = [[
+            InlineKeyboardButton(
+                text="click here for more",
+                url=f"{wikipedia.page(reply).url}")
+        ]]
+    send_message(update.effective_message, summary, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.MARKDOWN)
 
 @run_async
 def urbandictionary(update, context):
