@@ -271,9 +271,10 @@ def phh(update, context):
 @run_async
 def getaex(update, context):
     args = context.args
+    message = update.effective_message
+    chat = update.effective_chat  # type: Optional[Chat]
 
     AEX_OTA_API = "https://api.aospextended.com/ota/"
-    message = update.effective_message
 
     if len(args) != 2:
         reply_text = "Please type your device **codename** and **Android Version**!\nFor example, `/aex pie tissot`"
@@ -308,7 +309,7 @@ def getaex(update, context):
             keyboard = [[
                 InlineKeyboardButton(text="Click here to Download", url=f"{url}")
             ]]
-            send_message(update.effective_message, reply_text,
+            send_message_raw(update.effective_message, reply_text,
                                reply_markup=InlineKeyboardMarkup(keyboard),
                                parse_mode=ParseMode.MARKDOWN,
                                disable_web_page_preview=True)
