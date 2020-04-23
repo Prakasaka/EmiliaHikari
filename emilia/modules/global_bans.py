@@ -168,12 +168,13 @@ def gban(update, context):
                   f"<b>Originated from:</b> {chat_name}\n"
                   f"<b>Admin:</b> {mention_html(banner.id, banner.first_name)}\n"
                   f"<b>Banned User:</b> {mention_html(user_chat.id, user_chat.first_name)}\n"
-                  f"<b>Banned User ID:</b> {user_chat.id}")
+                  f"<b>Banned User ID:</b> {user_chat.id}\n"
+                  f"<b>Reason:</b> {reason}" or "No reason given")
 
     if GBAN_LOGS:
         context.bot.send_message(GBAN_LOGS, log_message, parse_mode=ParseMode.HTML)
-    send_to_list(context.bot, SUDO_USERS + SUPPORT_USERS, "{} has been gbanned".format(mention_html(user_chat.id, user_chat.first_name)), html=True)
-    send_message(update.effective_message, "{} has been gbanned".format(mention_html(user_chat.id, user_chat.first_name)), parse_mode=ParseMode.HTML)
+    send_to_list(context.bot, SUDO_USERS + SUPPORT_USERS, f"Admin {mention_html(banner.id, banner.first_name)} gbanned user {mention_html(user_chat.id, user_chat.first_name)}\nReason: {reason}" , html=True)
+    send_message(update.effective_message, f"Admin {mention_html(banner.id, banner.first_name)} gbanned user {mention_html(user_chat.id, user_chat.first_name)}\nReason: {reason}" , parse_mode=ParseMode.HTML)
 
 
 @run_async
