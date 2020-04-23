@@ -283,16 +283,32 @@ def user_join_fed(update, context):
                         owner_name = owner.first_name + " " + owner.last_name
                 except:
                         owner_name = owner.first_name
+                try:
+                        user_chat = context.bot.get_chat(user_id)
+                        isvalid = True
+                        fban_user_name = user_chat.first_name
+                except BadRequest as excp:
+                        if not str(user_id).isdigit():
+                                send_message(update.effective_message, excp.message)
+                                return
+                        elif not len(str(user_id)) == 9:
+                                send_message(update.effective_message, "That's not a user!")
+                                return
+                if isvalid:
+                        user_target = mention_html(fban_user_id, fban_user_name)
+                else:
+                        user_target = fban_user_name
                 FEDADMIN = sql.all_fed_users(fed_id)
                 FEDADMIN.append(int(owner.id))
                 admin = FEDADMIN
+                                
                 if res:
-                        send_message(update.effective_message, f"{admin} promoted {mention_html(user.id, user.first_name)} in {fed_info['fname']}")
+                        send_message(update.effective_message, f"{mention_html(user.id, user.first_name)} promoted {user_target} in {fed_info['fname']}")
                 else:
                         send_message(update.effective_message, "Failed to promote!")
                 if FED_LOGS:
                         context.bot.send_message(FED_LOGS,
-                    f"{admin} promoted {mention_html(user.id, user.first_name)} in {fed_info['fname']}", parse_mode=ParseMode.HTML)
+                    f"{mention_html(user.id, user.first_name)} promoted {user_target} in {fed_info['fname']}", parse_mode=ParseMode.HTML)
         else:
                 send_message(update.effective_message, "Only fed owner can do this!")
 
