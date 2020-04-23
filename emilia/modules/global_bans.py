@@ -163,13 +163,8 @@ def gban(update, context):
         except TelegramError:
             pass
 
-    if chat.type != 'private':
-        chat_origin = "<b>{} ({})</b>\n".format(html.escape(chat.title), chat.id)
-    else:
-        chat_origin = "<b>{}</b>\n".format(chat.id)
-
     log_message = (f"#GBANNED\n"
-                  f"<b>Originated from:</b> {chat_origin}\n"
+                  f"<b>Originated from:</b> {chat_id}\n"
                   f"<b>Admin:</b> {mention_html(user.id, user.first_name)}\n"
                   f"<b>Banned User:</b> {mention_html(user_chat.id, user_chat.first_name)}\n"
                   f"<b>Banned User ID:</b> {user_chat.id}")
@@ -238,13 +233,8 @@ def ungban(update, context):
         except TelegramError:
             pass
 
-    if chat.type != 'private':
-        chat_origin = "<b>{} ({})</b>\n".format(html.escape(chat.title), chat.id)
-    else:
-        chat_origin = "<b>{}</b>\n".format(chat.id)
-
     log_message = (f"#UNGBANNED\n"
-                  f"<b>Originated from:</b> {chat_origin}\n"
+                  f"<b>Originated from:</b> {chat_id}\n"
                   f"<b>Admin:</b> {mention_html(user.id, user.first_name)}\n"
                   f"<b>Banned User:</b> {mention_html(user_chat.id, user_chat.first_name)}\n"
                   f"<b>Banned User ID:</b> {user_chat.id}")
