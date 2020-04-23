@@ -55,7 +55,6 @@ def clean_blue_text_must_click(update, context):
                                 if command[0] not in command_list:
                                         message.delete()
 @run_async
-@connection_status
 @bot_can_delete
 @user_admin
 def set_blue_text_must_click(update, context):
@@ -87,7 +86,7 @@ def set_blue_text_must_click(update, context):
                 reply = "Bluetext cleaning for <b>{}</b> : <b>{}</b>".format(chat.title, clean_status)
                 send_message(update.effective_message, reply, parse_mode=ParseMode.HTML)
 
-        
+
 @run_async
 @user_admin
 def add_bluetext_ignore(update, context):
