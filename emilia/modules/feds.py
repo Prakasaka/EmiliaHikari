@@ -278,17 +278,9 @@ def user_join_fed(update, context):
                         send_message(update.effective_message, "I have become a federation admin and managed it!")
                         return
                 res = sql.user_join_fed(fed_id, user_id)
-                owner = context.bot.get_chat(info['owner'])
-                try:
-                        owner_name = owner.first_name + " " + owner.last_name
-                except:
-                        owner_name = owner.first_name
-                FEDADMIN = sql.all_fed_users(fed_id)
-                FEDADMIN.append(int(owner.id))
-                admin = FEDADMIN
                                 
                 if res:
-                        send_message(update.effective_message, f"FedAdmin promote {mention_html(user.id, user.first_name)} in {fed_info['fname']}", parse_mode=ParseMode.HTML)
+                        send_message(update.effective_message, f"FedAdmin promoted {mention_html(user.id, user.first_name)} in {fed_info['fname']}", parse_mode=ParseMode.HTML)
                 else:
                         send_message(update.effective_message, "Failed to promote!")
                 if FED_LOGS:
@@ -337,15 +329,7 @@ def user_demote_fed(update, context):
                         return
 
                 res = sql.user_demote_fed(fed_id, user_id)
-                owner = context.bot.get_chat(info['owner'])
-                try:
-                        owner_name = owner.first_name + " " + owner.last_name
-                except:
-                        owner_name = owner.first_name
-                FEDADMIN = sql.all_fed_users(fed_id)
-                FEDADMIN.append(int(owner.id))
-                admin = FEDADMIN
-                if res:
+                if res == True:
                         send_message(update.effective_message, f"FedAdmin demoted {mention_html(user.id, user.first_name)} in {fed_info['fname']}", parse_mode=ParseMode.HTML)
                 else:
                         send_message(update.effective_message, "Failed to promote!")
