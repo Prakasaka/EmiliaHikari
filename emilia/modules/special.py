@@ -175,7 +175,7 @@ def paste(update, context):
             os.remove(down)
         else:
             msg = msg.msg
-    r = requests.post(f'{BASE_URL}/documents', data=msg.encode('UTF-8'))
+    r = requests.post(f'{BASE_URL}/documents', data=data.encode('UTF-8'))
 
     if r.status_code == 404:
         send_message(update.effective_message, 'Failed to reach dogbin')
