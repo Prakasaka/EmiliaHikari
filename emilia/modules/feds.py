@@ -280,12 +280,12 @@ def user_join_fed(update, context):
                 res = sql.user_join_fed(fed_id, user_id)
                                 
                 if res:
-                        send_message(update.effective_message, f"FedAdmin promoted {mention_html(user.id, user.first_name)} in {fed_info['fname']}", parse_mode=ParseMode.HTML)
+                        send_message(update.effective_message, f"{mention_html(user.id, user.first_name)} Successfully Promoted! in {fed_info['fname']} Federation.", parse_mode=ParseMode.HTML)
                 else:
                         send_message(update.effective_message, "Failed to promote!")
                 if FED_LOGS:
                         context.bot.send_message(FED_LOGS,
-                    f"FedAdmin promoted {mention_html(user.id, user.first_name)} in {fed_info['fname']}", parse_mode=ParseMode.HTML)
+                    f"{mention_html(user.id, user.first_name)} Successfully Promoted! in {fed_info['fname']} Federation.", parse_mode=ParseMode.HTML)
         else:
                 send_message(update.effective_message, "Only fed owner can do this!")
 
@@ -330,12 +330,12 @@ def user_demote_fed(update, context):
 
                 res = sql.user_demote_fed(fed_id, user_id)
                 if res == True:
-                        send_message(update.effective_message, f"FedAdmin demoted {mention_html(user.id, user.first_name)} in {fed_info['fname']}", parse_mode=ParseMode.HTML)
+                        send_message(update.effective_message, f"{mention_html(user.id, user.first_name)} Successfully Demoted! in {fed_info['fname']} Federation.", parse_mode=ParseMode.HTML)
                 else:
                         send_message(update.effective_message, "Failed to promote!")
                 if FED_LOGS:
                         context.bot.send_message(FED_LOGS,
-                    f"FedAdmin demoted {mention_html(user.id, user.first_name)} in {fed_info['fname']}", parse_mode=ParseMode.HTML)
+                    f"{mention_html(user.id, user.first_name)} Successfully Demoted! in {fed_info['fname']} Federation.", parse_mode=ParseMode.HTML)
         else:
                 send_message(update.effective_message, "Only fed owner can do this!")
                 return
