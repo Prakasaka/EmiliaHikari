@@ -75,7 +75,7 @@ def del_message(update, context) -> str:
     chat = update.effective_chat
     if update.effective_message.reply_to_message:
         user = update.effective_user
-        if can_delete(chat, bot.id):
+        if can_delete(chat, context.bot.id):
             update.effective_message.reply_to_message.delete()
             update.effective_message.delete()
             return "<b>{}:</b>" \
