@@ -160,16 +160,31 @@ def paste(update, context):
         send_message(update.effective_message, "What am I supposed to do with this?!")
         return
 
-    r = requests.post(f'{BASE_URL}/documents', data=data.encode('utf-8'))
+    if data:
+        msg = data
+    elif data:
+        msg = message.reply_to_message.text
+        if msg.media:
+            down = context.bot.download(msg, TDD)
+            m_list = None
+            with open(down, "rb") as fd:
+                m_list - fd.readlines()
+            msg = ""
+            for m in m_list:
+                msg += m.decode("UTF-8") + "\r"
+            os.remove(down)
+        else:
+            msg = msg.msg
+    r = requests.post(f'{BASE_URL}/documents', data=data.encode('UTF-8'))
 
     if r.status_code == 404:
-        update.effective_send_message(update.effective_message, 'Failed to reach dogbin')
+        send_message(update.effective_message, 'Failed to reach dogbin')
         r.raise_for_status()
 
     res = r.json()
 
     if r.status_code != 200:
-        update.effective_send_message(update.effective_message, res['message'])
+        send_message(update.effective_message, res['message'])
         r.raise_for_status()
 
     key = res['key']
@@ -177,7 +192,7 @@ def paste(update, context):
         reply = f'Shortened URL: {BASE_URL}/{key}\nYou can view stats, etc. [here]({BASE_URL}/v/{key})'
     else:
         reply = f'{BASE_URL}/{key}'
-    update.effective_send_message(update.effective_message, reply, parse_mode=ParseMode.MARKDOWN)
+    send_message(update.effective_message, reply, parse_mode=ParseMode.MARKDOWN)
 
 @run_async
 def get_paste_content(update, context):
@@ -203,15 +218,15 @@ def get_paste_content(update, context):
     if r.status_code != 200:
         try:
             res = r.json()
-            update.effective_send_message(update.effective_message, res['message'])
+            send_message(update.effective_message, res['message'])
         except Exception:
             if r.status_code == 404:
-                update.effective_send_message(update.effective_message, 'Failed to reach dogbin')
+                send_message(update.effective_message, 'Failed to reach dogbin')
             else:
-                update.effective_send_message(update.effective_message, 'Unknown error occured')
+                send_message(update.effective_message, 'Unknown error occured')
         r.raise_for_status()
 
-    update.effective_send_message(update.effective_message, '```' + escape_markdown(r.text) + '```', parse_mode=ParseMode.MARKDOWN)
+    send_message(update.effective_message, '```' + escape_markdown(r.text) + '```', parse_mode=ParseMode.MARKDOWN)
 
 @run_async
 def get_paste_stats(update, context):
@@ -237,19 +252,19 @@ def get_paste_stats(update, context):
     if r.status_code != 200:
         try:
             res = r.json()
-            update.effective_send_message(update.effective_message, res['message'])
+            send_message(update.effective_message, res['message'])
         except Exception:
             if r.status_code == 404:
-                update.effective_send_message(update.effective_message, 'Failed to reach dogbin')
+                send_message(update.effective_message, 'Failed to reach dogbin')
             else:
-                update.effective_send_message(update.effective_message, 'Unknown error occured')
+                send_message(update.effective_message, 'Unknown error occured')
         r.raise_for_status()
 
     document = r.json()['document']
     key = document['_id']
     views = document['viewCount']
     reply = f'Stats for **[/{key}]({BASE_URL}/{key})**:\nViews: `{views}`'
-    update.effective_send_message(update.effective_message, reply, parse_mode=ParseMode.MARKDOWN)
+    send_message(update.effective_message, reply, parse_mode=ParseMode.MARKDOWN)
 
 
 @run_async
