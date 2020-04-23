@@ -25,7 +25,7 @@ import emilia.modules.sql.feds_sql as feds_sql
 from emilia.modules.helper_funcs.alternate import send_message
 
 
-MARKDOWN_HELP: """
+MARKDOWN_HELP = """
 Markdown is a very powerful formatting tool supported by telegram. {} has some enhancements, to make sure that \
 saved messages are correctly parsed, and to allow you to create buttons.
 - <code>_italic_</code>: wrapping text with '_' will produce italic text
