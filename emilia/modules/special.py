@@ -160,21 +160,6 @@ def paste(update, context):
         send_message(update.effective_message, "What am I supposed to do with this?!")
         return
 
-    if data:
-        msg = data
-    elif data:
-        msg = message.reply_to_message.text
-        if msg.media:
-            down = context.bot.download(msg, TDD)
-            m_list = None
-            with open(down, "rb") as fd:
-                m_list - fd.readlines()
-            msg = ""
-            for m in m_list:
-                msg += m.decode("UTF-8") + "\r"
-            os.remove(down)
-        else:
-            msg = msg.msg
     r = requests.post(f'{BASE_URL}/documents', data=data.encode('UTF-8'))
 
     if r.status_code == 404:
