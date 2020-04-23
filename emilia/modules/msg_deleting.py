@@ -53,7 +53,7 @@ def purge(update, context):
             a = send_message(update.effective_message, "Purge complete.")
             try:
                 a.delete()
-            except BadRequest as err:
+            except BadRequest:
                 pass
             return "<b>{}:</b>" \
                    "\n#PURGE" \

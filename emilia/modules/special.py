@@ -14,7 +14,6 @@ from pyowm import timeutils, exceptions
 import wikipedia
 import base64
 from bs4 import BeautifulSoup
-from emoji import UNICODE_EMOJI
 
 import requests
 from telegram.error import BadRequest, Unauthorized
@@ -30,6 +29,8 @@ from emilia.modules.helper_funcs.extraction import extract_user
 from emilia.modules.helper_funcs.filters import CustomFilters
 
 from emilia.modules.helper_funcs.alternate import send_message
+
+BASE_URL = 'https://del.dog'
 
 @run_async
 def stickerid(update, context):
@@ -147,32 +148,140 @@ def urbandictionary(update, context):
 
 
 @run_async
+def paste(update, context):
+    message = update.effective_message
+    args = context.args
+
+    if message.reply_to_message:
+        data = message.reply_to_message.text
+    elif len(args) >= 1:
+        data = message.text.split(None, 1)[1]
+    else:
+        send_message(update.effective_message, "What am I supposed to do with this?!")
+        return
+
+    r = requests.post(f'{BASE_URL}/documents', data=data.encode('utf-8'))
+
+    if r.status_code == 404:
+        update.effective_send_message(update.effective_message, 'Failed to reach dogbin')
+        r.raise_for_status()
+
+    res = r.json()
+
+    if r.status_code != 200:
+        update.effective_send_message(update.effective_message, res['message'])
+        r.raise_for_status()
+
+    key = res['key']
+    if res['isUrl']:
+        reply = f'Shortened URL: {BASE_URL}/{key}\nYou can view stats, etc. [here]({BASE_URL}/v/{key})'
+    else:
+        reply = f'{BASE_URL}/{key}'
+    update.effective_send_message(update.effective_message, reply, parse_mode=ParseMode.MARKDOWN)
+
+@run_async
+def get_paste_content(update, context):
+    message = update.effective_message
+    args = context.args
+
+    if len(args) >= 1:
+        key = args[0]
+    else:
+        send_message(update.effective_message, "Please supply a paste key!")
+        return
+
+    format_normal = f'{BASE_URL}/'
+    format_view = f'{BASE_URL}/v/'
+
+    if key.startswith(format_view):
+        key = key[len(format_view):]
+    elif key.startswith(format_normal):
+        key = key[len(format_normal):]
+
+    r = requests.get(f'{BASE_URL}/raw/{key}')
+
+    if r.status_code != 200:
+        try:
+            res = r.json()
+            update.effective_send_message(update.effective_message, res['message'])
+        except Exception:
+            if r.status_code == 404:
+                update.effective_send_message(update.effective_message, 'Failed to reach dogbin')
+            else:
+                update.effective_send_message(update.effective_message, 'Unknown error occured')
+        r.raise_for_status()
+
+    update.effective_send_message(update.effective_message, '```' + escape_markdown(r.text) + '```', parse_mode=ParseMode.MARKDOWN)
+
+@run_async
+def get_paste_stats(update, context):
+    message = update.effective_message
+    args = context.args
+
+    if len(args) >= 1:
+        key = args[0]
+    else:
+        send_message(update.effective_message, "Please supply a paste key!")
+        return
+
+    format_normal = f'{BASE_URL}/'
+    format_view = f'{BASE_URL}/v/'
+
+    if key.startswith(format_view):
+        key = key[len(format_view):]
+    elif key.startswith(format_normal):
+        key = key[len(format_normal):]
+
+    r = requests.get(f'{BASE_URL}/documents/{key}')
+
+    if r.status_code != 200:
+        try:
+            res = r.json()
+            update.effective_send_message(update.effective_message, res['message'])
+        except Exception:
+            if r.status_code == 404:
+                update.effective_send_message(update.effective_message, 'Failed to reach dogbin')
+            else:
+                update.effective_send_message(update.effective_message, 'Unknown error occured')
+        r.raise_for_status()
+
+    document = r.json()['document']
+    key = document['_id']
+    views = document['viewCount']
+    reply = f'Stats for **[/{key}]({BASE_URL}/{key})**:\nViews: `{views}`'
+    update.effective_send_message(update.effective_message, reply, parse_mode=ParseMode.MARKDOWN)
+
+
+@run_async
 def log(update, context):
 	message = update.effective_message
 	eventdict = message.to_dict()
 	jsondump = json.dumps(eventdict, indent=4)
 	send_message(update.effective_message, jsondump)
 
-def deEmojify(inputString):
-    return inputString.encode('ascii', 'ignore').decode('ascii')
-
 
 __help__ = """
  - /stickerid: reply message sticker at PM to get ID sticker
  - /wiki <text>: search for text written from the wikipedia source
  - /ud <text>: search from urban dictionary
+ - /paste: Create a paste or a shortened url using [dogbin](https://del.dog)
+ - /getpaste: Get the content of a paste or shortened url from [dogbin](https://del.dog)
+ - /pastestats: Get stats of a paste or shortened url from [dogbin](https://del.dog)
 """
 
 __mod_name__ = "special"
 
 STICKERID_HANDLER = DisableAbleCommandHandler("stickerid", stickerid)
 #GETSTICKER_HANDLER = DisableAbleCommandHandler("getsticker", getsticker)
-STIKER_HANDLER = CommandHandler("stiker", stiker, filters=Filters.user(OWNER_ID))
+STIKER_HANDLER = CommandHandler("sticker", stiker, filters=Filters.user(OWNER_ID))
 FILE_HANDLER = CommandHandler("file", file, filters=Filters.user(OWNER_ID))
 GETLINK_HANDLER = CommandHandler("getlink", getlink, pass_args=True, filters=Filters.user(OWNER_ID))
 LEAVECHAT_HANDLER = CommandHandler(["leavechat", "leavegroup", "leave"], leavechat, pass_args=True, filters=Filters.user(OWNER_ID))
 WIKIPEDIA_HANDLER = DisableAbleCommandHandler("wiki", wiki, pass_args=True)
 UD_HANDLER = DisableAbleCommandHandler("ud", urbandictionary)
+PASTE_HANDLER = DisableAbleCommandHandler("paste", paste, pass_args=True)
+GET_PASTE_HANDLER = DisableAbleCommandHandler("getpaste", get_paste_content, pass_args=True)
+PASTE_STATS_HANDLER = DisableAbleCommandHandler("pastestats", get_paste_stats, pass_args=True)
 LOG_HANDLER = DisableAbleCommandHandler("log", log, filters=Filters.user(OWNER_ID))
 
 #dispatcher.add_handler(PING_HANDLER)
@@ -184,4 +293,7 @@ dispatcher.add_handler(GETLINK_HANDLER)
 dispatcher.add_handler(LEAVECHAT_HANDLER)
 dispatcher.add_handler(WIKIPEDIA_HANDLER)
 dispatcher.add_handler(UD_HANDLER)
+dispatcher.add_handler(PASTE_HANDLER)
+dispatcher.add_handler(GET_PASTE_HANDLER)
+dispatcher.add_handler(PASTE_STATS_HANDLER)
 dispatcher.add_handler(LOG_HANDLER)
