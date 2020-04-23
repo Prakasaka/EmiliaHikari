@@ -287,6 +287,7 @@ def user_join_fed(update, context):
                         user_chat = context.bot.get_chat(user_id)
                         isvalid = True
                         fban_user_name = user_chat.first_name
+                        fban_user_id = user_chat.id
                 except BadRequest as excp:
                         if not str(user_id).isdigit():
                                 send_message(update.effective_message, excp.message)
