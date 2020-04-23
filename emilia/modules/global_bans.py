@@ -58,6 +58,7 @@ UPDATE_GBAN = """
 def gban(update, context):
     banner = update.effective_user  # type: Optional[User]
     message = update.effective_message  # type: Optional[Message]
+    chat_name = update.effective_message.chat.title
     args = context.args
 
     user_id, reason = extract_user_and_text(message, args)
@@ -164,7 +165,7 @@ def gban(update, context):
             pass
 
     log_message = (f"#GBANNED\n"
-                  f"<b>Originated from:</b> {chat_id}\n"
+                  f"<b>Originated from:</b> {chat_name}\n"
                   f"<b>Admin:</b> {mention_html(banner.id, banner.first_name)}\n"
                   f"<b>Banned User:</b> {mention_html(user_chat.id, user_chat.first_name)}\n"
                   f"<b>Banned User ID:</b> {user_chat.id}")
@@ -178,6 +179,7 @@ def gban(update, context):
 @run_async
 def ungban(update, context):
     message = update.effective_message  # type: Optional[Message]
+    chat_name = update.effective_message.chat.title
     args = context.args
 
     user_id = extract_user(message, args)
@@ -234,7 +236,7 @@ def ungban(update, context):
             pass
 
     log_message = (f"#UNGBANNED\n"
-                  f"<b>Originated from:</b> {chat_id}\n"
+                  f"<b>Originated from:</b> {chat_name}\n"
                   f"<b>Admin:</b> {mention_html(banner.id, banner.first_name)}\n"
                   f"<b>Banned User:</b> {mention_html(user_chat.id, user_chat.first_name)}\n"
                   f"<b>Banned User ID:</b> {user_chat.id}")
