@@ -77,7 +77,10 @@ def del_message(update, context) -> str:
         user = update.effective_user
         if can_delete(chat, context.bot.id):
             update.effective_message.reply_to_message.delete()
-            update.effective_message.delete()
+            try:
+                update.effective_message.delete()
+            except BadRequest:
+                pass
             return "<b>{}:</b>" \
                    "\n#DEL" \
                    "\n<b>• Admin:</b> {}" \
