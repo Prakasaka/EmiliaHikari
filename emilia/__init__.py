@@ -68,6 +68,7 @@ if ENV:
         FED_LOGS = os.environ.get('FED_LOGS', None)
         PORT = int(os.environ.get('PORT', 5000))
         GBAN_LOGS = os.environ.get('GBAN_LOGS', None)
+        TDD = os.environ.get("TDD","/downloads")
         CERT_PATH = os.environ.get("CERT_PATH")
 
         DB_URI = os.environ.get('DATABASE_URL')
@@ -126,6 +127,7 @@ else:
         FED_LOGS = Config.FED_LOGS
         WEBHOOK = Config.WEBHOOK
         URL = Config.URL
+        TDD - Config.TDD
         PORT = Config.PORT
         CERT_PATH = Config.CERT_PATH
 
