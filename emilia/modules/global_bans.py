@@ -165,7 +165,7 @@ def gban(update, context):
 
     log_message = (f"#GBANNED\n"
                   f"<b>Originated from:</b> {chat_id}\n"
-                  f"<b>Admin:</b> {mention_html(user.id, user.first_name)}\n"
+                  f"<b>Admin:</b> {mention_html(banner.id, banner.first_name)}\n"
                   f"<b>Banned User:</b> {mention_html(user_chat.id, user_chat.first_name)}\n"
                   f"<b>Banned User ID:</b> {user_chat.id}")
 
@@ -235,7 +235,7 @@ def ungban(update, context):
 
     log_message = (f"#UNGBANNED\n"
                   f"<b>Originated from:</b> {chat_id}\n"
-                  f"<b>Admin:</b> {mention_html(user.id, user.first_name)}\n"
+                  f"<b>Admin:</b> {mention_html(banner.id, banner.first_name)}\n"
                   f"<b>Banned User:</b> {mention_html(user_chat.id, user_chat.first_name)}\n"
                   f"<b>Banned User ID:</b> {user_chat.id}")
 
