@@ -182,7 +182,7 @@ def remove_bluetext_ignore_global(update, context):
 
 
 @run_async
-def bluetext_ignore_list(bot: Bot, update: Update):
+def bluetext_ignore_list(update, context):
 
     message = update.effective_message
     chat = update.effective_chat
