@@ -104,7 +104,7 @@ RUN_STRINGS = (
     "Go watch POGO!",
     "Pew Pew Pew...",
     "You think speed is your ally? I was born on treadmill.",
-    "A shinigami is coming after you.",
+    "A shinigami is coming after you."
 )
 
 SLAP_TEMPLATES = (
@@ -124,7 +124,7 @@ SLAP_TEMPLATES = (
     "{user1} throws a Kamehameha wave at {user2}.",
     "{user1} cuts {user2} into pieces using Destructo Discs.",
     "{user1} snaps his fingers causing {user2} to disintegrate from the universe.",
-    "{user1} craves {user2} in the Death Note.",
+    "{user1} craves {user2} in the Death Note."
 )
 
 ITEMS = (
@@ -156,14 +156,14 @@ ITEMS = (
     "beehive",
     "piece of rotten meat",
     "bear",
-    "ton of bricks",
+    "ton of bricks"
 )
 
 THROW = (
     "throws",
     "flings",
     "chucks",
-    "hurls",
+    "hurls"
 )
 
 HIT = (
@@ -171,13 +171,13 @@ HIT = (
     "whacks",
     "slaps",
     "smacks",
-    "bashes",
+    "bashes"
 )
 
 
 @run_async
 def runs(update, context):
-    send_message(update.effective_message, random.choice("RUN_STRINGS"))
+    send_message(update.effective_message, random.choice(RUN_STRINGS))
 
 @run_async
 def slap(update, context):
@@ -207,10 +207,10 @@ def slap(update, context):
         user1 = "{}".format(mention_markdown(context.bot.id, context.bot.first_name))
         user2 = curr_user
 
-    temp = random.choice("SLAP_TEMPLATES")
-    item = random.choice("ITEMS")
-    hit = random.choice("HIT")
-    throw = random.choice("THROW")
+    temp = random.choice(SLAP_TEMPLATES)
+    item = random.choice(ITEMS)
+    hit = random.choice(HIT)
+    throw = random.choice(THROW)
 
     repl = temp.format(user1=user1, user2=user2, item=item, hits=hit, throws=throw)
 
@@ -353,7 +353,7 @@ def echo(update, context):
 def markdown_help(update, context):
     send_message(update.effective_message, MARKDOWN_HELP.format(dispatcher.bot.first_name), parse_mode=ParseMode.HTML)
     send_message(update.effective_message, "Try forwarding the following message to me, and you'll see!")
-    send_message(update.effective_message, "/save test This is a markdown test. _italics_, *bold*, `code`, [URL](example.com) [button](buttonurl:github.com) [button2](buttonurl:google.com:same)")
+    send_message(update.effective_message, "`/save test This is a markdown test. _italics_, *bold*, `code`, [URL](example.com) [button](buttonurl:github.com) [button2](buttonurl:google.com:same)`")
 
 
 @run_async
@@ -374,7 +374,7 @@ __mod_name__ = "Misc"
 
 ID_HANDLER = DisableAbleCommandHandler("id", get_id, pass_args=True)
 
-RUNS_HANDLER = DisableAbleCommandHandler(["runs", "lari"], runs)
+RUNS_HANDLER = DisableAbleCommandHandler("runs", runs)
 SLAP_HANDLER = DisableAbleCommandHandler("slap", slap, pass_args=True)
 INFO_HANDLER = DisableAbleCommandHandler("info", info, pass_args=True)
 
