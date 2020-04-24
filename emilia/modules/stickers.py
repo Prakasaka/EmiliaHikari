@@ -173,7 +173,7 @@ def kang(update, context):
         os.remove("kangsticker.png")
 
 
-def makepack_internal(msg, user, png_sticker, emoji, context.bot):
+def makepack_internal(msg, user, png_sticker, emoji, bot):
     name = user.first_name
     name = name[:50]
     hash = hashlib.sha1(bytearray(user.id)).hexdigest()
