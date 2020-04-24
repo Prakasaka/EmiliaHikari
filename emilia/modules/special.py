@@ -33,60 +33,6 @@ from emilia.modules.helper_funcs.alternate import send_message
 BASE_URL = 'https://del.dog'
 
 @run_async
-def stickerid(update, context):
-	msg = update.effective_message
-	if msg.reply_to_message and msg.reply_to_message.sticker:
-		send_message(update.effective_message, "Hi {}, sticker id that you reply is :\n```{}```".format(mention_markdown(msg.from_user.id, msg.from_user.first_name), msg.reply_to_message.sticker.file_id),
-											parse_mode=ParseMode.MARKDOWN)
-	else:
-		send_message(update.effective_message, "Please reply to the sticker to get the ID sticker",
-											parse_mode=ParseMode.MARKDOWN)
-
-@run_async
-def getsticker(update, context):
-	msg = update.effective_message
-	chat_id = update.effective_chat.id
-	if msg.reply_to_message and msg.reply_to_message.sticker:
-		send_message(update.effective_message, "Hi " + "[{}](tg://user?id={})".format(msg.from_user.first_name,
-											msg.from_user.id) + "Please check the file you requested below."
-                                                                                        "\nPlease use this feature wisely!",
-											parse_mode=ParseMode.MARKDOWN)
-		context.bot.sendChatAction(chat_id, "upload_document")
-		file_id = msg.reply_to_message.sticker.file_id
-		newFile = context.bot.get_file(file_id)
-		newFile.download('sticker.png')
-		context.bot.sendDocument(chat_id, document=open('sticker.png', 'rb'))
-		context.bot.sendChatAction(chat_id, "upload_photo")
-		context.bot.send_photo(chat_id, photo=open('sticker.png', 'rb'))
-		
-	else:
-		send_message(update.effective_message, "Hi " + "[{}](tg://user?id={})".format(msg.from_user.first_name,
-											msg.from_user.id) + ", Please reply to the sticker message to get the sticker image",
-											parse_mode=ParseMode.MARKDOWN)
-
-@run_async
-def stiker(update, context):
-	chat_id = update.effective_chat.id
-	args = update.effective_message.text.split(None, 1)
-	message = update.effective_message
-	message.delete()
-	if message.reply_to_message:
-		context.bot.sendSticker(chat_id, args[1], reply_to_message_id=message.reply_to_message.message_id)
-	else:
-		context.bot.sendSticker(chat_id, args[1])
-
-@run_async
-def file(update, context):
-	chat_id = update.effective_chat.id
-	args = update.effective_message.text.split(None, 1)
-	message = update.effective_message
-	message.delete()
-	if message.reply_to_message:
-		context.bot.sendDocument(chat_id, args[1], reply_to_message_id=message.reply_to_message.message_id)
-	else:
-		context.bot.sendDocument(chat_id, args[1])
-
-@run_async
 def getlink(update, context):
 	args = context.args
 	if args:
@@ -261,7 +207,6 @@ def log(update, context):
 
 
 __help__ = """
- - /stickerid: reply message sticker at PM to get ID sticker
  - /wiki <text>: search for text written from the wikipedia source
  - /ud <text>: search from urban dictionary
  - /paste: Create a paste or a shortened url using [dogbin](https://del.dog)
@@ -271,10 +216,6 @@ __help__ = """
 
 __mod_name__ = "special"
 
-STICKERID_HANDLER = DisableAbleCommandHandler("stickerid", stickerid)
-#GETSTICKER_HANDLER = DisableAbleCommandHandler("getsticker", getsticker)
-STIKER_HANDLER = CommandHandler("sticker", stiker, filters=Filters.user(OWNER_ID))
-FILE_HANDLER = CommandHandler("file", file, filters=Filters.user(OWNER_ID))
 GETLINK_HANDLER = CommandHandler("getlink", getlink, pass_args=True, filters=Filters.user(OWNER_ID))
 LEAVECHAT_HANDLER = CommandHandler(["leavechat", "leavegroup", "leave"], leavechat, pass_args=True, filters=Filters.user(OWNER_ID))
 WIKIPEDIA_HANDLER = DisableAbleCommandHandler("wiki", wiki, pass_args=True)
@@ -284,11 +225,6 @@ GET_PASTE_HANDLER = DisableAbleCommandHandler("getpaste", get_paste_content, pas
 PASTE_STATS_HANDLER = DisableAbleCommandHandler("pastestats", get_paste_stats, pass_args=True)
 LOG_HANDLER = DisableAbleCommandHandler("log", log, filters=Filters.user(OWNER_ID))
 
-#dispatcher.add_handler(PING_HANDLER)
-dispatcher.add_handler(STICKERID_HANDLER)
-#dispatcher.add_handler(GETSTICKER_HANDLER)
-dispatcher.add_handler(STIKER_HANDLER)
-dispatcher.add_handler(FILE_HANDLER)
 dispatcher.add_handler(GETLINK_HANDLER)
 dispatcher.add_handler(LEAVECHAT_HANDLER)
 dispatcher.add_handler(WIKIPEDIA_HANDLER)

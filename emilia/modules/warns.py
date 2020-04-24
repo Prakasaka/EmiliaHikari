@@ -88,13 +88,13 @@ def warn(user: User, chat: Chat, reason: str, message: Message, warner: User = N
 
         if num_warns+1 == limit:
             if not warn_mode:
-                action_mode = "Kick"
+                action_mode = "kicked"
             elif warn_mode == 1:
-                action_mode = "Kick"
+                action_mode = "kicked"
             elif warn_mode == 2:
-                action_mode = "ban"
+                action_mode = "banned"
             elif warn_mode == 3:
-                action_mode = "mute"
+                action_mode = "muted"
             reply = "{} has {}/{} warnings... If you are warned again, you will be {}!".format(mention_html(user.id, user.first_name), num_warns, limit, action_mode)
         else:
             reply = "{} has {}/{} warnings... watch out!".format(mention_html(user.id, user.first_name), num_warns, limit)
