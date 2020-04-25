@@ -116,7 +116,7 @@ def kang(update, context):
         except TelegramError as e:
             if e.message == "Stickerset_invalid":
                 makepack_internal(msg, user, open('kangsticker.png', 'rb'),
-                                  sticker_emoji, context.bot, packname, packnum, chat)
+                                  sticker_emoji, context, packname, packnum, chat)
             elif e.message == "Sticker_png_dimensions":
                 im.save(kangsticker, "PNG")
                 context.bot.add_sticker_to_set(user_id=user.id,
@@ -216,7 +216,7 @@ def kang(update, context):
         os.remove("kangsticker.png")
 
 
-def makepack_internal(msg, user, png_sticker, emoji, bot, packname, packnum,
+def makepack_internal(msg, user, png_sticker, emoji, context, packname, packnum,
                       chat):
     name = user.first_name
     name = name[:50]
@@ -224,7 +224,7 @@ def makepack_internal(msg, user, png_sticker, emoji, bot, packname, packnum,
         extra_version = ""
         if packnum > 0:
             extra_version = " " + str(packnum)
-        success = bot.create_new_sticker_set(user.id,
+        success = context.bot.create_new_sticker_set(user.id,
                                              packname,
                                              f"{name}s haruka pack" +
                                              extra_version,
