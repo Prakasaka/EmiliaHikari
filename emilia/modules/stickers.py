@@ -224,7 +224,7 @@ def makepack_internal(msg, user, png_sticker, emoji, bot, packname, packnum,
         extra_version = ""
         if packnum > 0:
             extra_version = " " + str(packnum)
-        success = context.bot.create_new_sticker_set(user.id,
+        success = bot.create_new_sticker_set(user.id,
                                              packname,
                                              f"{name}s haruka pack" +
                                              extra_version,
