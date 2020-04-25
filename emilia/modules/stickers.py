@@ -201,7 +201,7 @@ def kang(update, context):
                                parse_mode=ParseMode.MARKDOWN)
             print(e)
     else:
-        packs = 'Please reply to a sticker or an image to kang it!\nOh, by the way. here are your packs:\n')
+        packs = 'Please reply to a sticker or an image to kang it!\nOh, by the way. here are your packs:\n'
         if packnum > 0:
             firstpackname = "c" + str(user.id) + "_by_" + context.bot.username
             for i in range(0, packnum + 1):
