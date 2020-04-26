@@ -186,14 +186,23 @@ def leavechat(update, context):
 @run_async
 def wiki(update, context):
     args = context.args
-    reply = " ".join(args)
-    summary = f"{wikipedia.summary(reply, sentences=3)}"
-    keyboard = [[
+    try:
+        reply = " ".join(args)
+        summary = f"{wikipedia.summary(reply, sentences=3)}"
+        keyboard = [[
             InlineKeyboardButton(
-                text="click here for more",
+                text="click here for read more",
                 url=f"{wikipedia.page(reply).url}")
         ]]
-    send_message(update.effective_message, summary, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.MARKDOWN)
+        send_message(update.effective_message, summary, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.MARKDOWN)
+    except wikipedia.PageError as e:
+        send_message(update.effective_message, "Error: {}".format(e))
+    except BadRequest as et:
+        send_message(update.effective_message, "Error: {}".format(et))
+    except wikipedia.exceptions.DisambiguationError as eet:
+        send_message(update.effective_message, 
+                "Error\n There are too many query! Express it more!\nPossible query result:\n{}"
+                .format(eet))
 
 @run_async
 def urbandictionary(update, context):
