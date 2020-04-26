@@ -32,53 +32,53 @@ DEVICES_DATA = 'https://raw.githubusercontent.com/androidtrackers/certified-andr
 @run_async
 def twrp(update, context):
     args = context.args
-    if len(args) == 0:
-        reply='No codename provided, write a codename for fetching informations.'
-        del_msg = send_message(update.effective_message, "{}".format(reply),
-                               parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
-        time.sleep(5)
-        try:
-            update.effective_message.delete()
-        except BadRequest:
-            pass
-
     try:
-        device = " ".join(args)
-        url = get(f'https://eu.dl.twrp.me/{device}/')
-        if url.status_code == 404:
-            reply = f"Couldn't find twrp downloads for {device}!\n"
+        if len(args) == 0:
+            reply='No codename provided, write a codename for fetching informations.'
             del_msg = send_message(update.effective_message, "{}".format(reply),
                                parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
-        time.sleep(5)
-        try:
-            update.effective_message.delete()
-        except BadRequest:
-            pass
-    else:
-        reply = f'*Latest Official TWRP for {device}*\n'            
-        db = get(DEVICES_DATA).json()
-        newdevice = device.strip('lte') if device.startswith('beyond') else device
-        try:
-            brand = db[newdevice][0]['brand']
-            name = db[newdevice][0]['name']
-            reply += f'*{brand} - {name}*\n'
-        except KeyError:
-            pass
-        page = BeautifulSoup(url.content, 'lxml')
-        date = page.find("em").text.strip()
-        reply += f'*Updated:* {date}\n'
-        trs = page.find('table').find_all('tr')
-        row = 2 if trs[0].find('a').text.endswith('tar') else 1
-        for i in range(row):
-            download = trs[i].find('a')
-            dl_link = f"https://eu.dl.twrp.me{download['href']}"
-            dl_file = download.text
-            size = trs[i].find("span", {"class": "filesize"}).text
-            reply += f'[{dl_file}]({dl_link}) - {size}\n'
+            time.sleep(5)
+            try:
+                update.effective_message.delete()
+            except BadRequest:
+                pass
+            device = " ".join(args)
+            url = get(f'https://eu.dl.twrp.me/{device}/')
+            if url.status_code == 404:
+                reply = f"Couldn't find twrp downloads for {device}!\n"
+                del_msg = send_message(update.effective_message, "{}".format(reply),
+                               parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
+            time.sleep(5)
+            try:
+                update.effective_message.delete()
+            except BadRequest:
+                pass
+        else:
+            reply = f'*Latest Official TWRP for {device}*\n'            
+            db = get(DEVICES_DATA).json()
+            newdevice = device.strip('lte') if device.startswith('beyond') else device
+            try:
+                brand = db[newdevice][0]['brand']
+                name = db[newdevice][0]['name']
+                reply += f'*{brand} - {name}*\n'
+            except KeyError:
+                pass
+            page = BeautifulSoup(url.content, 'lxml')
+            date = page.find("em").text.strip()
+            reply += f'*Updated:* {date}\n'
+            trs = page.find('table').find_all('tr')
+            row = 2 if trs[0].find('a').text.endswith('tar') else 1
+            for i in range(row):
+                download = trs[i].find('a')
+                dl_link = f"https://eu.dl.twrp.me{download['href']}"
+                dl_file = download.text
+                size = trs[i].find("span", {"class": "filesize"}).text
+                reply += f'[{dl_file}]({dl_link}) - {size}\n'
+
+            send_message(update.effective_message, "{}".format(reply),
+                               parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
     except telegram.error.BadRequest as e:
         send_message(update.effective_message, "Error: {}".format(e))
-        send_message(update.effective_message, "{}".format(reply),
-                               parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
 
 
 @run_async
