@@ -41,8 +41,7 @@ def twrp(update, context):
             del_msg.delete()
             update.effective_message.delete()
         except BadRequest as err:
-            if (err.message == "Message to delete not found" ) or (err.message == "Message can't be deleted" ):
-                return
+            pass
 
     device = " ".join(args)
     url = get(f'https://eu.dl.twrp.me/{device}/')
@@ -55,8 +54,7 @@ def twrp(update, context):
             del_msg.delete()
             update.effective_message.delete()
         except BadRequest as err:
-            if (err.message == "Message to delete not found" ) or (err.message == "Message can't be deleted" ):
-                return
+            pass
     else:
         reply = f'*Latest Official TWRP for {device}*\n'            
         db = get(DEVICES_DATA).json()

@@ -147,11 +147,6 @@ def clear(update, context):
         del namespaces[update.message.chat_id]
     send("Cleared locals.", update, context)
 
-
-@run_async
-def media_telegraph(update, context):
-    msg = update.effective_message # type: Optional[Message]
-
 @run_async
 def post_telegraph(update, context):
     args = context.args
@@ -360,8 +355,7 @@ __help__ = """
  - /paste: Create a paste or a shortened url using [dogbin](https://del.dog)
  - /getpaste: Get the content of a paste or shortened url from [dogbin](https://del.dog)
  - /pastestats: Get stats of a paste or shortened url from [dogbin](https://del.dog)
- - /tele.gra.ph - as reply to a long message
- - /telegraph - as a reply to a media less than 5MiB
+ - /tele <text> - as reply to a long message
 """
 
 __mod_name__ = "special"
@@ -378,7 +372,6 @@ eval_handler = CommandHandler('eval', evaluate, filters=Filters.user(OWNER_ID))
 exec_handler = CommandHandler('py', execute, filters=Filters.user(OWNER_ID))
 clear_handler = CommandHandler('clearlocals', clear, filters=Filters.user(OWNER_ID))
 dispatcher.add_handler(DisableAbleCommandHandler("tele", post_telegraph, pass_args=True))
-dispatcher.add_handler(DisableAbleCommandHandler("telegraph", media_telegraph, filters=Filters.video | Filters.photo))
 
 dispatcher.add_handler(GETLINK_HANDLER)
 dispatcher.add_handler(LEAVECHAT_HANDLER)
