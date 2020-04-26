@@ -226,7 +226,7 @@ def blacklist_mode(update, context):
 		if conn:
 			text = "The blacklist mode has been changed, the User will be `{}` on *{}*!".format(settypeblacklist, chat_name)
 		else:
-			text = "Blacklist mode changed, will `{}` at *{}*!".format(settypeblacklist)
+			text = "Blacklist mode changed, will `{}`".format(settypeblacklist)
 		send_message(update.effective_message, text, parse_mode="markdown")
 		return "<b>{}:</b>\n" \
 				"<b>Admin:</b> {}\n" \
@@ -345,7 +345,7 @@ def __stats__():
 	return "{} blacklist triggers, across {} chats.".format(sql.num_blacklist_filters(), sql.num_blacklist_filter_chats())
 
 
-__mod_name__ = "Word Blacklists"
+__mod_name__ = "Blacklists"
 
 __help__ = """
 Blacklists are used to stop certain triggers from being said in a group. Any time the trigger is mentioned, \
@@ -360,6 +360,13 @@ lines will allow you to add multiple triggers.
  - /unblacklist <triggers>: Remove triggers from the blacklist. Same newline logic applies here, so you can remove \
 multiple triggers at once.
  - /rmblacklist <triggers>: Same as above.
+ - /blacklistmode <ban/kick/mute/tban/tmute> <value>: select the action perform when warnings have been exceeded. ban/kick/mute/tmute/tban
+ Note:
+ - Value must be filled for tban and tmute, Can be:
+        `4m` = 4 minutes
+        `3h` = 4 hours
+        `2d` = 2 days
+        `1w` = 1 week
 """
 
 BLACKLIST_HANDLER = DisableAbleCommandHandler("blacklist", blacklist, pass_args=True, admin_ok=True)

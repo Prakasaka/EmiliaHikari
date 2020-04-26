@@ -1,9 +1,13 @@
 import json
+import html, time
+from bs4 import BeautifulSoup
 from datetime import datetime
 from typing import Optional, List
 from hurry.filesize import size as sizee
 
-from telegram import Chat, Update, Bot
+from telegram import Message, Chat, Update, Bot
+from telegram.error import BadRequest
+from telegram.utils.helpers import escape_markdown, mention_html
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import run_async
 
@@ -22,6 +26,84 @@ from requests import get
 # None of the code is taken from the bot itself, to avoid confusion.
 
 LOGGER.info("android: Original Android Modules by @RealAkito on Telegram")
+
+
+@run_async
+def twrp(update, context):
+    args = context.args
+    if len(args) == 0:
+        reply='No codename provided, write a codename for fetching informations.'
+        del_msg = send_message(update.effective_message, "{}".format(reply),
+                               parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
+        time.sleep(5)
+        try:
+            del_msg.delete()
+            update.effective_message.delete()
+        except BadRequest as err:
+            if (err.message == "Message to delete not found" ) or (err.message == "Message can't be deleted" ):
+                return
+
+    device = " ".join(args)
+    url = get(f'https://eu.dl.twrp.me/{device}/')
+    if url.status_code == 404:
+        reply = f"Couldn't find twrp downloads for {device}!\n"
+        del_msg = send_message(update.effective_message, "{}".format(reply),
+                               parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
+        time.sleep(5)
+        try:
+            del_msg.delete()
+            update.effective_message.delete()
+        except BadRequest as err:
+            if (err.message == "Message to delete not found" ) or (err.message == "Message can't be deleted" ):
+                return
+    else:
+        reply = f'*Latest Official TWRP for {device}*\n'            
+        db = get(DEVICES_DATA).json()
+        newdevice = device.strip('lte') if device.startswith('beyond') else device
+        try:
+            brand = db[newdevice][0]['brand']
+            name = db[newdevice][0]['name']
+            reply += f'*{brand} - {name}*\n'
+        except KeyError as err:
+            pass
+        page = BeautifulSoup(url.content, 'lxml')
+        date = page.find("em").text.strip()
+        reply += f'*Updated:* {date}\n'
+        trs = page.find('table').find_all('tr')
+        row = 2 if trs[0].find('a').text.endswith('tar') else 1
+        for i in range(row):
+            download = trs[i].find('a')
+            dl_link = f"https://eu.dl.twrp.me{download['href']}"
+            dl_file = download.text
+            size = trs[i].find("span", {"class": "filesize"}).text
+            reply += f'[{dl_file}]({dl_link}) - {size}\n'
+
+        send_message(update.effective_message, "{}".format(reply),
+                               parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
+
+
+@run_async
+def magisk(update, context):
+    url = 'https://raw.githubusercontent.com/topjohnwu/magisk_files/'
+    releases = ""
+    for type, branch in {"Stable":["master/stable","master"], "Beta":["master/beta","master"], "Canary (release)":["canary/release","canary"], "Canary (debug)":["canary/debug","canary"]}.items():
+        data = get(url + branch[0] + '.json').json()
+        releases += f'*{type}*: \n' \
+                    f'• [Changelog](https://github.com/topjohnwu/magisk_files/blob/{branch[1]}/notes.md)\n' \
+                    f'• Zip - [{data["magisk"]["version"]}-{data["magisk"]["versionCode"]}]({data["magisk"]["link"]}) \n' \
+                    f'• App - [{data["app"]["version"]}-{data["app"]["versionCode"]}]({data["app"]["link"]}) \n' \
+                    f'• Uninstaller - [{data["magisk"]["version"]}-{data["magisk"]["versionCode"]}]({data["uninstaller"]["link"]})\n\n'
+                        
+
+    del_msg = send_message(update.effective_message, "*Latest Magisk Releases:*\n{}".format(releases),
+                               parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
+    time.sleep(300)
+    try:
+        del_msg.delete()
+        update.effective_message.delete()
+    except BadRequest as err:
+        if (err.message == "Message to delete not found" ) or (err.message == "Message can't be deleted" ):
+            return
 
 
 @run_async
@@ -426,6 +508,8 @@ def bootleggers(update, context):
 __help__ = """
 *This module is made with love by* @peaktogoo *and code beauty by* @kandnub
  *Device Specific Rom*
+ - /magisk - gets the latest magisk release for Stable/Beta/Canary
+ - /twrp <codename> -  gets latest twrp for the android device using the codename
  - /havoc <device>: Get the Havoc Rom
  - /viper <device>: Get the Viper Rom
  - /evo <device>: Get the Evolution X Rom
@@ -443,6 +527,8 @@ __mod_name__ = "Android"
 
 
 EVO_HANDLER = DisableAbleCommandHandler("evo", evo, admin_ok=True)
+MAGISK_HANDLER = DisableAbleCommandHandler("magisk", magisk)
+TWRP_HANDLER = DisableAbleCommandHandler("twrp", twrp, pass_args=True)
 DOTOS_HANDLER = DisableAbleCommandHandler("dotos", dotos, admin_ok=True)
 PIXYS_HANDLER = DisableAbleCommandHandler("pixys", pixys, admin_ok=True)
 DESCENDANT_HANDLER = DisableAbleCommandHandler("descendant", descendant, pass_args=True, admin_ok=True)
@@ -459,6 +545,8 @@ BOOTLEGGERS_HANDLER = DisableAbleCommandHandler("bootleggers",
                                                 admin_ok=True)
 
 dispatcher.add_handler(EVO_HANDLER)
+dispatcher.add_handler(MAGISK_HANDLER)
+dispatcher.add_handler(TWRP_HANDLER)
 dispatcher.add_handler(HAVOC_HANDLER)
 dispatcher.add_handler(VIPER_HANDLER)
 dispatcher.add_handler(DOTOS_HANDLER)
