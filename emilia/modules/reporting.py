@@ -66,7 +66,7 @@ def report(update, context) -> str:
                 reported_user = message.reply_to_message.from_user  # type: Optional[User]
                 chat_name = chat.title or chat.first or chat.username
 
-                a, b = user_protection_checker(bot, message.reply_to_message.from_user.id)
+                a, b = user_protection_checker(context.bot, message.reply_to_message.from_user.id)
                 if not a:
                         return ""
 
