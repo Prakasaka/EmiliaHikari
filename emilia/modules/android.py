@@ -53,32 +53,29 @@ def twrp(update, context):
         except BadRequest:
             pass
     else:
+        reply = f'*Latest Official TWRP for {device}*\n'            
+        db = get(DEVICES_DATA).json()
+        newdevice = device.strip('lte') if device.startswith('beyond') else device
         try:
-            reply = f'*Latest Official TWRP for {device}*\n'            
-            db = get(DEVICES_DATA).json()
-            newdevice = device.strip('lte') if device.startswith('beyond') else device
-            try:
-                brand = db[newdevice][0]['brand']
-                name = db[newdevice][0]['name']
-                reply += f'*{brand} - {name}*\n'
-            except KeyError:
-                pass
-            page = BeautifulSoup(url.content, 'lxml')
-            date = page.find("em").text.strip()
-            reply += f'*Updated:* {date}\n'
-            trs = page.find('table').find_all('tr')
-            row = 2 if trs[0].find('a').text.endswith('tar') else 1
-            for i in range(row):
-                download = trs[i].find('a')
-                dl_link = f"https://eu.dl.twrp.me{download['href']}"
-                dl_file = download.text
-                size = trs[i].find("span", {"class": "filesize"}).text
-                reply += f'[{dl_file}]({dl_link}) - {size}\n'
+            brand = db[newdevice][0]['brand']
+            name = db[newdevice][0]['name']
+            reply += f'*{brand} - {name}*\n'
+        except KeyError:
+            pass
+        page = BeautifulSoup(url.content, 'lxml')
+        date = page.find("em").text.strip()
+        reply += f'*Updated:* {date}\n'
+        trs = page.find('table').find_all('tr')
+        row = 2 if trs[0].find('a').text.endswith('tar') else 1
+        for i in range(row):
+            download = trs[i].find('a')
+            dl_link = f"https://eu.dl.twrp.me{download['href']}"
+            dl_file = download.text
+            size = trs[i].find("span", {"class": "filesize"}).text
+            reply += f'[{dl_file}]({dl_link}) - {size}\n'
 
-            send_message(update.effective_message, "{}".format(reply),
+        send_message(update.effective_message, "{}".format(reply),
                                parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
-        except BadRequest as e:
-            send_message(update.effective_message, "Error: {}".format(e))
 
 
 @run_async
