@@ -1,31 +1,37 @@
 import html
-import json
-import random
 import PIL
-import os
-import io
-import sys
-import glob
-import inspect
-import shutil
-import math
-import textwrap
-import gc
 import traceback
 from contextlib import redirect_stdout
-import urllib
-import datetime
 from typing import Optional, List
-import time
 import urbandict
-
 import pyowm
 from pyowm import timeutils, exceptions
 import wikipedia
 import base64
 from bs4 import BeautifulSoup
 
+import sys
+import inspect
+import os
+import shutil
+import glob
+import math
+import textwrap
+import os
 import requests
+import json
+import gc
+import datetime
+import time
+import traceback
+import re
+import io
+import asyncio
+import random
+import subprocess
+import urllib
+import psutil
+
 from telegram.error import BadRequest, Unauthorized
 from telegram import Message, Chat, Update, Bot, MessageEntity
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
@@ -126,7 +132,7 @@ def do(func, update, context):
         else:
             result = f'{value}{func_return}'
         if result:
-            if len(str(result)) > 2000:
+            if len(str(result)) > 5000:
                 result = 'Output is too long'
             return result
 

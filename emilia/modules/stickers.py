@@ -106,8 +106,8 @@ def kang(update, context):
                                    name=packname,
                                    png_sticker=open('kangsticker.png', 'rb'),
                                    emojis=sticker_emoji)
-            send_message(update.effective_message, 'Sticker pack successfully created. Get it [pack](t.me/addstickers/{})\nEmoji: {}'.format(
-                packname, sticker_emoji),
+            send_message(update.effective_message, f"Sticker successfully added to [pack](t.me/addstickers/{packname})\n"
+                           f"Emoji is:" + " " + sticker_emoji,
                            parse_mode=ParseMode.MARKDOWN)
         except OSError as e:
             send_message(update.effective_message, 'I can only kang images!')
@@ -124,16 +124,16 @@ def kang(update, context):
                                        png_sticker=open(
                                            'kangsticker.png', 'rb'),
                                        emojis=sticker_emoji) 
-                send_message(update.effective_message, 'Sticker pack successfully created. Get it [pack](t.me/addstickers/{})\nEmoji: {}'.format(
-                    packname, sticker_emoji),
+                send_message(update.effective_message, f"Sticker successfully added to [pack](t.me/addstickers/{packname})\n"
+                               f"Emoji is: {sticker_emoji}",
                                parse_mode=ParseMode.MARKDOWN)
             elif e.message == "Invalid sticker emojis":
                 send_message(update.effective_message, "Error: Invalid emoji(s).")
             elif e.message == "Stickers_too_much":
                 send_message(update.effective_message, "Error: Max packsize reached. Press F to pay respecc.")
             elif e.message == "Internal Server Error: sticker set not found (500)":
-                send_message(update.effective_message, 'Sticker pack successfully created. Get it [pack](t.me/addstickers/{})\nEmoji: {}'.format(
-                    packname, sticker_emoji),
+                send_message(update.effective_message, f"Sticker successfully added to [pack](t.me/addstickers/{packname})\n"
+                               f"Emoji is: {sticker_emoji}",
                                parse_mode=ParseMode.MARKDOWN)
             print(e)
     elif args:
@@ -170,9 +170,9 @@ def kang(update, context):
                                    name=packname,
                                    png_sticker=open('kangsticker.png', 'rb'),
                                    emojis=sticker_emoji)
-            send_message(update.effective_message, 'Sticker pack successfully created. Get it [pack](t.me/addstickers/{})\nEmoji: {}'.format(
-                packname, sticker_emoji),
-                           parse_mode=ParseMode.MARKDOWN)
+            send_message(update.effective_message, f"Sticker successfully added to [pack](t.me/addstickers/{packname})\n"
+                f"Emoji is: {sticker_emoji}",
+                parse_mode=ParseMode.MARKDOWN)
         except OSError as e:
             send_message(update.effective_message, 'I can only kang images!')
             print(e)
@@ -196,9 +196,9 @@ def kang(update, context):
             elif e.message == "Stickers_too_much":
                 send_message(update.effective_message, "Error: Max packsize reached. Press F to pay respecc.")
             elif e.message == "Internal Server Error: sticker set not found (500)":
-                send_message(update.effective_message, 'Sticker pack successfully created. Get it [pack](t.me/addstickers/{})\nEmoji: {}'.format(
-                    packname, sticker_emoji),
-                               parse_mode=ParseMode.MARKDOWN)
+                send_message(update.effective_message, f"Sticker successfully added to [pack](t.me/addstickers/{packname})\n"
+                f"Emoji is: {sticker_emoji}",
+                parse_mode=ParseMode.MARKDOWN)
             print(e)
     else:
         packs = 'Please reply to a sticker or an image to kang it!\nOh, by the way. here are your packs:\n'
