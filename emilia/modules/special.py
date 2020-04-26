@@ -89,7 +89,7 @@ def do(func, update, context):
     log_input(update)
     content = update.message.text.split(' ', 1)[-1]
     body = cleanup_code(content)
-    env = namespace_of(update.message.chat_id, update, bot)
+    env = namespace_of(update.message.chat_id, update, context)
 
     os.chdir(os.getcwd())
     with open(os.path.join(os.getcwd(), 'tg_bot/modules/helper_funcs/temp.txt'), 'w') as temp:
