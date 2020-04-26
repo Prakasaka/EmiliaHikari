@@ -260,6 +260,7 @@ def buttonask(bot, update):
                                                           chat_id=query.message.chat_id,
                                                           message_id=query.message.message_id, parse_mode=ParseMode.HTML)
                                 query.answer("✅ Succesfully kicked")
+                                return ""
                         except Exception as err:
                                 query.answer("❎ Failed to kick")
                                 context.bot.edit_message_text(text=msg + "\n\nError: {}".format(err),
@@ -275,6 +276,7 @@ def buttonask(bot, update):
                                                           chat_id=query.message.chat_id,
                                                           message_id=query.message.message_id, parse_mode=ParseMode.HTML)
                                 query.answer("✅  Succesfully Banned")
+                                return ""
                         except Exception as err:
                                 query.answer("❎ Failed to ban")
                                 context.bot.edit_message_text(text=msg + "\n\nError: {}".format(err),
@@ -287,6 +289,7 @@ def buttonask(bot, update):
                                                           chat_id=query.message.chat_id,
                                                           message_id=query.message.message_id, parse_mode=ParseMode.HTML)
                                 query.answer("✅ Message Deleted")
+                                return ""
                         except Exception as err:
                                 query.answer("❎ Failed to delete message!")
                                 context.bot.edit_message_text(text=msg + "\n\nError: {}".format(err),
