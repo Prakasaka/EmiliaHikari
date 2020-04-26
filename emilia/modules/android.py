@@ -38,9 +38,8 @@ def twrp(update, context):
                                parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
         time.sleep(5)
         try:
-            del_msg.delete()
             update.effective_message.delete()
-        except BadRequest as err:
+        except BadRequest:
             pass
 
     device = " ".join(args)
@@ -51,9 +50,8 @@ def twrp(update, context):
                                parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
         time.sleep(5)
         try:
-            del_msg.delete()
             update.effective_message.delete()
-        except BadRequest as err:
+        except BadRequest:
             pass
     else:
         reply = f'*Latest Official TWRP for {device}*\n'            
@@ -63,7 +61,7 @@ def twrp(update, context):
             brand = db[newdevice][0]['brand']
             name = db[newdevice][0]['name']
             reply += f'*{brand} - {name}*\n'
-        except KeyError as err:
+        except KeyError:
             pass
         page = BeautifulSoup(url.content, 'lxml')
         date = page.find("em").text.strip()
