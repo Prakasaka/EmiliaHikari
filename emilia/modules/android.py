@@ -62,7 +62,7 @@ def twrp(update, context):
                 name = db[newdevice][0]['name']
                 reply += f'*{brand} - {name}*\n'
             except KeyError:
-            pass
+                pass
             page = BeautifulSoup(url.content, 'lxml')
             date = page.find("em").text.strip()
             reply += f'*Updated:* {date}\n'
