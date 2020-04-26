@@ -137,10 +137,10 @@ def report(update, context) -> str:
                                                 context.bot.send_message(admin.user.id, msg + chatlink, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
                                                 
                                                 if should_forward:
-                            message.reply_to_message.forward(admin.user.id)
+                                                        message.reply_to_message.forward(admin.user.id)
 
-                            if len(message.text.split()) > 1:  # If user is giving a reason, send his message too
-                                message.forward(admin.user.id)
+                                                        if len(message.text.split()) > 1:  # If user is giving a reason, send his message too
+                                                                message.forward(admin.user.id)
 
                                 except Unauthorized:
                                         pass
