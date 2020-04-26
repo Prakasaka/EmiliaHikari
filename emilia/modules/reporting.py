@@ -102,7 +102,9 @@ def report(update, context) -> str:
                 reply_markup = InlineKeyboardMarkup(keyboard)
 
                 should_forward = True
-                context.bot.send_message(chat.id, "<i>Message has been reported to all admins!</i>", parse_mode=ParseMode.HTML, reply_to_message_id=message.message_id)
+                context.bot.send_message(chat.id, "{} reported the message to the admins.".
+                                            format(mention_html(user.id, user.first_name)),
+                                            parse_mode=ParseMode.HTML)
 
                 CURRENT_REPORT[str(chat.id)] = msg
                 CURRENT_REPORT[str(chat.id)+"key"] = reply_markup
@@ -257,7 +259,9 @@ def buttonask(bot, update):
                                 context.bot.edit_message_text(text=msg + "\n\n{} has been kicked!".format(mention_html(userinfo['id'], userinfo['name'])),
                                                           chat_id=query.message.chat_id,
                                                           message_id=query.message.message_id, parse_mode=ParseMode.HTML)
+                                query.answer("✅ Succesfully kicked")
                         except Exception as err:
+                                query.answer("❎ Failed to kick")
                                 context.bot.edit_message_text(text=msg + "\n\nError: {}".format(err),
                                                           chat_id=query.message.chat_id,
                                                           message_id=query.message.message_id, parse_mode=ParseMode.HTML)
@@ -270,7 +274,9 @@ def buttonask(bot, update):
                                 context.bot.edit_message_text(text=msg + "\n\n{} has been banned!".format(mention_html(userinfo['id'], userinfo['name'])),
                                                           chat_id=query.message.chat_id,
                                                           message_id=query.message.message_id, parse_mode=ParseMode.HTML)
+                                query.answer("✅  Succesfully Banned")
                         except Exception as err:
+                                query.answer("❎ Failed to ban")
                                 context.bot.edit_message_text(text=msg + "\n\nError: {}".format(err),
                                                           chat_id=query.message.chat_id,
                                                           message_id=query.message.message_id, parse_mode=ParseMode.HTML)
@@ -280,7 +286,9 @@ def buttonask(bot, update):
                                 context.bot.edit_message_text(text=msg + "\n\nMessage was deleted!",
                                                           chat_id=query.message.chat_id,
                                                           message_id=query.message.message_id, parse_mode=ParseMode.HTML)
+                                query.answer("✅ Message Deleted")
                         except Exception as err:
+                                query.answer("❎ Failed to delete message!")
                                 context.bot.edit_message_text(text=msg + "\n\nError: {}".format(err),
                                                           chat_id=query.message.chat_id,
                                                           message_id=query.message.message_id, parse_mode=ParseMode.HTML)
@@ -291,7 +299,7 @@ def buttonask(bot, update):
                                                           reply_markup=key)
 
 
-def user_protection_checker(bot, user_id):
+def user_protection_checker(context, user_id):
         if not user_id:
                 return False, "You don't seem to be referring to a user."
 
