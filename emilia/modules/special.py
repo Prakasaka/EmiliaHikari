@@ -36,7 +36,7 @@ from typing import Optional, List
 from telegram.error import BadRequest, Unauthorized
 from telegram import Message, Chat, Update, Bot, MessageEntity
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.ext import CommandHandler, run_async, Filters, MessageHandler, 
+from telegram.ext import CommandHandler, run_async, Filters, MessageHandler
 from telegram.utils.helpers import escape_markdown, mention_html, mention_markdown
 
 from emilia import dispatcher, OWNER_ID, SUDO_USERS, SUPPORT_USERS, WHITELIST_USERS, LOGGER
