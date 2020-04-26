@@ -92,7 +92,7 @@ def do(func, update, context):
     env = namespace_of(update.message.chat_id, update, context)
 
     os.chdir(os.getcwd())
-    with open(os.path.join(os.getcwd(), 'tg_bot/modules/helper_funcs/temp.txt'), 'w') as temp:
+    with open(os.path.join(os.getcwd(), 'emilia/modules/helper_funcs/temp.txt'), 'w') as temp:
         temp.write(body)
 
     stdout = io.StringIO()
