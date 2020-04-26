@@ -38,9 +38,11 @@ def twrp(update, context):
                                parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
         time.sleep(5)
         try:
+            del_msg.delete()
             update.effective_message.delete()
-        except BadRequest:
-            pass
+        except BadRequest as err:
+            if (err.message == "Message to delete not found" ) or (err.message == "Message can't be deleted" ):
+                return
         device = " ".join(args)
         url = get(f'https://eu.dl.twrp.me/{device}/')
         if url.status_code == 404:
@@ -49,9 +51,11 @@ def twrp(update, context):
                                parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
         time.sleep(5)
         try:
+            del_msg.delete()
             update.effective_message.delete()
-        except BadRequest:
-            pass
+        except BadRequest as err:
+            if (err.message == "Message to delete not found" ) or (err.message == "Message can't be deleted" ):
+                return
     else:
         reply = f'*Latest Official TWRP for {device}*\n'            
         db = get(DEVICES_DATA).json()
