@@ -224,7 +224,7 @@ def blacklist_mode(update, context):
 			send_message(update.effective_message, "I only understand off/del/warn/ban/kick/mute/tban/tmute!")
 			return ""
 		if conn:
-			text = tl(update.effective_message, "Mode blacklist diubah, Pengguna akan `{}` pada *{}*!").format(settypeblacklist, chat_name)
+			text = "The blacklist mode has been changed, the User will be `{}` on *{}*!".format(settypeblacklist, chat_name)
 		else:
 			text = "Blacklist mode changed, will `{}` at *{}*!".format(settypeblacklist)
 		send_message(update.effective_message, text, parse_mode="markdown")
