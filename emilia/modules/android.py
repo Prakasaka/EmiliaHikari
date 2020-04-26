@@ -42,12 +42,15 @@ def twrp(update, context):
         except BadRequest:
             pass
 
-    device = " ".join(args)
-    url = get(f'https://eu.dl.twrp.me/{device}/')
-    if url.status_code == 404:
-        reply = f"Couldn't find twrp downloads for {device}!\n"
-        del_msg = send_message(update.effective_message, "{}".format(reply),
+    try:
+        device = " ".join(args)
+        url = get(f'https://eu.dl.twrp.me/{device}/')
+        if url.status_code == 404:
+            reply = f"Couldn't find twrp downloads for {device}!\n"
+            del_msg = send_message(update.effective_message, "{}".format(reply),
                                parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
+    except telegram.error.BadRequest as e:
+        send_message(update.effective_message, "Error: {}".format(e))
         time.sleep(5)
         try:
             update.effective_message.delete()
