@@ -44,7 +44,7 @@ BASE_URL = 'https://del.dog'
 namespaces = {}
 
 
-def namespace_of(chat, update, bot):
+def namespace_of(chat, update, context):
     if chat not in namespaces:
         namespaces[chat] = {
             '__builtins__': globals()['__builtins__'],
