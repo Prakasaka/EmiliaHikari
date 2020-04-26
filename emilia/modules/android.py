@@ -26,6 +26,7 @@ from requests import get
 # None of the code is taken from the bot itself, to avoid confusion.
 
 LOGGER.info("android: Original Android Modules by @RealAkito on Telegram")
+DEVICES_DATA = 'https://raw.githubusercontent.com/androidtrackers/certified-android-devices/master/by_device.json'
 
 
 @run_async
