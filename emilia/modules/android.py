@@ -43,11 +43,12 @@ def twrp(update, context):
         except BadRequest as err:
             if (err.message == "Message to delete not found" ) or (err.message == "Message can't be deleted" ):
                 return
-        device = " ".join(args)
-        url = get(f'https://eu.dl.twrp.me/{device}/')
-        if url.status_code == 404:
-            reply = f"Couldn't find twrp downloads for {device}!\n"
-            del_msg = send_message(update.effective_message, "{}".format(reply),
+
+    device = " ".join(args)
+    url = get(f'https://eu.dl.twrp.me/{device}/')
+    if url.status_code == 404:
+        reply = f"Couldn't find twrp downloads for {device}!\n"
+        del_msg = update.effective_message.reply_text("{}".format(reply),
                                parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
         time.sleep(5)
         try:
@@ -64,7 +65,7 @@ def twrp(update, context):
             brand = db[newdevice][0]['brand']
             name = db[newdevice][0]['name']
             reply += f'*{brand} - {name}*\n'
-        except KeyError:
+        except KeyError as err:
             pass
         page = BeautifulSoup(url.content, 'lxml')
         date = page.find("em").text.strip()
