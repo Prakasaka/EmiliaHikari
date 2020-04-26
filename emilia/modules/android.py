@@ -77,7 +77,7 @@ def twrp(update, context):
 
             send_message(update.effective_message, "{}".format(reply),
                                parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
-    except telegram.error.BadRequest as e:
+    except BadRequest as e:
         send_message(update.effective_message, "Error: {}".format(e))
 
 
