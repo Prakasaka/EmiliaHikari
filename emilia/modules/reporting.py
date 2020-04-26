@@ -96,7 +96,7 @@ def report(update, context) -> str:
                           [InlineKeyboardButton("➡ Message reported", url=chatlink)],
                           [InlineKeyboardButton("⚠️ Kick", callback_data="rp_{}=1={}".format(chat.id, reported_user.id)),
                           InlineKeyboardButton("⛔️ Banned", callback_data="rp_{}=2={}".format(chat.id, reported_user.id))],
-                          [InlineKeyboardButton("❎ Delete messagen", callback_data="rp_{}=3={}".format(chat.id, message.reply_to_message.message_id))],
+                          [InlineKeyboardButton("❎ Delete message", callback_data="rp_{}=3={}".format(chat.id, message.reply_to_message.message_id))],
                           [InlineKeyboardButton("Close button", callback_data="rp_{}=4={}".format(chat.id, reported_user.id))]
                         ]
                 reply_markup = InlineKeyboardMarkup(keyboard)
@@ -312,7 +312,7 @@ def user_protection_checker(context, user_id):
         # if int(user_id) in SUPPORT_USERS:
         #       return False, "Error: User is under protection"
 
-        if int(user_id) == bot.id:
+        if int(user_id) == context.bot.id:
                 return False, "\n\nError: This is myself!"
 
         return True, ""
