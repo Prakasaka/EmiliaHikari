@@ -2,6 +2,7 @@ future
 emoji
 requests
 sqlalchemy
+beautifulsoup4
 python-telegram-bot
 psycopg2-binary
 feedparser
