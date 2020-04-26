@@ -49,8 +49,6 @@ def twrp(update, context):
             reply = f"Couldn't find twrp downloads for {device}!\n"
             del_msg = send_message(update.effective_message, "{}".format(reply),
                                parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
-    except telegram.error.BadRequest as e:
-        send_message(update.effective_message, "Error: {}".format(e))
         time.sleep(5)
         try:
             update.effective_message.delete()
@@ -77,7 +75,8 @@ def twrp(update, context):
             dl_file = download.text
             size = trs[i].find("span", {"class": "filesize"}).text
             reply += f'[{dl_file}]({dl_link}) - {size}\n'
-
+    except telegram.error.BadRequest as e:
+        send_message(update.effective_message, "Error: {}".format(e))
         send_message(update.effective_message, "{}".format(reply),
                                parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
 
