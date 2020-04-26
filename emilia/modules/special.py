@@ -32,10 +32,11 @@ import subprocess
 import urllib
 import psutil
 
+from typing import Optional, List
 from telegram.error import BadRequest, Unauthorized
 from telegram import Message, Chat, Update, Bot, MessageEntity
 from telegram import ParseMode, InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.ext import CommandHandler, run_async, Filters
+from telegram.ext import CommandHandler, run_async, Filters, MessageHandler, 
 from telegram.utils.helpers import escape_markdown, mention_html, mention_markdown
 
 from emilia import dispatcher, OWNER_ID, SUDO_USERS, SUPPORT_USERS, WHITELIST_USERS, LOGGER
@@ -45,6 +46,7 @@ from emilia.modules.helper_funcs.extraction import extract_user
 from emilia.modules.helper_funcs.filters import CustomFilters
 
 from emilia.modules.helper_funcs.alternate import send_message
+from telegraph import Telegraph, upload_file
 
 BASE_URL = 'https://del.dog'
 namespaces = {}
@@ -144,6 +146,29 @@ def clear(update, context):
     if update.message.chat_id in namespaces:
         del namespaces[update.message.chat_id]
     send("Cleared locals.", update, context)
+
+
+@run_async
+def media_telegraph(update, context):
+    msg = update.effective_message # type: Optional[Message]
+
+@run_async
+def post_telegraph(update, context):
+    args = context.args
+    short_name = "Created By @MidukkiBot 😬"
+    msg = update.effective_message # type: Optional[Message]
+    telegraph = Telegraph()
+    r = telegraph.create_account(short_name=short_name)
+    auth_url = r["auth_url"]
+    LOGGER.info(auth_url)
+    title_of_page = " ".join(args)
+    page_content = msg.reply_to_message.text
+    page_content = page_content.replace("\n", "<br>")
+    response = telegraph.create_page(
+        title_of_page,
+        html_content=page_content
+    )
+    send_message(update.effective_message, "https://telegra.ph/{}".format(response["path"]))
 
 
 @run_async
@@ -335,6 +360,8 @@ __help__ = """
  - /paste: Create a paste or a shortened url using [dogbin](https://del.dog)
  - /getpaste: Get the content of a paste or shortened url from [dogbin](https://del.dog)
  - /pastestats: Get stats of a paste or shortened url from [dogbin](https://del.dog)
+ - /tele.gra.ph - as reply to a long message
+ - /telegraph - as a reply to a media less than 5MiB
 """
 
 __mod_name__ = "special"
@@ -350,6 +377,8 @@ LOG_HANDLER = DisableAbleCommandHandler("log", log, filters=Filters.user(OWNER_I
 eval_handler = CommandHandler('eval', evaluate, filters=Filters.user(OWNER_ID))
 exec_handler = CommandHandler('py', execute, filters=Filters.user(OWNER_ID))
 clear_handler = CommandHandler('clearlocals', clear, filters=Filters.user(OWNER_ID))
+dispatcher.add_handler(DisableAbleCommandHandler("tele", post_telegraph, pass_args=True))
+dispatcher.add_handler(DisableAbleCommandHandler("telegraph", media_telegraph, filters=Filters.video | Filters.photo))
 
 dispatcher.add_handler(GETLINK_HANDLER)
 dispatcher.add_handler(LEAVECHAT_HANDLER)

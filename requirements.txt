@@ -14,5 +14,6 @@ Pillow
 alphabet_detector
 urbandict
 hurry.filesize
+telegraph
 psutil
 lxml
