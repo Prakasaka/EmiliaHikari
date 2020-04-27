@@ -59,14 +59,11 @@ def ofox(update, context):
         reply = f'*Latest Stable Orangefox for {device}*\n'
         fetch = get(f'https://api.orangefox.download/v2/device/{device}/releases/stable/last').json()
         try:
-            bugs = fetch['bugs']
-            filename = fetch['filename']
             changelog = fetch['changelog']
             buildate = fetch['date']
             link = fetch['url']
             version = fetch['version']
-            reply += (f'*Bugs* -  {bugs}\n'
-                     f'*Changelog* - {changelog}\n'
+            reply += (f'*Changelog* - {changelog}\n'
                      f'*Build Date* - {buildate}\n'
                      f'*Version* - {version}\n')
             keyboard = [[InlineKeyboardButton(text="click here to Download", url=f"{link}")]]
