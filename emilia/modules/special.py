@@ -349,13 +349,13 @@ def slist(update, context):
     for user_id in SUDO_USERS:
         try:
             user = context.bot.get_chat(user_id)
-            name = "[{}](tg://user?id={})".format(user.first_name + (user.last_name or ""), user.id)
+            name = "{}".format(mention_markdown(user.id, user.first_name + " " + (user.last_name or "")))
             if user.username:
                 name = escape_markdown("@" + user.username)
-            text1 += "\n - `{}`".format(name)
+            text1 += "\n • {}".format(name)
         except BadRequest as excp:
             if excp.message == 'Chat not found':
-                text1 += "\n - ({}) - not found".format(user_id)
+                text1 += "\n • ({}) • not found".format(user_id)
     # for user_id in SUPPORT_USERS:
     #     try:
     #         user = bot.get_chat(user_id)
