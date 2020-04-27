@@ -102,20 +102,22 @@ def report(update, context) -> str:
 		reply_markup = InlineKeyboardMarkup(keyboard)
 
 		should_forward = True
-		context.bot.send_message(chat.id, "{} <b>has been reported to the admin</b>{}".format(
-                                        mention_html(reported_user.id, reported_user.first_name),
-                                        "".join(all_admins)), parse_mode=ParseMode.HTML, reply_to_message_id=message.reply_to_message.message_id)
 
 		CURRENT_REPORT[str(chat.id)] = msg
 		CURRENT_REPORT[str(chat.id)+"key"] = reply_markup
 		CURRENT_REPORT[str(chat.id)+"user"] = {'name': reported_user.first_name, 'id': reported_user.id, 'rname': user.first_name, 'rid': user.id}
-		for admin in admin_list:
+		all_admins = []
+                for admin in admin_list:
 			if admin.user.is_bot:  # can't message bots
 				continue
 
 			if sql.user_should_report(admin.user.id):
+                                all_admins.append("<a href='tg://user?id={}'>⁣</a>".format(admin.user.id))
 				try:
-					#bot.send_message(admin.user.id, msg + link, parse_mode=ParseMode.HTML)
+					context.bot.send_message(chat.id, "{} <b>has been reported to the admin</b>{}".format(
+                                                                                                                        mention_html(reported_user.id, reported_user.first_name),
+                                                                                                                        "".join(all_admins)), parse_mode=ParseMode.HTML, reply_to_message_id=message.reply_to_message.message_id)
+                                        #bot.send_message(admin.user.id, msg + link, parse_mode=ParseMode.HTML)
 					#bot.send_message(admin.user.id, msg, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
 
 					try:
