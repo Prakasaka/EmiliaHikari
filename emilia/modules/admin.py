@@ -332,8 +332,8 @@ def adminlist(update, context):
 			name = "☠ Deleted Account"
 		else:
 			name = "{}".format(mention_markdown(user.id, user.first_name + " " + (user.last_name or "")))
-		#if user.username:
-		#    name = escape_markdown("@" + user.username)
+		if user.username:
+		   name = escape_markdown("@" + user.username)
 		if status == "creator":
 			text += "\n 👑 Creator:"
 			text += "\n` • `{} \n\n 🔱 Admins:".format(name)
@@ -344,8 +344,8 @@ def adminlist(update, context):
 			name = "☠ Deleted Account"
 		else:
 			name = "{}".format(mention_markdown(user.id, user.first_name + " " + (user.last_name or "")))
-		#if user.username:
-		#    name = escape_markdown("@" + user.username)
+		if user.username:
+		   name = escape_markdown("@" + user.username)
 		if status == "administrator":
 			text += "\n` • `{}".format(name)
 
