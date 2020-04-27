@@ -93,16 +93,18 @@ def report(update, context) -> str:
 		else:
 			chatlink = "https://t.me/c/{}/{}".format(str(chat.id)[4:], str(message.reply_to_message.message_id))
 		keyboard = [
-			  [InlineKeyboardButton("⚠️ Message reported", url=chatlink)],
+			  [InlineKeyboardButton("➡ Message reported", url=chatlink)],
 			  [InlineKeyboardButton("⚠️ Kick", callback_data="rp_{}=1={}".format(chat.id, reported_user.id)),
 			  InlineKeyboardButton("⛔️ Banned", callback_data="rp_{}=2={}".format(chat.id, reported_user.id))],
-			  [InlineKeyboardButton("Delete messagen", callback_data="rp_{}=3={}".format(chat.id, message.reply_to_message.message_id))],
+			  [InlineKeyboardButton("❎ Delete messagen", callback_data="rp_{}=3={}".format(chat.id, message.reply_to_message.message_id))],
 			  [InlineKeyboardButton("Close button", callback_data="rp_{}=4={}".format(chat.id, reported_user.id))]
 			]
 		reply_markup = InlineKeyboardMarkup(keyboard)
 
 		should_forward = True
-		context.bot.send_message(chat.id, "<i>⚠️ Message has been reported to all admins!</i>", parse_mode=ParseMode.HTML, reply_to_message_id=message.message_id)
+		context.bot.send_message(chat.id, "{} <b>has been reported to the admin</b>{}".format(
+                                        mention_html(reported_user.id, reported_user.first_name),
+                                        "".join(all_admins)), parse_mode=ParseMode.HTML, reply_to_message_id=message.reply_to_message.message_id)
 
 		CURRENT_REPORT[str(chat.id)] = msg
 		CURRENT_REPORT[str(chat.id)+"key"] = reply_markup
@@ -163,7 +165,7 @@ def report_alt(update, context) -> str:
 			if sql.user_should_report(admin.user.id):
 				all_admins.append("<a href='tg://user?id={}'>⁣</a>".format(admin.user.id))
 
-		context.bot.send_message(chat.id, "⚠️ {} <b>has been reported to the admin</b>{}".format(
+		context.bot.send_message(chat.id, "{} <b>has been reported to the admin</b>{}".format(
 					mention_html(reported_user.id, reported_user.first_name),
 					"".join(all_admins)), parse_mode=ParseMode.HTML, reply_to_message_id=message.reply_to_message.message_id)
 		return msg
@@ -338,7 +340,7 @@ NOTE: neither of these will get triggered if used by admins
 """
 
 
-REPORT_HANDLER = CommandHandler("report", report_alt, filters=Filters.group)
+REPORT_HANDLER = CommandHandler("report", report, filters=Filters.group)
 SETTING_HANDLER = CommandHandler("reports", report_setting, pass_args=True)
 ADMIN_REPORT_HANDLER = MessageHandler(Filters.regex("(?i)@admin(s)?"), report_alt)
 Callback_Report = CallbackQueryHandler(button, pattern=r"rp_")
