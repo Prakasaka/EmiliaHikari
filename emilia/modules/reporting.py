@@ -78,34 +78,21 @@ def report(update, context) -> str:
         else:
             msg = "{} is calling for admins in \"{}\"!".format(
                 mention_html(user.id, user.first_name), html.escape(chat_name))
-
+        if chat.username:
+            chatlink = "https://t.me/{}/{}".format(chat.username, str(message.reply_to_message.message_id))
+        else:
+            chatlink = "https://t.me/c/{}/{}".format(str(chat.id)[4:], str(message.reply_to_message.message_id))
         # should_forward = False
-        keyboard = [[
-                InlineKeyboardButton(
-                    u"➡ Message",
-                    url="https://t.me/{}/{}".format(
-                        chat.username,
-                        str(message.reply_to_message.message_id)))
-                        ],
-                        [
-                            InlineKeyboardButton(
-                                u"⚠ Kick",
-                                callback_data="report_{}=kick={}={}".format(
+        keyboard = [[InlineKeyboardButton(u"➡ Message", url=chatlink)],
+                   [InlineKeyboardButton(u"⚠ Kick", callback_data="report_{}=kick={}={}".format(
                                     chat.id, reported_user.id,
                                     reported_user.first_name)),
-                            InlineKeyboardButton(
-                                u"⛔️ Ban",
-                                callback_data="report_{}=banned={}={}".format(
+                    InlineKeyboardButton(u"⛔️ Ban", callback_data="report_{}=banned={}={}".format(
                                     chat.id, reported_user.id,
-                                    reported_user.first_name))
-                        ],
-                        [
-                            InlineKeyboardButton(
-                                u"❎ Delete Message",
-                                callback_data="report_{}=delete={}={}".format(
+                                    reported_user.first_name))],
+                    [InlineKeyboardButton(u"❎ Delete Message", callback_data="report_{}=delete={}={}".format(
                                     chat.id, reported_user.id,
-                                    message.reply_to_message.message_id))
-                        ]]
+                                    message.reply_to_message.message_id))]]
         reply_markup = InlineKeyboardMarkup(keyboard)
         should_forward = True
         all_admins = []
