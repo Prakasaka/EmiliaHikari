@@ -33,8 +33,8 @@ DEVICES_DATA = 'https://raw.githubusercontent.com/androidtrackers/certified-andr
 def ofox(update, context):
     args = update.message.text.split()
     if len(args) == 0:
-        reply = 'No codename provided, write a codename for fetching informations.'
-        del_msg = send_message(update.effective_message, reply, parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
+        reply = "No codename provided, write a codename for fetching informations."
+        del_msg = send_message(update.effective_message, reply)
         time.sleep(5)
         try:
             del_msg.delete()
@@ -45,22 +45,21 @@ def ofox(update, context):
     device = str(args[1])
     fetch = get(f"https://api.orangefox.download/v2/device/{device}")
     if url.status_code == 404:
-        send_message(update.effective_message, f"Couldn't find Orangefox downloads for {device}!")
+        send_message(update.effective_message, f"Couldn't find Orangefox downloads for {device}")
     else:
         reply = f"<b>Latest Stable Orangefox for {device}</b>\n"
         fetch = get(f'https://api.orangefox.download/v2/device/{device}/releases/stable/last').json()
-        try:
-            changelog = fetch['changelog']
-            buildate = fetch['date']
-            size = url['size_human']
-            link = fetch['url']
-            version = fetch['version']
-            reply += (f'<b>Changelog</b> - {changelog}\n'
-                      f'<b>Size - </b> {size}\n'
-                      f'<b>Build Date</b> - {buildate}\n'
-                      f'<b>Version</b> - {version}')
-            keyboard = [[InlineKeyboardButton(text="click here to Download", url=f"{link}")]]
-            send_message(update.effective_message, reply, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode='HTML', disable_web_page_preview=True)
+        changelog = fetch['changelog']
+        buildate = fetch['date']
+        size = url['size_human']
+        link = fetch['url']
+        version = fetch['version']
+        reply += (f'<b>Changelog</b> - {changelog}\n'
+                  f'<b>Size - </b> {size}\n'
+                  f'<b>Build Date</b> - {buildate}\n'
+                  f'<b>Version</b> - {version}')
+        keyboard = [[InlineKeyboardButton(text="click here to Download", url=f"{link}")]]
+        send_message(update.effective_message, reply, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode="HTML", disable_web_page_preview=True)
 
 @run_async
 def twrp(update, context):
