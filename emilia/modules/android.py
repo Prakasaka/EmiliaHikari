@@ -31,7 +31,7 @@ DEVICES_DATA = 'https://raw.githubusercontent.com/androidtrackers/certified-andr
 
 @run_async
 def ofox(update, context):
-    args = context.args
+    cmd_name = "ofox"
     if len(args) == 0:
         reply = 'No codename provided, write a codename for fetching informations.'
         del_msg = send_message(update.effective_message, "{}".format(reply), parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
@@ -42,7 +42,7 @@ def ofox(update, context):
         except BadRequest as err:
             if (err.message == "Message to delete not found" ) or (err.message == "Message can't be deleted" ):
                 return
-    device = " ".join(args)
+    device = message.text[len(f'/{cmd_name} '):]
     fetch = get(f'https://api.orangefox.download/v2/device/{device}')
     if fetch.status_code == 404:
         reply = f"Couldn't find Orangefox downloads for {device}!\n"
@@ -56,16 +56,16 @@ def ofox(update, context):
             if (err.message == "Message to delete not found" ) or (err.message == "Message can't be deleted" ):
                 return
     else:
-        reply = f'*Latest Stable Orangefox for {device}*\n'
+        reply = f'<b>Latest Stable Orangefox for {device}</b>\n'
         fetch = get(f'https://api.orangefox.download/v2/device/{device}/releases/stable/last').json()
         try:
             changelog = fetch['changelog']
             buildate = fetch['date']
             link = fetch['url']
             version = fetch['version']
-            reply += (f'*Changelog* - {changelog}\n'
-                     f'*Build Date* - {buildate}\n'
-                     f'*Version* - {version}\n')
+            reply += (f'<b>Changelog</b> - {changelog}\n'
+                     f'<b>Build Date</b> - {buildate}\n'
+                     f'<b>Version</b> - {version}')
             keyboard = [[InlineKeyboardButton(text="click here to Download", url=f"{link}")]]
             send_message(update.effective_message, reply, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
             return
@@ -75,7 +75,7 @@ def ofox(update, context):
 
 @run_async
 def twrp(update, context):
-    args = context.args
+    cmd_name = "twrp"
     if len(args) == 0:
         reply='No codename provided, write a codename for fetching informations.'
         del_msg = send_message(update.effective_message, "{}".format(reply),
@@ -88,7 +88,7 @@ def twrp(update, context):
             if (err.message == "Message to delete not found" ) or (err.message == "Message can't be deleted" ):
                 return
 
-    device = " ".join(args)
+    device = message.text[len(f'/{cmd_name} '):]
     url = get(f'https://eu.dl.twrp.me/{device}/')
     if url.status_code == 404:
         reply = f"Couldn't find twrp downloads for {device}!\n"
@@ -574,8 +574,8 @@ __mod_name__ = "Android"
 
 EVO_HANDLER = DisableAbleCommandHandler("evo", evo, admin_ok=True)
 MAGISK_HANDLER = DisableAbleCommandHandler("magisk", magisk)
-TWRP_HANDLER = DisableAbleCommandHandler("twrp", twrp, pass_args=True)
-OFOX_HANDLER = DisableAbleCommandHandler("ofox", ofox, pass_args=True)
+TWRP_HANDLER = DisableAbleCommandHandler("twrp", twrp, admin_ok=True)
+OFOX_HANDLER = DisableAbleCommandHandler("ofox", ofox, admin_ok=True)
 DOTOS_HANDLER = DisableAbleCommandHandler("dotos", dotos, admin_ok=True)
 PIXYS_HANDLER = DisableAbleCommandHandler("pixys", pixys, admin_ok=True)
 DESCENDANT_HANDLER = DisableAbleCommandHandler("descendant", descendant, pass_args=True, admin_ok=True)
