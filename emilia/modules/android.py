@@ -43,8 +43,8 @@ def ofox(update, context):
             if (err.message == "Message to delete not found" ) or (err.message == "Message can't be deleted" ):
                 return
     device = " ".join(args)
-    url = get(f'https://api.orangefox.download/v2/device/{device}')
-    if url.status_code == 404:
+    fetch = get(f'https://api.orangefox.download/v2/device/{device}.json')
+    if fetch.status_code == 404:
         reply = f"Couldn't find Orangefox downloads for {device}!\n"
         del_msg = send_message(update.effective_message, "{}".format(reply),
                                parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
@@ -59,16 +59,18 @@ def ofox(update, context):
         reply = f'*Latest Stable Orangefox for {device}*\n'
         url = get(f'https://api.orangefox.download/v2/device/{device}/releases/stable/last').json()
         try:
-            bugs = url['bugs']
-            filename = url['filename']
-            changelog = url['changelog']
-            buildate = url['date']
-            link = url['url']
-            version = url['version']
+            usr = fetch.json()
+            response = usr['response'][0]
+            bugs = response['bugs']
+            filename = response['filename']
+            changelog = response['changelog']
+            buildate = response['date']
+            link = response['url']
+            version = response['version']
             reply = (f'*Bugs* -  {bugs}\n'
-                                         f'*Changelog* - {changelog}\n'
-                                         f'*Build Date* - {buildate}\n'
-                                         f'*Version* - {version}\n')
+                     f'*Changelog* - {changelog}\n'
+                     f'*Build Date* - {buildate}\n'
+                     f'*Version* - {version}\n')
             keyboard = [[InlineKeyboardButton(text="click here to Download", url=f"{link}")]]
             send_message(update.effective_message, reply, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
             return
@@ -122,10 +124,12 @@ def twrp(update, context):
         for i in range(row):
             download = trs[i].find('a')
             dl_link = f"https://eu.dl.twrp.me{download['href']}"
-            dl_file = download.text
-            dload = f'[{dl_file}]({dl_link})'
+            # dl_file = download.text
+            # load = f'{dl_file}{dl_link}'
+            # dload = load
 
-        keyboard = [[InlineKeyboardButton(text="click here to Download", url=f"{dload}")]]
+
+        keyboard = [[InlineKeyboardButton(text="click here to Download", url=f"{dl_link}")]]
         send_message(update.effective_message, reply, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
 
 
