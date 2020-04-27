@@ -350,7 +350,7 @@ def build_lock_message(chat_id):
 	locklist = []
 	permslist = []
 	if locks:
-		res += "*" + chat_id, "These are the locks in this chat:" + "*"
+		res += "*" + "These are the locks in this chat:" + "*"
 		if locks:
 			locklist.append("sticker = `{}`".format(locks.sticker))
 			locklist.append("audio = `{}`".format(locks.audio))
@@ -383,7 +383,7 @@ def build_lock_message(chat_id):
 		# Building lock list string
 		for x in locklist:
 			res += "\n - {}".format(x)
-	res += "\n\n*" + chat_id, "These are permissions in this chat:" + "*"
+	res += "\n\n*" + "These are permissions in this chat:" + "*"
 	for x in permslist:
 		res += "\n - {}".format(x)
 	return res
