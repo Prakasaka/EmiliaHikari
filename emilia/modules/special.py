@@ -368,12 +368,12 @@ def slist(update, context):
     #             text2 += "\n - ({}) - not found".format(user_id)
     send_message(update.effective_message, text1 + "\n", parse_mode=ParseMode.MARKDOWN)
 
-@run_async
-def log(update, context):
-	message = update.effsend_message(update.effective_message, ective_message
-	eventdict = message.to_dict()
-	jsondump = json.dumps(eventdict, indent=4)
-	send_message(update.effective_message, jsondump)
+# @run_async
+# def log(update, context):
+#     message = update.effective_message
+#     eventdict = message.to_dict()
+#     jsondump = json.dumps(eventdict, indent=4)
+#     send_message(update.effective_message, jsondump)
 
 
 __help__ = """
@@ -394,7 +394,7 @@ UD_HANDLER = DisableAbleCommandHandler("ud", urbandictionary)
 PASTE_HANDLER = DisableAbleCommandHandler("paste", paste, pass_args=True)
 GET_PASTE_HANDLER = DisableAbleCommandHandler("getpaste", get_paste_content, pass_args=True)
 PASTE_STATS_HANDLER = DisableAbleCommandHandler("pastestats", get_paste_stats, pass_args=True)
-LOG_HANDLER = DisableAbleCommandHandler("log", log, filters=Filters.user(OWNER_ID))
+# LOG_HANDLER = DisableAbleCommandHandler("log", log, filters=Filters.user(OWNER_ID))
 SLIST_HANDLER = CommandHandler("slist", slist, filters=Filters.user(OWNER_ID))
 # eval_handler = CommandHandler('eval', evaluate, filters=Filters.user(OWNER_ID))
 # exec_handler = CommandHandler('py', execute, filters=Filters.user(OWNER_ID))
@@ -409,7 +409,7 @@ dispatcher.add_handler(SLIST_HANDLER)
 dispatcher.add_handler(PASTE_HANDLER)
 dispatcher.add_handler(GET_PASTE_HANDLER)
 dispatcher.add_handler(PASTE_STATS_HANDLER)
-dispatcher.add_handler(LOG_HANDLER)
+# dispatcher.add_handler(LOG_HANDLER)
 # dispatcher.add_handler(eval_handler)
 # dispatcher.add_handler(exec_handler)
 # dispatcher.add_handler(clear_handler)
