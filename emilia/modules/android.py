@@ -43,7 +43,7 @@ def ofox(update, context):
             if (err.message == "Message to delete not found" ) or (err.message == "Message can't be deleted" ):
                 return
     device = " ".join(args)
-    fetch = get(f'https://api.orangefox.download/v2/device/{device}.json')
+    fetch = get(f'https://api.orangefox.download/v2/device/{device}')
     if fetch.status_code == 404:
         reply = f"Couldn't find Orangefox downloads for {device}!\n"
         del_msg = send_message(update.effective_message, "{}".format(reply),
@@ -57,26 +57,23 @@ def ofox(update, context):
                 return
     else:
         reply = f'*Latest Stable Orangefox for {device}*\n'
-        fetch = get(f'https://api.orangefox.download/v2/device/{device}/releases/stable/last.json')
+        fetch = get(f'https://api.orangefox.download/v2/device/{device}/releases/stable/last').json()
         try:
-            usr = fetch.json()
-            response = usr['response'][0]
-            bugs = response['bugs']
-            filename = response['filename']
-            changelog = response['changelog']
-            buildate = response['date']
-            link = response['url']
-            version = response['version']
-            reply = (f'*Bugs* -  {bugs}\n'
+            bugs = fetch['bugs']
+            filename = fetch['filename']
+            changelog = fetch['changelog']
+            buildate = fetch['date']
+            link = fetch['url']
+            version = fetch['version']
+            reply += (f'*Bugs* -  {bugs}\n'
                      f'*Changelog* - {changelog}\n'
                      f'*Build Date* - {buildate}\n'
                      f'*Version* - {version}\n')
             keyboard = [[InlineKeyboardButton(text="click here to Download", url=f"{link}")]]
             send_message(update.effective_message, reply, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
             return
-        except Exception as exp:
-           send_message(update.effective_message, "The link could not be fetched for some reason, please try again later")
-           LOGGER.info(exp)
+        except Exception:
+           pass
 
 @run_async
 def twrp(update, context):
