@@ -195,7 +195,7 @@ def button(context, update):
 			InlineKeyboardButton("No", callback_data="ak_1+n|{}={}".format(report_chat, report_target))]
 		]
 		reply_markup = InlineKeyboardMarkup(keyboard)
-		query.answer(text=msg + "\n\nAre you sure you want to kick {}?".format(userinfo.get('name')),
+		context.bot.edit_message_text(text=msg + "\n\nAre you sure you want to kick {}?".format(userinfo.get('name')),
 						  chat_id=query.message.chat_id,
 						  message_id=query.message.message_id, parse_mode=ParseMode.HTML,
 						  reply_markup=reply_markup)
@@ -205,7 +205,7 @@ def button(context, update):
 			InlineKeyboardButton("No", callback_data="ak_2+n|{}={}".format(report_chat, report_target))]
 		]
 		reply_markup = InlineKeyboardMarkup(keyboard)
-		query.answer(text=msg + "\n\nAre you sure you want to banned {}?".format(userinfo.get('name')),
+		context.bot.edit_message_text(text=msg + "\n\nAre you sure you want to banned {}?".format(userinfo.get('name')),
 						  chat_id=query.message.chat_id,
 						  message_id=query.message.message_id, parse_mode=ParseMode.HTML,
 						  reply_markup=reply_markup)
@@ -215,21 +215,21 @@ def button(context, update):
 			InlineKeyboardButton("No", callback_data="ak_3+n|{}={}".format(report_chat, report_target))]
 		]
 		reply_markup = InlineKeyboardMarkup(keyboard)
-		query.answer(text=msg + "\n\nDelete message?",
+		context.bot.edit_message_text(text=msg + "\n\nDelete message?",
 						  chat_id=query.message.chat_id,
 						  message_id=query.message.message_id, parse_mode=ParseMode.HTML,
 						  reply_markup=reply_markup)
 	elif splitter[1] == "4":
 		try:
-			query.answer(text=msg + "\n\nButton closed!",
+			context.bot.edit_message_text(text=msg + "\n\nButton closed!",
 						  chat_id=query.message.chat_id,
 						  message_id=query.message.message_id, parse_mode=ParseMode.HTML)
 		except Exception as err:
-			query.answer(text=msg + "\n\nError: {}".format(err),
+			context.bot.edit_message_text(text=msg + "\n\nError: {}".format(err),
 						  chat_id=query.message.chat_id,
 						  message_id=query.message.message_id, parse_mode=ParseMode.HTML)
 		"""
-		query.answer(text="Chat: {}\nAction: {}\nUser: {}".format(splitter[0], splitter[1], splitter[2]),
+		context.bot.edit_message_text(text="Chat: {}\nAction: {}\nUser: {}".format(splitter[0], splitter[1], splitter[2]),
 						  chat_id=query.message.chat_id,
 						  message_id=query.message.message_id)
 		"""
@@ -248,7 +248,7 @@ def buttonask(context, update):
 	if isyes == "y":
 		a, b = user_protection_checker(context.bot, report_target)
 		if not a:
-			query.answer(text=msg + b,
+			context.bot.edit_message_text(text=msg + b,
 							  chat_id=query.message.chat_id,
 							  message_id=query.message.message_id, parse_mode=ParseMode.HTML)
 			return
@@ -258,11 +258,11 @@ def buttonask(context, update):
 				context.bot.sendMessage(report_chat, text="{} has been kicked!\nBy: {}".format(\
 					mention_markdown(userinfo['id'], userinfo['name']), mention_markdown(chat.id, chat.first_name)), \
 					parse_mode=ParseMode.MARKDOWN)
-				query.answer(text=msg + "\n\n{} has been kicked!".format(mention_html(userinfo['id'], userinfo['name'])),
+				context.bot.edit_message_text(text=msg + "\n\n{} has been kicked!".format(mention_html(userinfo['id'], userinfo['name'])),
 							  chat_id=query.message.chat_id,
 							  message_id=query.message.message_id, parse_mode=ParseMode.HTML)
 			except Exception as err:
-				query.answer(text=msg + "\n\nError: {}".format(err),
+				context.bot.edit_message_text(text=msg + "\n\nError: {}".format(err),
 							  chat_id=query.message.chat_id,
 							  message_id=query.message.message_id, parse_mode=ParseMode.HTML)
 		elif splitter[0] == "2":
@@ -271,25 +271,25 @@ def buttonask(context, update):
 				context.bot.sendMessage(report_chat, text="{} has been banned!\nBy: {}".format(\
 					mention_markdown(userinfo['id'], userinfo['name']), mention_markdown(chat.id, chat.first_name)), \
 					parse_mode=ParseMode.MARKDOWN)
-				query.answer(text=msg + "\n\n{} has been banned!".format(mention_html(userinfo['id'], userinfo['name'])),
+				context.bot.edit_message_text(text=msg + "\n\n{} has been banned!".format(mention_html(userinfo['id'], userinfo['name'])),
 							  chat_id=query.message.chat_id,
 							  message_id=query.message.message_id, parse_mode=ParseMode.HTML)
 			except Exception as err:
-				query.answer(text=msg + "\n\nError: {}".format(err),
+				context.bot.edit_message_text(text=msg + "\n\nError: {}".format(err),
 							  chat_id=query.message.chat_id,
 							  message_id=query.message.message_id, parse_mode=ParseMode.HTML)
 		elif splitter[0] == "3":
 			try:
 				context.bot.deleteMessage(report_chat, report_target)
-				query.answer(text=msg + "\n\nMessage was deleted!",
+				context.bot.edit_message_text(text=msg + "\n\nMessage was deleted!",
 							  chat_id=query.message.chat_id,
 							  message_id=query.message.message_id, parse_mode=ParseMode.HTML)
 			except Exception as err:
-				query.answer(text=msg + "\n\nError: {}".format(err),
+				context.bot.edit_message_text(text=msg + "\n\nError: {}".format(err),
 							  chat_id=query.message.chat_id,
 							  message_id=query.message.message_id, parse_mode=ParseMode.HTML)
 	elif isyes == "n":
-		query.answer(text=msg,
+		context.bot.edit_message_text(text=msg,
 							  chat_id=query.message.chat_id,
 							  message_id=query.message.message_id, parse_mode=ParseMode.HTML,
 							  reply_markup=key)
@@ -344,7 +344,7 @@ NOTE: neither of these will get triggered if used by admins
 
 REPORT_HANDLER = CommandHandler("report", report, filters=Filters.group)
 SETTING_HANDLER = CommandHandler("reports", report_setting, pass_args=True)
-ADMIN_REPORT_HANDLER = MessageHandler(Filters.regex("(?i)@admin(s)?"), report_alt)
+ADMIN_REPORT_HANDLER = MessageHandler(Filters.regex("(?i)@admin(s)?"), report)
 Callback_Report = CallbackQueryHandler(button, pattern=r"rp_")
 Callback_ReportAsk = CallbackQueryHandler(buttonask, pattern=r"ak_")
 
