@@ -32,6 +32,7 @@ DEVICES_DATA = 'https://raw.githubusercontent.com/androidtrackers/certified-andr
 @run_async
 def ofox(update, context):
     cmd_name = "ofox"
+    message = update.effective_message
     device = message.text[len(f'/{cmd_name} '):]
     fetch = get(f'https://api.orangefox.download/v2/device/{device}')
     if device == '':
@@ -76,6 +77,7 @@ def ofox(update, context):
 @run_async
 def twrp(update, context):
     cmd_name = "twrp"
+    message = update.effective_message
     device = message.text[len(f'/{cmd_name} '):]
     url = get(f'https://eu.dl.twrp.me/{device}/')
     if device == '':
