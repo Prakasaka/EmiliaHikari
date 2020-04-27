@@ -120,10 +120,10 @@ def report(update, context) -> str:
             if sql.user_should_report(admin.user.id):
                 all_admins.append("<a href='tg://user?id={}'>⁣</a>".format(admin.user.id))
                 try:
-                     context.context.bot.send_message(chat.id, "{} <b>has been reported to the admin</b>{}".format(
+                    context.context.bot.send_message(chat.id, "{} <b>has been reported to the admin</b>{}".format(
                                                                                                                         mention_html(reported_user.id, reported_user.first_name),
                                                                                                                         "".join(all_admins)), parse_mode=ParseMode.HTML, reply_to_message_id=message.reply_to_message.message_id)
-                     try:
+                    try:
                         if should_forward:
                             message.reply_to_message.forward(admin.user.id)
                             if len(message.text.split()) > 1:  # If user is giving a reason, send his message too
@@ -470,11 +470,13 @@ NOTE: neither of these will get triggered if used by admins
 REPORT_HANDLER = CommandHandler("report", report, filters=Filters.group)
 SETTING_HANDLER = CommandHandler("reports", report_setting, pass_args=True)
 ADMIN_REPORT_HANDLER = MessageHandler(Filters.regex("(?i)@admin(s)?"), report)
-Callback_Report = CallbackQueryHandler(button, pattern=r"rp_")
-Callback_ReportAsk = CallbackQueryHandler(buttonask, pattern=r"ak_")
+# Callback_Report = CallbackQueryHandler(button, pattern=r"rp_")
+# Callback_ReportAsk = CallbackQueryHandler(buttonask, pattern=r"ak_")
+report_button_user_handler = CallbackQueryHandler(buttons, pattern=r"report_")
 
+dispatcher.add_handler(report_button_user_handler)
 dispatcher.add_handler(REPORT_HANDLER, REPORT_GROUP)
 dispatcher.add_handler(ADMIN_REPORT_HANDLER, REPORT_GROUP)
 dispatcher.add_handler(SETTING_HANDLER)
-dispatcher.add_handler(Callback_Report)
-dispatcher.add_handler(Callback_ReportAsk)
+# dispatcher.add_handler(Callback_Report)
+# dispatcher.add_handler(Callback_ReportAsk)
