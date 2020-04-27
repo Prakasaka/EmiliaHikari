@@ -112,28 +112,43 @@ def report(update, context) -> str:
             msg = "{} is calling for admins in \"{}\"!".format(
                 mention_html(user.id, user.first_name), html.escape(chat_name))
             link = ""
-            should_forward = True
-        all_admins = []
+        should_forward = True
         for admin in admin_list:
             if admin.user.is_bot:  # can't message bots
                 continue
             if sql.user_should_report(admin.user.id):
-                all_admins.append("<a href='tg://user?id={}'>⁣</a>".format(admin.user.id))
                 try:
-                    context.bot.send_message(chat.id, "{} <b>has been reported to the admin</b>{}".format(mention_html(reported_user.id, reported_user.first_name),
-                    "".join(all_admins)), parse_mode=ParseMode.HTML, reply_to_message_id=message.reply_to_message.message_id)
-                    try:
+                    if not chat.type == Chat.SUPERGROUP:
+                        context.bot.send_message(admin.user.id, msg + link, parse_mode=ParseMode.HTML)
                         if should_forward:
                             message.reply_to_message.forward(admin.user.id)
                             if len(message.text.split()) > 1:  # If user is giving a reason, send his message too
                                 message.forward(admin.user.id)
-                    except:
-                        pass
-                    context.bot.send_message(admin.user.id, msg, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
+                    if not chat.username:
+                        context.bot.send_message(admin.user.id, msg + link, parse_mode=ParseMode.HTML)
+
+                        if should_forward:
+                            message.reply_to_message.forward(admin.user.id)
+
+                            if len(message.text.split()) > 1:  # If user is giving a reason, send his message too
+                                message.forward(admin.user.id)
+
+                    if chat.username and chat.type == Chat.SUPERGROUP:
+                        context.bot.send_message(admin.user.id, msg + link, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
+
+                        if should_forward:
+                            message.reply_to_message.forward(admin.user.id)
+
+                            if len(message.text.split()) > 1:  # If user is giving a reason, send his message too
+                                message.forward(admin.user.id)
+
                 except Unauthorized:
                     pass
                 except BadRequest as excp:  # TODO: cleanup exceptions
                     LOGGER.exception("Exception while reporting user")
+        context.bot.send_message(chat.id, "{} <b>has been reported to the admin</b>".format(
+					mention_html(reported_user.id, reported_user.first_name),
+					parse_mode=ParseMode.HTML, reply_to_message_id=message.reply_to_message.message_id))
         return msg
     return ""
 
