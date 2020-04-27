@@ -30,6 +30,53 @@ DEVICES_DATA = 'https://raw.githubusercontent.com/androidtrackers/certified-andr
 
 
 @run_async
+def ofox(update, context):
+    args = context.args
+    if len(args) == 0:
+        reply = 'No codename provided, write a codename for fetching informations.'
+        del_msg = send_message(update.effective_message, "{}".format(reply), parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
+        time.sleep(5)
+        try:
+            del_msg.delete()
+            update.effective_message.delete()
+        except BadRequest as err:
+            if (err.message == "Message to delete not found" ) or (err.message == "Message can't be deleted" ):
+                return
+    device = " ".join(args)
+    url = get(f'https://api.orangefox.download/v2/device/{device}')
+    if url.status_code == 404:
+        reply = f"Couldn't find Orangefox downloads for {device}!\n"
+        del_msg = send_message(update.effective_message, "{}".format(reply),
+                               parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
+        time.sleep(5)
+        try:
+            del_msg.delete()
+            update.effective_message.delete()
+        except BadRequest as err:
+            if (err.message == "Message to delete not found" ) or (err.message == "Message can't be deleted" ):
+                return
+    else:
+        reply = f'*Latest Stable Orangefox for {device}*\n'
+        url = get(f'https://api.orangefox.download/v2/device/{device}/releases/stable/last').json()
+        try:
+            bugs = url['bugs']
+            filename = url['filename']
+            changelog = url['changelog']
+            buildate = url['date']
+            link = url['url']
+            version = url['version']
+            reply = (f'*Bugs* -  {bugs}\n'
+                                         f'*Changelog* - {changelog}\n'
+                                         f'*Build Date* - {buildate}\n'
+                                         f'*Version* - {version}\n')
+            keyboard = [[InlineKeyboardButton(text="click here to Download", url=f"{link}")]]
+            send_message(update.effective_message, reply, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
+            return
+        except Exception as exp:
+           send_message(update.effective_message, "The link could not be fetched for some reason, please try again later")
+           LOGGER.info(exp)
+
+@run_async
 def twrp(update, context):
     args = context.args
     if len(args) == 0:
@@ -76,11 +123,10 @@ def twrp(update, context):
             download = trs[i].find('a')
             dl_link = f"https://eu.dl.twrp.me{download['href']}"
             dl_file = download.text
-            size = trs[i].find("span", {"class": "filesize"}).text
-            reply += f'[{dl_file}]({dl_link}) - {size}\n'
+            dload = f'[{dl_file}]({dl_link})'
 
-        send_message(update.effective_message, "{}".format(reply),
-                               parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
+        keyboard = [[InlineKeyboardButton(text="click here to Download", url=f"{dload}")]]
+        send_message(update.effective_message, reply, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
 
 
 @run_async
@@ -530,6 +576,7 @@ __mod_name__ = "Android"
 EVO_HANDLER = DisableAbleCommandHandler("evo", evo, admin_ok=True)
 MAGISK_HANDLER = DisableAbleCommandHandler("magisk", magisk)
 TWRP_HANDLER = DisableAbleCommandHandler("twrp", twrp, pass_args=True)
+OFOX_HANDLER = DisableAbleCommandHandler("ofox", ofox, pass_args=True)
 DOTOS_HANDLER = DisableAbleCommandHandler("dotos", dotos, admin_ok=True)
 PIXYS_HANDLER = DisableAbleCommandHandler("pixys", pixys, admin_ok=True)
 DESCENDANT_HANDLER = DisableAbleCommandHandler("descendant", descendant, pass_args=True, admin_ok=True)
@@ -549,6 +596,7 @@ dispatcher.add_handler(EVO_HANDLER)
 dispatcher.add_handler(MAGISK_HANDLER)
 dispatcher.add_handler(TWRP_HANDLER)
 dispatcher.add_handler(HAVOC_HANDLER)
+dispatcher.add_handler(OFOX_HANDLER)
 dispatcher.add_handler(VIPER_HANDLER)
 dispatcher.add_handler(DOTOS_HANDLER)
 dispatcher.add_handler(PIXYS_HANDLER)

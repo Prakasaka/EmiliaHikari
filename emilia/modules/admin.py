@@ -212,7 +212,7 @@ def pin(update, context):
 
 	is_silent = True
 	if len(args) >= 1:
-		is_silent = not (args[0].lower() == 'silent' or args[0].lower() == 'off' or args[0].lower() == 'mute')
+		is_silent = not (args[0].lower() == 'notify' or args[0].lower() == 'loud' or args[0].lower() == 'violent')
 
 	if prev_message and is_group:
 		try:
