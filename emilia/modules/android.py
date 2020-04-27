@@ -32,7 +32,7 @@ DEVICES_DATA = 'https://raw.githubusercontent.com/androidtrackers/certified-andr
 @run_async
 def ofox(update, context):
     cmd_name = "ofox"
-    if len(args) == 0:
+    if device == '':
         reply = 'No codename provided, write a codename for fetching informations.'
         del_msg = send_message(update.effective_message, "{}".format(reply), parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
         time.sleep(5)
@@ -76,7 +76,7 @@ def ofox(update, context):
 @run_async
 def twrp(update, context):
     cmd_name = "twrp"
-    if len(args) == 0:
+    if device == '':
         reply='No codename provided, write a codename for fetching informations.'
         del_msg = send_message(update.effective_message, "{}".format(reply),
                                parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
