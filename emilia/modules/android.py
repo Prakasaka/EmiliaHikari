@@ -72,8 +72,9 @@ def ofox(update, context):
             keyboard = [[InlineKeyboardButton(text="click here to Download", url=f"{link}")]]
             send_message(update.effective_message, reply, reply_markup=InlineKeyboardMarkup(keyboard), parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
             return
-        except Exception:
-           pass
+        except Exception as exp:
+           send_message(update.effective_message, "The link could not be fetched for some reason, please try again later")
+           LOGGER.info(exp)
 
 @run_async
 def twrp(update, context):
