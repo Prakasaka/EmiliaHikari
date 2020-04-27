@@ -10,27 +10,27 @@ import wikipedia
 import base64
 from bs4 import BeautifulSoup
 
-import sys
-import inspect
-import os
-import shutil
-import glob
-import math
-import textwrap
+# import sys
+# import inspect
+# import os
+# import shutil
+# import glob
+# import math
+# import textwrap
 import os
 import requests
 import json
-import gc
+# import gc
 import datetime
-import time
-import traceback
+# import time
+# import traceback
 import re
-import io
+# import io
 import asyncio
 import random
-import subprocess
-import urllib
-import psutil
+# import subprocess
+# import urllib
+# import psutil
 
 from typing import Optional, List
 from telegram.error import BadRequest, Unauthorized
@@ -49,103 +49,103 @@ from emilia.modules.helper_funcs.alternate import send_message
 from telegraph import Telegraph, upload_file
 
 BASE_URL = 'https://del.dog'
-namespaces = {}
+# namespaces = {}
 
 
-def namespace_of(chat, update, context):
-    if chat not in namespaces:
-        namespaces[chat] = {
-            '__builtins__': globals()['__builtins__'],
-            'context.bot': context.bot,
-            'effective_message': update.effective_message,
-            'effective_user': update.effective_user,
-            'effective_chat': update.effective_chat,
-            'update': update
-        }
+# def namespace_of(chat, update, context):
+#     if chat not in namespaces:
+#         namespaces[chat] = {
+#             '__builtins__': globals()['__builtins__'],
+#             'context.bot': context.bot,
+#             'effective_message': update.effective_message,
+#             'effective_user': update.effective_user,
+#             'effective_chat': update.effective_chat,
+#             'update': update
+#         }
 
-    return namespaces[chat]
-
-
-def log_input(update):
-    user = update.effective_user.id
-    chat = update.effective_chat.id
-    LOGGER.info(f"IN: {update.effective_message.text} (user={user}, chat={chat})")
+#     return namespaces[chat]
 
 
-def send(msg, update, context):
-    LOGGER.info(f"OUT: '{msg}'")
-    context.bot.send_message(chat_id=update.effective_chat.id, text=f"`{msg}`", parse_mode=ParseMode.MARKDOWN)
+# def log_input(update):
+#     user = update.effective_user.id
+#     chat = update.effective_chat.id
+#     LOGGER.info(f"IN: {update.effective_message.text} (user={user}, chat={chat})")
 
 
-@run_async
-def evaluate(update, context):
-    send(do(eval, update, context), update, context)
+# def send(msg, update, context):
+#     LOGGER.info(f"OUT: '{msg}'")
+#     context.bot.send_message(chat_id=update.effective_chat.id, text=f"`{msg}`", parse_mode=ParseMode.MARKDOWN)
 
 
-@run_async
-def execute(update, context):
-    send(do(exec, update, context), update, context)
+# @run_async
+# def evaluate(update, context):
+#     send(do(eval, update, context), update, context)
 
 
-def cleanup_code(code):
-    if code.startswith('```') and code.endswith('```'):
-        return '\n'.join(code.split('\n')[1:-1])
-    return code.strip('` \n')
+# @run_async
+# def execute(update, context):
+#     send(do(exec, update, context), update, context)
 
 
-def do(func, update, context):
-    log_input(update)
-    content = update.message.text.split(' ', 1)[-1]
-    body = cleanup_code(content)
-    env = namespace_of(update.message.chat_id, update, context)
-
-    os.chdir(os.getcwd())
-    with open(os.path.join(os.getcwd(), 'emilia/modules/helper_funcs/temp.txt'), 'w') as temp:
-        temp.write(body)
-
-    stdout = io.StringIO()
-
-    to_compile = f'def func():\n{textwrap.indent(body, "  ")}'
-
-    try:
-        exec(to_compile, env)
-    except Exception as e:
-        return f'{e.__class__.__name__}: {e}'
-
-    func = env['func']
-
-    try:
-        with redirect_stdout(stdout):
-            func_return = func()
-    except Exception as e:
-        value = stdout.getvalue()
-        return f'{value}{traceback.format_exc()}'
-    else:
-        value = stdout.getvalue()
-        result = None
-        if func_return is None:
-            if value:
-                result = f'{value}'
-            else:
-                try:
-                    result = f'{repr(eval(body, env))}'
-                except:
-                    pass
-        else:
-            result = f'{value}{func_return}'
-        if result:
-            if len(str(result)) > 5000:
-                result = 'Output is too long'
-            return result
+# def cleanup_code(code):
+#     if code.startswith('```') and code.endswith('```'):
+#         return '\n'.join(code.split('\n')[1:-1])
+#     return code.strip('` \n')
 
 
-@run_async
-def clear(update, context):
-    log_input(update)
-    global namespaces
-    if update.message.chat_id in namespaces:
-        del namespaces[update.message.chat_id]
-    send("Cleared locals.", update, context)
+# def do(func, update, context):
+#     log_input(update)
+#     content = update.message.text.split(' ', 1)[-1]
+#     body = cleanup_code(content)
+#     env = namespace_of(update.message.chat_id, update, context)
+
+#     os.chdir(os.getcwd())
+#     with open(os.path.join(os.getcwd(), 'emilia/modules/helper_funcs/temp.txt'), 'w') as temp:
+#         temp.write(body)
+
+#     stdout = io.StringIO()
+
+#     to_compile = f'def func():\n{textwrap.indent(body, "  ")}'
+
+#     try:
+#         exec(to_compile, env)
+#     except Exception as e:
+#         return f'{e.__class__.__name__}: {e}'
+
+#     func = env['func']
+
+#     try:
+#         with redirect_stdout(stdout):
+#             func_return = func()
+#     except Exception as e:
+#         value = stdout.getvalue()
+#         return f'{value}{traceback.format_exc()}'
+#     else:
+#         value = stdout.getvalue()
+#         result = None
+#         if func_return is None:
+#             if value:
+#                 result = f'{value}'
+#             else:
+#                 try:
+#                     result = f'{repr(eval(body, env))}'
+#                 except:
+#                     pass
+#         else:
+#             result = f'{value}{func_return}'
+#         if result:
+#             if len(str(result)) > 5000:
+#                 result = 'Output is too long'
+#             return result
+
+
+# @run_async
+# def clear(update, context):
+#     log_input(update)
+#     global namespaces
+#     if update.message.chat_id in namespaces:
+#         del namespaces[update.message.chat_id]
+#     send("Cleared locals.", update, context)
 
 @run_async
 def post_telegraph(update, context):
@@ -368,9 +368,9 @@ PASTE_HANDLER = DisableAbleCommandHandler("paste", paste, pass_args=True)
 GET_PASTE_HANDLER = DisableAbleCommandHandler("getpaste", get_paste_content, pass_args=True)
 PASTE_STATS_HANDLER = DisableAbleCommandHandler("pastestats", get_paste_stats, pass_args=True)
 LOG_HANDLER = DisableAbleCommandHandler("log", log, filters=Filters.user(OWNER_ID))
-eval_handler = CommandHandler('eval', evaluate, filters=Filters.user(OWNER_ID))
-exec_handler = CommandHandler('py', execute, filters=Filters.user(OWNER_ID))
-clear_handler = CommandHandler('clearlocals', clear, filters=Filters.user(OWNER_ID))
+# eval_handler = CommandHandler('eval', evaluate, filters=Filters.user(OWNER_ID))
+# exec_handler = CommandHandler('py', execute, filters=Filters.user(OWNER_ID))
+# clear_handler = CommandHandler('clearlocals', clear, filters=Filters.user(OWNER_ID))
 dispatcher.add_handler(DisableAbleCommandHandler("tele", post_telegraph, pass_args=True))
 
 dispatcher.add_handler(GETLINK_HANDLER)
@@ -381,6 +381,6 @@ dispatcher.add_handler(PASTE_HANDLER)
 dispatcher.add_handler(GET_PASTE_HANDLER)
 dispatcher.add_handler(PASTE_STATS_HANDLER)
 dispatcher.add_handler(LOG_HANDLER)
-dispatcher.add_handler(eval_handler)
-dispatcher.add_handler(exec_handler)
-dispatcher.add_handler(clear_handler)
+# dispatcher.add_handler(eval_handler)
+# dispatcher.add_handler(exec_handler)
+# dispatcher.add_handler(clear_handler)
