@@ -73,11 +73,14 @@ def report(update, context) -> str:
                                                                       mention_html(user.id,
                                                                                    user.first_name),
                                                                       user.id)
-            link = "\n<b>Link:</b> " \
-                   "<a href=\"http://telegram.me/{}/{}\">click here</a>".format(chat.username, message.message_id)
+            # link = "\n<b>Link:</b> " \
+            #        "<a href=\"http://telegram.me/{}/{}\">click here</a>".format(chat.username, message.message_id)
+        else:
+            msg = "{} is calling for admins in \"{}\"!".format(
+                mention_html(user.id, user.first_name), html.escape(chat_name))
 
-            should_forward = False
-            keyboard = [[
+        # should_forward = False
+        keyboard = [[
                 InlineKeyboardButton(
                     u"➡ Message",
                     url="https://t.me/{}/{}".format(
@@ -103,17 +106,14 @@ def report(update, context) -> str:
                                     chat.id, reported_user.id,
                                     message.reply_to_message.message_id))
                         ]]
-            reply_markup = InlineKeyboardMarkup(keyboard)
-
-        else:
-            msg = "{} is calling for admins in \"{}\"!".format(
-                mention_html(user.id, user.first_name), html.escape(chat_name))
-            link = ""
-            should_forward = True
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        should_forward = True
+        all_admins = []
         for admin in admin_list:
             if admin.user.is_bot:  # can't message bots
                 continue
             if sql.user_should_report(admin.user.id):
+            	all_admins.append("<a href='tg://user?id={}'>⁣</a>".format(admin.user.id))
                 try:
                     if not chat.type == Chat.SUPERGROUP:
                         context.bot.sendMessage(admin.user.id, msg + link, parse_mode=ParseMode.HTML)
@@ -143,9 +143,9 @@ def report(update, context) -> str:
                     pass
                 except BadRequest as excp:  # TODO: cleanup exceptions
                     LOGGER.exception("Exception while reporting user")
-        context.bot.send_message("{} <b>has been reported to the admin</b>".format(
-					mention_html(reported_user.id, reported_user.first_name),
-					parse_mode="HTML", reply_to_message_id=message.reply_to_message.message_id))
+        context.bot.sendMessage("{} <b>has been reported to the admin</b>".format(
+					mention_html(reported_user.id, reported_user.first_name),"".join(all_admins))
+					parse_mode="HTML", reply_to_message_id=message.reply_to_message.message_id)
         return msg
     return ""
 
