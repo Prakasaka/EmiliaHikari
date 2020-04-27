@@ -116,13 +116,13 @@ def report(update, context) -> str:
                 all_admins.append("<a href='tg://user?id={}'>⁣</a>".format(admin.user.id))
                 try:
                     if not chat.type == Chat.SUPERGROUP:
-                        context.bot.sendMessage(admin.user.id, msg + link, parse_mode=ParseMode.HTML)
+                        context.bot.sendMessage(admin.user.id, msg, parse_mode=ParseMode.HTML)
                         if should_forward:
                             message.reply_to_message.forward(admin.user.id)
                             if len(message.text.split()) > 1:  # If user is giving a reason, send his message too
                                 message.forward(admin.user.id)
                     if not chat.username:
-                        context.bot.sendMessage(admin.user.id, msg + link, parse_mode=ParseMode.HTML)
+                        context.bot.sendMessage(admin.user.id, msg, parse_mode=ParseMode.HTML)
 
                         if should_forward:
                             message.reply_to_message.forward(admin.user.id)
@@ -131,7 +131,7 @@ def report(update, context) -> str:
                                 message.forward(admin.user.id)
 
                     if chat.username and chat.type == Chat.SUPERGROUP:
-                        context.bot.sendMessage(admin.user.id, msg + link, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
+                        context.bot.sendMessage(admin.user.id, msg, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
 
                         if should_forward:
                             message.reply_to_message.forward(admin.user.id)
