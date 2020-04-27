@@ -94,10 +94,10 @@ def report(update, context) -> str:
                         chatlink = "https://t.me/c/{}/{}".format(str(chat.id)[4:], str(message.reply_to_message.message_id))
                 keyboard = [
                           [InlineKeyboardButton("➡ Message reported", url=chatlink)],
-                          [InlineKeyboardButton("⚠️ Kick", callback_data="rp_{}=1={}".format(chat.id, reported_user.id)),
-                          InlineKeyboardButton("⛔️ Banned", callback_data="rp_{}=2={}".format(chat.id, reported_user.id))],
-                          [InlineKeyboardButton("❎ Delete message", callback_data="rp_{}=3={}".format(chat.id, message.reply_to_message.message_id))],
-                          [InlineKeyboardButton("Close button", callback_data="rp_{}=4={}".format(chat.id, reported_user.id))]
+                          [InlineKeyboardButton("⚠️ Kick", callback_data="rp_{}=k={}".format(chat.id, reported_user.id)),
+                          InlineKeyboardButton("⛔️ Banned", callback_data="rp_{}=b={}".format(chat.id, reported_user.id))],
+                          [InlineKeyboardButton("❎ Delete message", callback_data="rp_{}=d={}".format(chat.id, message.reply_to_message.message_id))],
+                          [InlineKeyboardButton("Close button", callback_data="rp_{}=c={}".format(chat.id, reported_user.id))]
                         ]
                 reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -190,7 +190,7 @@ def button(context, update):
                 query.message.edit_text("Session is time out!")
                 return
 
-        if splitter[1] == "1":
+        if splitter[1] == "k":
                 keyboard = [
                         [InlineKeyboardButton("Yes", callback_data="ak_1+y|{}={}".format(report_chat, report_target)),
                         InlineKeyboardButton("No", callback_data="ak_1+n|{}={}".format(report_chat, report_target))]
@@ -200,7 +200,7 @@ def button(context, update):
                                                   chat_id=chat_id,
                                                   message_id=msg_id, parse_mode=ParseMode.HTML,
                                                   reply_markup=reply_markup)
-        elif splitter[1] == "2":
+        elif splitter[1] == "b":
                 keyboard = [
                         [InlineKeyboardButton("Yes", callback_data="ak_2+y|{}={}".format(report_chat, report_target)),
                         InlineKeyboardButton("No", callback_data="ak_2+n|{}={}".format(report_chat, report_target))]
@@ -210,7 +210,7 @@ def button(context, update):
                                                   chat_id=chat_id,
                                                   message_id=msg_id, parse_mode=ParseMode.HTML,
                                                   reply_markup=reply_markup)
-        elif splitter[1] == "3":
+        elif splitter[1] == "d":
                 keyboard = [
                         [InlineKeyboardButton("Yes", callback_data="ak_3+y|{}={}".format(report_chat, report_target)),
                         InlineKeyboardButton("No", callback_data="ak_3+n|{}={}".format(report_chat, report_target))]
@@ -220,7 +220,7 @@ def button(context, update):
                                                   chat_id=chat_id,
                                                   message_id=msg_id, parse_mode=ParseMode.HTML,
                                                   reply_markup=reply_markup)
-        elif splitter[1] == "4":
+        elif splitter[1] == "c":
                 try:
                         context.bot.edit_message_text(text=msg + "\n\nButton closed!",
                                                   chat_id=chat_id,
@@ -254,7 +254,7 @@ def buttonask(context, update):
                                                           chat_id=chat_id,
                                                           message_id=msg_id, parse_mode=ParseMode.HTML)
                         return
-                if splitter[0] == "1":
+                if splitter[0] == "k":
                         try:
                                 context.bot.unbanChatMember(report_chat, report_target)
                                 context.bot.sendMessage(report_chat, text="{} has been kicked!\nBy: {}".format(\
@@ -267,7 +267,7 @@ def buttonask(context, update):
                                 context.bot.edit_message_text(text=msg + "\n\nError: {}".format(err),
                                                           chat_id=chat_id,
                                                           message_id=msg_id, parse_mode=ParseMode.HTML)
-                elif splitter[0] == "2":
+                elif splitter[0] == "b":
                         try:
                                 context.bot.kickChatMember(report_chat, report_target)
                                 context.bot.sendMessage(report_chat, text="{} has been banned!\nBy: {}".format(\
@@ -280,7 +280,7 @@ def buttonask(context, update):
                                 context.bot.edit_message_text(text=msg + "\n\nError: {}".format(err),
                                                           chat_id=chat_id,
                                                           message_id=msg_id, parse_mode=ParseMode.HTML)
-                elif splitter[0] == "3":
+                elif splitter[0] == "d":
                         try:
                                 context.bot.deleteMessage(report_chat, report_target)
                                 context.bot.edit_message_text(text=msg + "\n\nMessage was deleted!",
