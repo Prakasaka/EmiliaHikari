@@ -120,9 +120,8 @@ def report(update, context) -> str:
             if sql.user_should_report(admin.user.id):
                 all_admins.append("<a href='tg://user?id={}'>⁣</a>".format(admin.user.id))
                 try:
-                    context.context.bot.send_message(chat.id, "{} <b>has been reported to the admin</b>{}".format(
-                                                                                                                        mention_html(reported_user.id, reported_user.first_name),
-                                                                                                                        "".join(all_admins)), parse_mode=ParseMode.HTML, reply_to_message_id=message.reply_to_message.message_id)
+                    context.bot.send_message(chat.id, "{} <b>has been reported to the admin</b>{}".format(mention_html(reported_user.id, reported_user.first_name),
+                    "".join(all_admins)), parse_mode=ParseMode.HTML, reply_to_message_id=message.reply_to_message.message_id)
                     try:
                         if should_forward:
                             message.reply_to_message.forward(admin.user.id)
