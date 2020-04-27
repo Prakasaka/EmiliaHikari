@@ -57,7 +57,7 @@ def ofox(update, context):
                 return
     else:
         reply = f'*Latest Stable Orangefox for {device}*\n'
-        url = get(f'https://api.orangefox.download/v2/device/{device}/releases/stable/last').json()
+        fetch = get(f'https://api.orangefox.download/v2/device/{device}/releases/stable/last').json()
         try:
             usr = fetch.json()
             response = usr['response'][0]
