@@ -44,14 +44,14 @@ def ofox(update, context):
                 return
     device = str(args[1])
     fetch = get(f"https://api.orangefox.download/v2/device/{device}")
-    if url.status_code == 404:
+    if fetch.status_code == 404:
         send_message(update.effective_message, f"Couldn't find Orangefox downloads for {device}")
     else:
         reply = f"<b>Latest Stable Orangefox for {device}</b>\n"
         fetch = get(f'https://api.orangefox.download/v2/device/{device}/releases/stable/last').json()
         changelog = fetch['changelog']
         buildate = fetch['date']
-        size = url['size_human']
+        size = fetch['size_human']
         link = fetch['url']
         version = fetch['version']
         reply += (f'<b>Changelog</b> - {changelog}\n'
