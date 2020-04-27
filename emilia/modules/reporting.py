@@ -77,7 +77,7 @@ def report(update, context) -> str:
                    "<a href=\"http://telegram.me/{}/{}\">click here</a>".format(chat.username, message.message_id)
 
             should_forward = False
-            keyboard = [
+            keyboard = [[
                 InlineKeyboardButton(
                     u"➡ Message",
                     url="https://t.me/{}/{}".format(
@@ -102,7 +102,7 @@ def report(update, context) -> str:
                                 callback_data="report_{}=delete={}={}".format(
                                     chat.id, reported_user.id,
                                     message.reply_to_message.message_id))
-                        ]
+                        ]]
             reply_markup = InlineKeyboardMarkup(keyboard)
 
         else:
