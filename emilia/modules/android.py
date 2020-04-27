@@ -32,6 +32,8 @@ DEVICES_DATA = 'https://raw.githubusercontent.com/androidtrackers/certified-andr
 @run_async
 def ofox(update, context):
     cmd_name = "ofox"
+    device = message.text[len(f'/{cmd_name} '):]
+    fetch = get(f'https://api.orangefox.download/v2/device/{device}')
     if device == '':
         reply = 'No codename provided, write a codename for fetching informations.'
         del_msg = send_message(update.effective_message, "{}".format(reply), parse_mode=ParseMode.MARKDOWN, disable_web_page_preview=True)
@@ -42,8 +44,6 @@ def ofox(update, context):
         except BadRequest as err:
             if (err.message == "Message to delete not found" ) or (err.message == "Message can't be deleted" ):
                 return
-    device = message.text[len(f'/{cmd_name} '):]
-    fetch = get(f'https://api.orangefox.download/v2/device/{device}')
     if fetch.status_code == 404:
         reply = f"Couldn't find Orangefox downloads for {device}!\n"
         del_msg = send_message(update.effective_message, "{}".format(reply),
@@ -76,6 +76,8 @@ def ofox(update, context):
 @run_async
 def twrp(update, context):
     cmd_name = "twrp"
+    device = message.text[len(f'/{cmd_name} '):]
+    url = get(f'https://eu.dl.twrp.me/{device}/')
     if device == '':
         reply='No codename provided, write a codename for fetching informations.'
         del_msg = send_message(update.effective_message, "{}".format(reply),
@@ -87,9 +89,6 @@ def twrp(update, context):
         except BadRequest as err:
             if (err.message == "Message to delete not found" ) or (err.message == "Message can't be deleted" ):
                 return
-
-    device = message.text[len(f'/{cmd_name} '):]
-    url = get(f'https://eu.dl.twrp.me/{device}/')
     if url.status_code == 404:
         reply = f"Couldn't find twrp downloads for {device}!\n"
         del_msg = update.effective_message.reply_text("{}".format(reply),
