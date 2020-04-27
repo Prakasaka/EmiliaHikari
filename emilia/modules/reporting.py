@@ -96,7 +96,7 @@ def report(update, context) -> str:
                           [InlineKeyboardButton("➡ Message reported", url=chatlink)],
                           [InlineKeyboardButton("⚠️ Kick", callback_data="rp_{}=1={}".format(chat.id, reported_user.id)),
                           InlineKeyboardButton("⛔️ Banned", callback_data="rp_{}=2={}".format(chat.id, reported_user.id))],
-                          [InlineKeyboardButton("❎ Delete messagen", callback_data="rp_{}=3={}".format(chat.id, message.reply_to_message.message_id))],
+                          [InlineKeyboardButton("❎ Delete message", callback_data="rp_{}=3={}".format(chat.id, message.reply_to_message.message_id))],
                           [InlineKeyboardButton("Close button", callback_data="rp_{}=4={}".format(chat.id, reported_user.id))]
                         ]
                 reply_markup = InlineKeyboardMarkup(keyboard)
@@ -173,7 +173,7 @@ def report_alt(update, context) -> str:
         return ""
 
 
-def button(bot, update):
+def button(context, update):
         query = update.callback_query
         splitter = query.data.replace("rp_", "").split("=")
         chat = update.effective_chat
@@ -232,7 +232,7 @@ def button(bot, update):
                                                   message_id=query.message.message_id)
                 """
 
-def buttonask(bot, update):
+def buttonask(context, update):
         query = update.callback_query
         splitter = query.data.replace("ak_", "").split("+")
         isyes = splitter[1].split('|')[0]
