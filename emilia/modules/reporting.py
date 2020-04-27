@@ -62,9 +62,6 @@ def report(update, context) -> str:
         chat_name = chat.title or chat.first or chat.username
         admin_list = chat.get_administrators()
 
-        if int(reported_user.id) == int(user.id):
-            return
-
         if chat.username and chat.type == Chat.SUPERGROUP:
             msg = "<b>{}:</b>" \
                   "\n<b>Reported user:</b> {} (<code>{}</code>)" \
@@ -79,8 +76,8 @@ def report(update, context) -> str:
             link = "\n<b>Link:</b> " \
                    "<a href=\"http://telegram.me/{}/{}\">click here</a>".format(chat.username, message.message_id)
 
-            should_forward = True
-            keyboard = [[
+            should_forward = False
+            keyboard = [
                 InlineKeyboardButton(
                     u"➡ Message",
                     url="https://t.me/{}/{}".format(
@@ -105,27 +102,27 @@ def report(update, context) -> str:
                                 callback_data="report_{}=delete={}={}".format(
                                     chat.id, reported_user.id,
                                     message.reply_to_message.message_id))
-                        ]]
+                        ]
             reply_markup = InlineKeyboardMarkup(keyboard)
 
         else:
             msg = "{} is calling for admins in \"{}\"!".format(
                 mention_html(user.id, user.first_name), html.escape(chat_name))
             link = ""
-        should_forward = True
+            should_forward = True
         for admin in admin_list:
             if admin.user.is_bot:  # can't message bots
                 continue
             if sql.user_should_report(admin.user.id):
                 try:
                     if not chat.type == Chat.SUPERGROUP:
-                        context.bot.send_message(admin.user.id, msg + link, parse_mode=ParseMode.HTML)
+                        context.bot.sendMessage(admin.user.id, msg + link, parse_mode=ParseMode.HTML)
                         if should_forward:
                             message.reply_to_message.forward(admin.user.id)
                             if len(message.text.split()) > 1:  # If user is giving a reason, send his message too
                                 message.forward(admin.user.id)
                     if not chat.username:
-                        context.bot.send_message(admin.user.id, msg + link, parse_mode=ParseMode.HTML)
+                        context.bot.sendMessage(admin.user.id, msg + link, parse_mode=ParseMode.HTML)
 
                         if should_forward:
                             message.reply_to_message.forward(admin.user.id)
@@ -134,7 +131,7 @@ def report(update, context) -> str:
                                 message.forward(admin.user.id)
 
                     if chat.username and chat.type == Chat.SUPERGROUP:
-                        context.bot.send_message(admin.user.id, msg + link, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
+                        context.bot.sendMessage(admin.user.id, msg + link, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
 
                         if should_forward:
                             message.reply_to_message.forward(admin.user.id)
@@ -146,7 +143,7 @@ def report(update, context) -> str:
                     pass
                 except BadRequest as excp:  # TODO: cleanup exceptions
                     LOGGER.exception("Exception while reporting user")
-        context.bot.send_message(chat.id, "{} <b>has been reported to the admin</b>".format(
+        context.bot.sendMessage("{} <b>has been reported to the admin</b>".format(
 					mention_html(reported_user.id, reported_user.first_name),
 					parse_mode=ParseMode.HTML, reply_to_message_id=message.reply_to_message.message_id))
         return msg
@@ -453,7 +450,7 @@ def user_protection_checker(context, user_id):
 
 
 
-
+"""
 def __chat_settings__(chat_id, user_id):
 	return user_id, "This chat is setup to send user reports to admins, via /report and @admin: `{}`".format(
 		sql.chat_should_report(chat_id))
@@ -462,10 +459,10 @@ def __chat_settings__(chat_id, user_id):
 def __user_settings__(user_id):
 	return user_id, "You receive reports from chats you're admin in: `{}`.\nToggle this with /reports in PM.".format(
 		sql.user_should_report(user_id))
-"""
+
 
 def __migrate__(old_chat_id, new_chat_id):
-        sql.migrate_chat(old_chat_id, new_chat_id)
+    sql.migrate_chat(old_chat_id, new_chat_id)
 
 __mod_name__ = "Reporting"
 
