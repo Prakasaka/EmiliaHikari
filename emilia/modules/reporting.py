@@ -171,8 +171,8 @@ def report_alt(update, context) -> str:
 	return ""
 
 
-def button(bot, update):
-	query = update.callback_query
+def button(context, update):
+	query = update.callback_query.answer()
 	splitter = query.data.replace("rp_", "").split("=")
 	chat = update.effective_chat
 	report_chat = splitter[0]
@@ -230,8 +230,8 @@ def button(bot, update):
 						  message_id=query.message.message_id)
 		"""
 
-def buttonask(bot, update):
-	query = update.callback_query
+def buttonask(context, update):
+	query = update.callback_query.answer()
 	splitter = query.data.replace("ak_", "").split("+")
 	isyes = splitter[1].split('|')[0]
 	report_chat = splitter[1].split('|')[1].split('=')[0]
