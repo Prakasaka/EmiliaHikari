@@ -52,7 +52,130 @@ def report_setting(update, context):
 			send_message(update.effective_message, "This chat's current setting is: `{}`".format(sql.chat_should_report(chat.id)),
 						   parse_mode=ParseMode.MARKDOWN)
 
+def report(update, context) -> str:
+    message = update.effective_message  # type: Optional[Message]
+    chat = update.effective_chat  # type: Optional[Chat]
+    user = update.effective_user  # type: Optional[User]
 
+    if chat and message.reply_to_message and sql.chat_should_report(chat.id):
+        reported_user = message.reply_to_message.from_user  # type: Optional[User]
+        chat_name = chat.title or chat.first or chat.username
+        admin_list = chat.get_administrators()
+
+        if int(reported_user.id) == int(user.id):
+            return
+
+        if chat.username and chat.type == Chat.SUPERGROUP:
+            msg = "<b>{}:</b>" \
+                  "\n<b>Reported user:</b> {} (<code>{}</code>)" \
+                  "\n<b>Reported by:</b> {} (<code>{}</code>)".format(html.escape(chat.title),
+                                                                      mention_html(
+                                                                          reported_user.id,
+                                                                          reported_user.first_name),
+                                                                      reported_user.id,
+                                                                      mention_html(user.id,
+                                                                                   user.first_name),
+                                                                      user.id)
+            link = "\n<b>Link:</b> " \
+                   "<a href=\"http://telegram.me/{}/{}\">click here</a>".format(chat.username, message.message_id)
+
+            should_forward = True
+            keyboard = [[
+                InlineKeyboardButton(
+                    u"➡ Message",
+                    url="https://t.me/{}/{}".format(
+                        chat.username,
+                        str(message.reply_to_message.message_id)))
+                        ],
+                        [
+                            InlineKeyboardButton(
+                                u"⚠ Kick",
+                                callback_data="report_{}=kick={}={}".format(
+                                    chat.id, reported_user.id,
+                                    reported_user.first_name)),
+                            InlineKeyboardButton(
+                                u"⛔️ Ban",
+                                callback_data="report_{}=banned={}={}".format(
+                                    chat.id, reported_user.id,
+                                    reported_user.first_name))
+                        ],
+                        [
+                            InlineKeyboardButton(
+                                u"❎ Delete Message",
+                                callback_data="report_{}=delete={}={}".format(
+                                    chat.id, reported_user.id,
+                                    message.reply_to_message.message_id))
+                        ]]
+            reply_markup = InlineKeyboardMarkup(keyboard)
+
+        else:
+            msg = "{} is calling for admins in \"{}\"!".format(
+                mention_html(user.id, user.first_name), html.escape(chat_name))
+            link = ""
+            should_forward = True
+        all_admins = []
+        for admin in admin_list:
+            if admin.user.is_bot:  # can't message bots
+                continue
+            if sql.user_should_report(admin.user.id):
+                all_admins.append("<a href='tg://user?id={}'>⁣</a>".format(admin.user.id))
+                    try:
+                        context.context.bot.send_message(chat.id, "{} <b>has been reported to the admin</b>{}".format(
+                                                                                                                        mention_html(reported_user.id, reported_user.first_name),
+                                                                                                                        "".join(all_admins)), parse_mode=ParseMode.HTML, reply_to_message_id=message.reply_to_message.message_id)
+                        try:
+                            if should_forward:
+                                message.reply_to_message.forward(admin.user.id)
+                                if len(message.text.split()) > 1:  # If user is giving a reason, send his message too
+                                    message.forward(admin.user.id)
+                        except:
+                            pass
+                        context.context.bot.send_message(admin.user.id, msg, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
+                    except Unauthorized:
+                        pass
+                    except BadRequest as excp:  # TODO: cleanup exceptions
+                        LOGGER.exception("Exception while reporting user")
+        return msg
+    return ""
+
+
+def buttons(update, context):
+    query = update.callback_query
+    splitter = query.data.replace("report_", "").split("=")
+    if splitter[1] == "kick":
+        try:
+            context.bot.kickChatMember(splitter[0], splitter[2])
+            context.bot.unbanChatMember(splitter[0], splitter[2])
+            query.answer("✅ Succesfully kicked")
+            return ""
+        except Exception as err:
+            query.answer("❎ Failed to kick")
+            context.bot.sendMessage(text="Error: {}".format(err),
+                            chat_id=query.message.chat_id,
+                            parse_mode=ParseMode.HTML)
+    elif splitter[1] == "banned":
+        try:
+            context.bot.kickChatMember(splitter[0], splitter[2])
+            query.answer("✅  Succesfully Banned")
+            return ""
+        except Exception as err:
+            context.bot.sendMessage(text="Error: {}".format(err),
+                            chat_id=query.message.chat_id,
+                            parse_mode=ParseMode.HTML)
+            query.answer("❎ Failed to ban")
+    elif splitter[1] == "delete":
+        try:
+            context.bot.deleteMessage(splitter[0], splitter[3])
+            query.answer("✅ Message Deleted")
+            return ""
+        except Exception as err:
+            context.bot.sendMessage(text="Error: {}".format(err),
+                            chat_id=query.message.chat_id,
+                            parse_mode=ParseMode.HTML)
+            query.answer("❎ Failed to delete message!")
+
+
+"""
 @run_async
 @user_not_admin
 @loggable
@@ -94,10 +217,10 @@ def report(update, context) -> str:
                         chatlink = "https://t.me/c/{}/{}".format(str(chat.id)[4:], str(message.reply_to_message.message_id))
                 keyboard = [
                           [InlineKeyboardButton("➡ Message reported", url=chatlink)],
-                          [InlineKeyboardButton("⚠️ Kick", callback_data="rp_{}=k={}".format(chat.id, reported_user.id)),
-                          InlineKeyboardButton("⛔️ Banned", callback_data="rp_{}=b={}".format(chat.id, reported_user.id))],
-                          [InlineKeyboardButton("❎ Delete message", callback_data="rp_{}=d={}".format(chat.id, message.reply_to_message.message_id))],
-                          [InlineKeyboardButton("Close button", callback_data="rp_{}=c={}".format(chat.id, reported_user.id))]
+                          [InlineKeyboardButton("⚠️ Kick", callback_data="rp_{}=1={}".format(chat.id, reported_user.id)),
+                          InlineKeyboardButton("⛔️ Banned", callback_data="rp_{}=2={}".format(chat.id, reported_user.id))],
+                          [InlineKeyboardButton("❎ Delete message", callback_data="rp_{}=3={}".format(chat.id, message.reply_to_message.message_id))],
+                          [InlineKeyboardButton("Close button", callback_data="rp_{}=4={}".format(chat.id, reported_user.id))]
                         ]
                 reply_markup = InlineKeyboardMarkup(keyboard)
 
@@ -114,11 +237,11 @@ def report(update, context) -> str:
                         if sql.user_should_report(admin.user.id):
                                 all_admins.append("<a href='tg://user?id={}'>⁣</a>".format(admin.user.id))
                                 try:
-                                        context.bot.send_message(chat.id, "{} <b>has been reported to the admin</b>{}".format(
+                                        context.context.bot.send_message(chat.id, "{} <b>has been reported to the admin</b>{}".format(
                                                                                                                         mention_html(reported_user.id, reported_user.first_name),
                                                                                                                         "".join(all_admins)), parse_mode=ParseMode.HTML, reply_to_message_id=message.reply_to_message.message_id)
-                    #bot.send_message(admin.user.id, msg + link, parse_mode=ParseMode.HTML)
-                                        #bot.send_message(admin.user.id, msg, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
+                    #context.bot.send_message(admin.user.id, msg + link, parse_mode=ParseMode.HTML)
+                                        #context.bot.send_message(admin.user.id, msg, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
 
                                         try:
                                                 if should_forward:
@@ -128,7 +251,7 @@ def report(update, context) -> str:
                                                                 message.forward(admin.user.id)
                                         except:
                                                 pass
-                                        context.bot.send_message(admin.user.id, msg, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
+                                        context.context.bot.send_message(admin.user.id, msg, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
 
                                 except Unauthorized:
                                         pass
@@ -167,7 +290,7 @@ def report_alt(update, context) -> str:
 			if sql.user_should_report(admin.user.id):
 				all_admins.append("<a href='tg://user?id={}'>⁣</a>".format(admin.user.id))
 
-		context.bot.send_message(chat.id, "{} <b>has been reported to the admin</b>{}".format(
+		context.context.bot.send_message(chat.id, "{} <b>has been reported to the admin</b>{}".format(
 					mention_html(reported_user.id, reported_user.first_name),
 					"".join(all_admins)), parse_mode=ParseMode.HTML, reply_to_message_id=message.reply_to_message.message_id)
 		return msg
@@ -176,125 +299,123 @@ def report_alt(update, context) -> str:
 
 
 def button(context, update):
-        query = update.callback_query
-        splitter = query.data.replace("rp_", "").split("=")
-        chat_id = update.callback_query.message.chat_id
-        msg_id = update.callback_query.message.message_id
-        report_chat = splitter[0]
-        report_method = splitter[1]
-        report_target = splitter[2]
-        msg = CURRENT_REPORT.get(str(report_chat))
-        userinfo = CURRENT_REPORT.get(str(report_chat)+"user")
-        key = CURRENT_REPORT.get(str(report_chat)+"key")
-        if msg == None or userinfo == None or key == None:
-                query.message.edit_text("Session is time out!")
-                return
+	query = update.callback_query
+	splitter = query.data.replace("rp_", "").split("=")
+	chat = update.effective_chat
+	report_chat = splitter[0]
+	report_method = splitter[1]
+	report_target = splitter[2]
+	msg = CURRENT_REPORT.get(str(report_chat))
+	userinfo = CURRENT_REPORT.get(str(report_chat)+"user")
+	key = CURRENT_REPORT.get(str(report_chat)+"key")
+	if msg == None or userinfo == None or key == None:
+		query.message.edit_text("Session is time out!")
+		return
 
-        if splitter[1] == "k":
-                keyboard = [
-                        [InlineKeyboardButton("Yes", callback_data="ak_1+y|{}={}".format(report_chat, report_target)),
-                        InlineKeyboardButton("No", callback_data="ak_1+n|{}={}".format(report_chat, report_target))]
-                ]
-                reply_markup = InlineKeyboardMarkup(keyboard)
-                context.bot.edit_message_text(text=msg + "\n\nAre you sure you want to kick {}?".format(userinfo.get('name')),
-                                                  chat_id=chat_id,
-                                                  message_id=msg_id, parse_mode=ParseMode.HTML,
-                                                  reply_markup=reply_markup)
-        elif splitter[1] == "b":
-                keyboard = [
-                        [InlineKeyboardButton("Yes", callback_data="ak_2+y|{}={}".format(report_chat, report_target)),
-                        InlineKeyboardButton("No", callback_data="ak_2+n|{}={}".format(report_chat, report_target))]
-                ]
-                reply_markup = InlineKeyboardMarkup(keyboard)
-                context.bot.edit_message_text(text=msg + "\n\nAre you sure you want to banned {}?".format(userinfo.get('name')),
-                                                  chat_id=chat_id,
-                                                  message_id=msg_id, parse_mode=ParseMode.HTML,
-                                                  reply_markup=reply_markup)
-        elif splitter[1] == "d":
-                keyboard = [
-                        [InlineKeyboardButton("Yes", callback_data="ak_3+y|{}={}".format(report_chat, report_target)),
-                        InlineKeyboardButton("No", callback_data="ak_3+n|{}={}".format(report_chat, report_target))]
-                ]
-                reply_markup = InlineKeyboardMarkup(keyboard)
-                context.bot.edit_message_text(text=msg + "\n\nDelete message?",
-                                                  chat_id=chat_id,
-                                                  message_id=msg_id, parse_mode=ParseMode.HTML,
-                                                  reply_markup=reply_markup)
-        elif splitter[1] == "c":
-                try:
-                        context.bot.edit_message_text(text=msg + "\n\nButton closed!",
-                                                  chat_id=chat_id,
-                                                  message_id=msg_id, parse_mode=ParseMode.HTML)
-                except Exception as err:
-                        context.bot.edit_message_text(text=msg + "\n\nError: {}".format(err),
-                                                  chat_id=chat_id,
-                                                  message_id=msg_id, parse_mode=ParseMode.HTML)
-                """
-                context.bot.edit_message_text(text="Chat: {}\nAction: {}\nUser: {}".format(splitter[0], splitter[1], splitter[2]),
-                                                  chat_id=chat_id,
-                                                  message_id=msg_id)
-		"""
+	if splitter[1] == "1":
+		keyboard = [
+			[InlineKeyboardButton("Yes", callback_data="ak_1+y|{}={}".format(report_chat, report_target)),
+			InlineKeyboardButton("No", callback_data="ak_1+n|{}={}".format(report_chat, report_target))]
+		]
+		reply_markup = InlineKeyboardMarkup(keyboard)
+		context.context.bot.edit_message_text(text=msg + "\n\nAre you sure you want to kick {}?".format(userinfo.get('name')),
+						  chat_id=query.message.chat_id,
+						  message_id=query.message.message_id, parse_mode=ParseMode.HTML,
+						  reply_markup=reply_markup)
+	elif splitter[1] == "2":
+		keyboard = [
+			[InlineKeyboardButton("Yes", callback_data="ak_2+y|{}={}".format(report_chat, report_target)),
+			InlineKeyboardButton("No", callback_data="ak_2+n|{}={}".format(report_chat, report_target))]
+		]
+		reply_markup = InlineKeyboardMarkup(keyboard)
+		context.context.bot.edit_message_text(text=msg + "\n\nAre you sure you want to banned {}?".format(userinfo.get('name')),
+						  chat_id=query.message.chat_id,
+						  message_id=query.message.message_id, parse_mode=ParseMode.HTML,
+						  reply_markup=reply_markup)
+	elif splitter[1] == "3":
+		keyboard = [
+			[InlineKeyboardButton("Yes", callback_data="ak_3+y|{}={}".format(report_chat, report_target)),
+			InlineKeyboardButton("No", callback_data="ak_3+n|{}={}".format(report_chat, report_target))]
+		]
+		reply_markup = InlineKeyboardMarkup(keyboard)
+		context.context.bot.edit_message_text(text=msg + "\n\nDelete message?",
+						  chat_id=query.message.chat_id,
+						  message_id=query.message.message_id, parse_mode=ParseMode.HTML,
+						  reply_markup=reply_markup)
+	elif splitter[1] == "4":
+		try:
+			context.context.bot.edit_message_text(text=msg + "\n\nButton closed!",
+						  chat_id=query.message.chat_id,
+						  message_id=query.message.message_id, parse_mode=ParseMode.HTML)
+		except Exception as err:
+			context.context.bot.edit_message_text(text=msg + "\n\nError: {}".format(err),
+						  chat_id=query.message.chat_id,
+						  message_id=query.message.message_id, parse_mode=ParseMode.HTML)
+		
+		context.context.bot.edit_message_text(text="Chat: {}\nAction: {}\nUser: {}".format(splitter[0], splitter[1], splitter[2]),
+						  chat_id=query.message.chat_id,
+						  message_id=query.message.message_id)
+		
 
 def buttonask(context, update):
-        query = update.callback_query
-        splitter = query.data.replace("ak_", "").split("+")
-        isyes = splitter[1].split('|')[0]
-        report_chat = splitter[1].split('|')[1].split('=')[0]
-        report_target = splitter[1].split('|')[1].split('=')[1]
-        chat_id = update.callback_query.message.chat_id
-        msg_id = update.callback_query.message.message_id
-        msg = CURRENT_REPORT.get(str(report_chat))
-        userinfo = CURRENT_REPORT.get(str(report_chat)+"user")
-        key = CURRENT_REPORT.get(str(report_chat)+"key")
+	query = update.callback_query
+	splitter = query.data.replace("ak_", "").split("+")
+	isyes = splitter[1].split('|')[0]
+	report_chat = splitter[1].split('|')[1].split('=')[0]
+	report_target = splitter[1].split('|')[1].split('=')[1]
+	chat = update.effective_chat
+	msg = CURRENT_REPORT.get(str(report_chat))
+	userinfo = CURRENT_REPORT.get(str(report_chat)+"user")
+	key = CURRENT_REPORT.get(str(report_chat)+"key")
 
-        if isyes == "y":
-                a, b = user_protection_checker(context.bot, report_target)
-                if not a:
-                        context.bot.edit_message_text(text=msg + b,
-                                                          chat_id=chat_id,
-                                                          message_id=msg_id, parse_mode=ParseMode.HTML)
-                        return
-                if splitter[0] == "k":
-                        try:
-                                context.bot.unbanChatMember(report_chat, report_target)
-                                context.bot.sendMessage(report_chat, text="{} has been kicked!\nBy: {}".format(\
-                                        mention_markdown(userinfo['id'], userinfo['name']), mention_markdown(chat.id, chat.first_name)), \
-                                        parse_mode=ParseMode.MARKDOWN)
-                                context.bot.edit_message_text(text=msg + "\n\n{} has been kicked!".format(mention_html(userinfo['id'], userinfo['name'])),
-                                                          chat_id=chat_id,
-                                                          message_id=msg_id, parse_mode=ParseMode.HTML)
-                        except Exception as err:
-                                context.bot.edit_message_text(text=msg + "\n\nError: {}".format(err),
-                                                          chat_id=chat_id,
-                                                          message_id=msg_id, parse_mode=ParseMode.HTML)
-                elif splitter[0] == "b":
-                        try:
-                                context.bot.kickChatMember(report_chat, report_target)
-                                context.bot.sendMessage(report_chat, text="{} has been banned!\nBy: {}".format(\
-                                        mention_markdown(userinfo['id'], userinfo['name']), mention_markdown(chat.id, chat.first_name)), \
-                                        parse_mode=ParseMode.MARKDOWN)
-                                context.bot.edit_message_text(text=msg + "\n\n{} has been banned!".format(mention_html(userinfo['id'], userinfo['name'])),
-                                                          chat_id=chat_id,
-                                                          message_id=msg_id, parse_mode=ParseMode.HTML)
-                        except Exception as err:
-                                context.bot.edit_message_text(text=msg + "\n\nError: {}".format(err),
-                                                          chat_id=chat_id,
-                                                          message_id=msg_id, parse_mode=ParseMode.HTML)
-                elif splitter[0] == "d":
-                        try:
-                                context.bot.deleteMessage(report_chat, report_target)
-                                context.bot.edit_message_text(text=msg + "\n\nMessage was deleted!",
-                                                          chat_id=chat_id,
-                                                          message_id=msg_id, parse_mode=ParseMode.HTML)
-                        except Exception as err:
-                                context.bot.edit_message_text(text=msg + "\n\nError: {}".format(err),
-                                                          chat_id=chat_id,
-                                                          message_id=msg_id, parse_mode=ParseMode.HTML)
-        elif isyes == "n":
-                context.bot.edit_message_text(text=msg,
-                                                          chat_id=chat_id,
-                                                          message_id=msg_id, parse_mode=ParseMode.HTML,
-                                                          reply_markup=key)
+	if isyes == "y":
+		a, b = user_protection_checker(context.bot, report_target)
+		if not a:
+			context.context.bot.edit_message_text(text=msg + b,
+							  chat_id=query.message.chat_id,
+							  message_id=query.message.message_id, parse_mode=ParseMode.HTML)
+			return
+		if splitter[0] == "1":
+			try:
+				context.context.bot.unbanChatMember(report_chat, report_target)
+				context.context.bot.sendMessage(report_chat, text="{} has been kicked!\nBy: {}".format(\
+					mention_markdown(userinfo['id'], userinfo['name']), mention_markdown(chat.id, chat.first_name)), \
+					parse_mode=ParseMode.MARKDOWN)
+				context.context.bot.edit_message_text(text=msg + "\n\n{} has been kicked!".format(mention_html(userinfo['id'], userinfo['name'])),
+							  chat_id=query.message.chat_id,
+							  message_id=query.message.message_id, parse_mode=ParseMode.HTML)
+			except Exception as err:
+				context.context.bot.edit_message_text(text=msg + "\n\nError: {}".format(err),
+							  chat_id=query.message.chat_id,
+							  message_id=query.message.message_id, parse_mode=ParseMode.HTML)
+		elif splitter[0] == "2":
+			try:
+				context.context.bot.kickChatMember(report_chat, report_target)
+				context.context.bot.sendMessage(report_chat, text="{} has been banned!\nBy: {}".format(\
+					mention_markdown(userinfo['id'], userinfo['name']), mention_markdown(chat.id, chat.first_name)), \
+					parse_mode=ParseMode.MARKDOWN)
+				context.context.bot.edit_message_text(text=msg + "\n\n{} has been banned!".format(mention_html(userinfo['id'], userinfo['name'])),
+							  chat_id=query.message.chat_id,
+							  message_id=query.message.message_id, parse_mode=ParseMode.HTML)
+			except Exception as err:
+				context.context.bot.edit_message_text(text=msg + "\n\nError: {}".format(err),
+							  chat_id=query.message.chat_id,
+							  message_id=query.message.message_id, parse_mode=ParseMode.HTML)
+		elif splitter[0] == "3":
+			try:
+				context.context.bot.deleteMessage(report_chat, report_target)
+				context.context.bot.edit_message_text(text=msg + "\n\nMessage was deleted!",
+							  chat_id=query.message.chat_id,
+							  message_id=query.message.message_id, parse_mode=ParseMode.HTML)
+			except Exception as err:
+				context.context.bot.edit_message_text(text=msg + "\n\nError: {}".format(err),
+							  chat_id=query.message.chat_id,
+							  message_id=query.message.message_id, parse_mode=ParseMode.HTML)
+	elif isyes == "n":
+		context.context.bot.edit_message_text(text=msg,
+							  chat_id=query.message.chat_id,
+							  message_id=query.message.message_id, parse_mode=ParseMode.HTML,
+							  reply_markup=key)
 
 
 def user_protection_checker(context, user_id):
@@ -310,14 +431,13 @@ def user_protection_checker(context, user_id):
 	# if int(user_id) in SUPPORT_USERS:
 	# 	return False, "Error: User is under protection"
 
-	if int(user_id) == context.bot.id:
+	if int(user_id) == context.context.bot.id:
 		return False, "\n\nError: This is myself!"
 
 	return True, ""
 
 
-def __migrate__(old_chat_id, new_chat_id):
-	sql.migrate_chat(old_chat_id, new_chat_id)
+
 
 
 def __chat_settings__(chat_id, user_id):
@@ -328,7 +448,10 @@ def __chat_settings__(chat_id, user_id):
 def __user_settings__(user_id):
 	return user_id, "You receive reports from chats you're admin in: `{}`.\nToggle this with /reports in PM.".format(
 		sql.user_should_report(user_id))
+"""
 
+def __migrate__(old_chat_id, new_chat_id):
+        sql.migrate_chat(old_chat_id, new_chat_id)
 
 __mod_name__ = "Reporting"
 
