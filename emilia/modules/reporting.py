@@ -293,7 +293,7 @@ def buttonask(context, update):
 							  reply_markup=key)
 
 
-def user_protection_checker(bot, user_id):
+def user_protection_checker(context, user_id):
 	if not user_id:
 		return False, "You don't seem to be referring to a user."
 
