@@ -129,7 +129,7 @@ def report(update, context) -> str:
                                 message.forward(admin.user.id)
                     except:
                         pass
-                    context.context.bot.send_message(admin.user.id, msg, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
+                    context.bot.send_message(admin.user.id, msg, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
                 except Unauthorized:
                     pass
                 except BadRequest as excp:  # TODO: cleanup exceptions
