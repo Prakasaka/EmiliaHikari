@@ -113,7 +113,7 @@ def report(update, context) -> str:
             if admin.user.is_bot:  # can't message bots
                 continue
             if sql.user_should_report(admin.user.id):
-            	all_admins.append("<a href='tg://user?id={}'>⁣</a>".format(admin.user.id))
+                all_admins.append("<a href='tg://user?id={}'>⁣</a>".format(admin.user.id))
                 try:
                     if not chat.type == Chat.SUPERGROUP:
                         context.bot.sendMessage(admin.user.id, msg + link, parse_mode=ParseMode.HTML)
