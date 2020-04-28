@@ -8,7 +8,7 @@ from telegram.ext import CommandHandler, MessageHandler, run_async, Filters, Cal
 from telegram.utils.helpers import mention_html, mention_markdown
 
 from emilia import dispatcher, LOGGER, OWNER_ID, SUDO_USERS, SUPPORT_USERS, STRICT_GBAN
-from emilia.modules.helper_funcs.chat_status import user_not_admin, user_admin
+from emilia.modules.helper_funcs.chat_status import user_not_admin, user_admin, is_user_ban_protected
 from emilia.modules.helper_funcs.extraction import extract_user
 from emilia.modules.log_channel import loggable
 from emilia.modules.sql import reporting_sql as sql
@@ -59,19 +59,13 @@ def report_setting(update, context):
 def report(update, context) -> str:
     message = update.effective_message  # type: Optional[Message]
     chat = update.effective_chat  # type: Optional[Chat]
-    chat_id = update.effective_chat.id
     user = update.effective_user  # type: Optional[User]
     args = context.args
     user_id = extract_user(message, args)
-    administrators = context.bot.getChatAdministrators(chat_id)
-#     user = administrators.user
-    status = administrators.status
-    if status == "administrator":
-        message.reply_text("r u blind or what ? there's a admin tag ahead of his name")
-        return
-	
-    if status == "creator":
-        message.reply_text("are u reporting a group owner? O bhai maaro mujhe maaro")
+    member = chat.get_member(user_id)
+
+    if is_user_ban_protected(chat, user_id, member):
+        message.reply_text("I really wish I could report admins...")
         return
 
     if user_id == OWNER_ID:
