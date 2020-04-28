@@ -53,7 +53,6 @@ def report_setting(update, context):
 			send_message(update.effective_message, "This chat's current setting is: `{}`".format(sql.chat_should_report(chat.id)),
 						   parse_mode=ParseMode.MARKDOWN)
 @run_async
-@loggable
 @user_not_admin
 def report(update, context) -> str:
     message = update.effective_message  # type: Optional[Message]
