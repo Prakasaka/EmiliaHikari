@@ -62,9 +62,23 @@ def report(update, context) -> str:
     user = update.effective_user  # type: Optional[User]
     args = context.args
     user_id = extract_user(message, args)
+    administrators = context.bot.getChatAdministrators(chat_id)
+    for admin in administrators:
+        user = admin.user
+        status = admin.status
+	if status == "administrator":
+            message.reply_text("r u blind or what ? there's a admin tag ahead of his name")
+            return
+	
+    for admin in administrators:
+        user = admin.user
+        status = admin.status
+	if status == "creator":
+            message.reply_text("are u reporting a group owner? O bhai maaro mujhe maaro")
+            return
 
     if user_id == OWNER_ID:
-        message.reply_text("are u reporting a owner? O bhai maaro mujhe maaro")
+        message.reply_text("are u reporting a bot owner? O bhai maaro mujhe maaro")
         return
 
     if int(user_id) in SUDO_USERS:
