@@ -452,7 +452,7 @@ def user_protection_checker(context, user_id):
 	# if int(user_id) in SUPPORT_USERS:
 	# 	return False, "Error: User is under protection"
 
-	if int(user_id) == context.context.bot.id:
+	if int(user_id) == context.bot.id:
 		return False, "\n\nError: This is myself!"
 
 	return True, ""
