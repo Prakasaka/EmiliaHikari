@@ -141,14 +141,14 @@ def report(update, context) -> str:
 #                             if len(message.text.split()) > 1:  # If user is giving a reason, send his message too
 #                                 message.forward(admin.user.id)
 
-                    if chat.username and chat.type == Chat.SUPERGROUP:
-                        context.bot.send_message(admin.user.id, msg, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
+#                     if chat.username and chat.type == Chat.SUPERGROUP:
+#                         context.bot.send_message(admin.user.id, msg, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
 
-                        if should_forward:
-                            message.reply_to_message.forward(admin.user.id)
+#                         if should_forward:
+#                             message.reply_to_message.forward(admin.user.id)
 
-                            if len(message.text.split()) > 1:  # If user is giving a reason, send his message too
-                                message.forward(admin.user.id)
+#                             if len(message.text.split()) > 1:  # If user is giving a reason, send his message too
+#                                 message.forward(admin.user.id)
 
                 except Unauthorized:
                     pass
@@ -194,7 +194,7 @@ def buttons(update, context):
             query.answer("❎ Failed to delete message!")
 
 
-
+"""
 # @run_async
 # @user_not_admin
 # @loggable
@@ -469,7 +469,7 @@ def __chat_settings__(chat_id, user_id):
 def __user_settings__(user_id):
 	return user_id, "You receive reports from chats you're admin in: `{}`.\nToggle this with /reports in PM.".format(
 		sql.user_should_report(user_id))
-
+"""
 
 def __migrate__(old_chat_id, new_chat_id):
     sql.migrate_chat(old_chat_id, new_chat_id)
