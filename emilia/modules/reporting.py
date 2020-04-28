@@ -62,11 +62,6 @@ def report(update, context) -> str:
     user = update.effective_user  # type: Optional[User]
     args = context.args
     user_id = extract_user(message, args)
-    member = chat.get_member(user_id)
-
-    if is_user_ban_protected(chat, user_id, member):
-        message.reply_text("I really wish I could report admins...")
-        return
 
     if user_id == OWNER_ID:
         message.reply_text("are u reporting a bot owner? O bhai maaro mujhe maaro")
