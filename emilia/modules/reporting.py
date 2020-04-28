@@ -9,6 +9,7 @@ from telegram.utils.helpers import mention_html, mention_markdown
 
 from emilia import dispatcher, LOGGER, OWNER_ID, SUDO_USERS, SUPPORT_USERS, STRICT_GBAN
 from emilia.modules.helper_funcs.chat_status import user_not_admin, user_admin, is_user_ban_protected
+from emilia.modules.helper_funcs.extraction import extract_user
 from emilia.modules.log_channel import loggable
 from emilia.modules.sql import reporting_sql as sql
 
@@ -53,11 +54,13 @@ def report_setting(update, context):
 			send_message(update.effective_message, "This chat's current setting is: `{}`".format(sql.chat_should_report(chat.id)),
 						   parse_mode=ParseMode.MARKDOWN)
 @run_async
+@loggable
 @user_admin
 def report(update, context) -> str:
     message = update.effective_message  # type: Optional[Message]
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
+    user_id = extract_user(message, args)
 
     if int(user_id) in SUDO_USERS:
         send_message(update.effective_message, "OOOH u r reporting Sudo user")
