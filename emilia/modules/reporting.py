@@ -9,6 +9,7 @@ from telegram.utils.helpers import mention_html, mention_markdown
 
 from emilia import dispatcher, LOGGER, OWNER_ID, SUDO_USERS, SUPPORT_USERS, STRICT_GBAN
 from emilia.modules.helper_funcs.chat_status import user_not_admin, user_admin
+from emilia.modules.helper_funcs.extraction import extract_user
 from emilia.modules.log_channel import loggable
 from emilia.modules.sql import reporting_sql as sql
 
