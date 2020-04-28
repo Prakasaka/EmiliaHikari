@@ -8,7 +8,7 @@ from telegram.ext import CommandHandler, MessageHandler, run_async, Filters, Cal
 from telegram.utils.helpers import mention_html, mention_markdown
 
 from emilia import dispatcher, LOGGER, OWNER_ID, SUDO_USERS, SUPPORT_USERS, STRICT_GBAN
-from emilia.modules.helper_funcs.chat_status import user_not_admin, user_admin
+from emilia.modules.helper_funcs.chat_status import user_not_admin, user_admin #, is_user_ban_protected
 from emilia.modules.log_channel import loggable
 from emilia.modules.sql import reporting_sql as sql
 
@@ -20,6 +20,7 @@ CURRENT_REPORT = {}
 
 
 @run_async
+@loggable
 @user_admin
 def report_setting(update, context):
 	chat = update.effective_chat  # type: Optional[Chat]
@@ -51,11 +52,28 @@ def report_setting(update, context):
 		else:
 			send_message(update.effective_message, "This chat's current setting is: `{}`".format(sql.chat_should_report(chat.id)),
 						   parse_mode=ParseMode.MARKDOWN)
-
+@run_async
+@user_not_admin
 def report(update, context) -> str:
     message = update.effective_message  # type: Optional[Message]
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
+
+#     if int(user_id) in SUDO_USERS:
+#         send_message(update.effective_message, "OOOH u r reporting Sudo user")
+#         return
+
+#     if int(user_id) in OWNER_ID:
+#         send_message(update.effective_message, "reporting a Owner Ooo bhai maaro mujhe maaro")
+#         return
+
+#     if is_user_ban_protected(chat, user_id):
+#         send_message(update.effective_message, "I really wish I could report admins...")
+#         return ""
+
+#     if user_id == context.bot.id:
+#         send_message(update.effective_message, "So funny, lets report myself why don't I? Nice try.")
+#         return
 
     if chat and message.reply_to_message and sql.chat_should_report(chat.id):
         reported_user = message.reply_to_message.from_user  # type: Optional[User]
@@ -111,31 +129,28 @@ def report(update, context) -> str:
                     except:
                         pass
                     context.bot.send_message(admin.user.id, msg, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
-                    # if not chat.username:
-                    #     context.bot.sendMessage(admin.user.id, msg, parse_mode=ParseMode.HTML)
+                    if not chat.username:
+                        context.bot.sendMessage(admin.user.id, msg, parse_mode=ParseMode.HTML)
 
-                    #     if should_forward:
-                    #         message.reply_to_message.forward(admin.user.id)
+                        if should_forward:
+                            message.reply_to_message.forward(admin.user.id)
 
-                    #         if len(message.text.split()) > 1:  # If user is giving a reason, send his message too
-                    #             message.forward(admin.user.id)
+                            if len(message.text.split()) > 1:  # If user is giving a reason, send his message too
+                                message.forward(admin.user.id)
 
-                    # if chat.username and chat.type == Chat.SUPERGROUP:
-                    #     context.bot.sendMessage(admin.user.id, msg, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
+                    if chat.username and chat.type == Chat.SUPERGROUP:
+                        context.bot.sendMessage(admin.user.id, msg, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
 
-                    #     if should_forward:
-                    #         message.reply_to_message.forward(admin.user.id)
+                        if should_forward:
+                            message.reply_to_message.forward(admin.user.id)
 
-                    #         if len(message.text.split()) > 1:  # If user is giving a reason, send his message too
-                    #             message.forward(admin.user.id)
+                            if len(message.text.split()) > 1:  # If user is giving a reason, send his message too
+                                message.forward(admin.user.id)
 
                 except Unauthorized:
                     pass
                 except BadRequest as excp:  # TODO: cleanup exceptions
                     LOGGER.exception("Exception while reporting user")
-        context.bot.sendMessage(chat.id, "{} <b>has been reported to the admin</b>{}".format(
-					mention_html(reported_user.id, reported_user.first_name),"".join(all_admins)),
-					parse_mode="HTML", reply_to_message_id=message.reply_to_message.message_id)
         return msg
     return ""
 
