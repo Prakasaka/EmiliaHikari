@@ -72,7 +72,7 @@ def report(update, context) -> str:
         return
 
     if user_id == context.bot.id:
-        message.reply_text("-_- So funny, lets gban myself why don't I? Nice try.")
+        message.reply_text("-_- So funny, lets report myself why don't I? Nice try.")
         return
 
     if chat and message.reply_to_message and sql.chat_should_report(chat.id):
