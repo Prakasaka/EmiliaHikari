@@ -59,6 +59,20 @@ def report(update, context) -> str:
     message = update.effective_message  # type: Optional[Message]
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
+    args = context.args
+    user_id = extract_user(message, args)
+
+    if int(user_id) in OWNER_ID:
+        message.reply_text("are u reporting a owner? O bhai maaro mujhe maaro")
+        return
+
+    if int(user_id) in SUDO_USERS:
+        message.reply_text("OOOH someone's trying to report a sudo user! *grabs popcorn*")
+        return
+
+    if user_id == context.bot.id:
+        message.reply_text("-_- So funny, lets gban myself why don't I? Nice try.")
+        return
 
     if chat and message.reply_to_message and sql.chat_should_report(chat.id):
         reported_user = message.reply_to_message.from_user  # type: Optional[User]
@@ -471,7 +485,7 @@ NOTE: neither of these will get triggered if used by admins
 """
 
 
-REPORT_HANDLER = CommandHandler("report", report, filters=Filters.group)
+REPORT_HANDLER = CommandHandler("report", report, filters=Filters.group, pass_args=True)
 SETTING_HANDLER = CommandHandler("reports", report_setting, pass_args=True)
 ADMIN_REPORT_HANDLER = MessageHandler(Filters.regex("(?i)@admin(s)?"), report)
 # Callback_Report = CallbackQueryHandler(button, pattern=r"rp_")
