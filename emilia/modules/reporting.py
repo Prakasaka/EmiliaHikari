@@ -79,7 +79,7 @@ def report(update, context) -> str:
             # link = "\n<b>Link:</b> " \
             #        "<a href=\"http://telegram.me/{}/{}\">click here</a>".format(chat.username, message.message_id)
         else:
-            msg = msg = "{} is calling for admins in \"{}\"!".format(
+            msg = "{} is calling for admins in \"{}\"!".format(
                 mention_html(user.id, user.first_name), html.escape(chat_name))
         if chat.username:
             chatlink = "https://t.me/{}/{}".format(chat.username, str(message.reply_to_message.message_id))
@@ -117,8 +117,8 @@ def report(update, context) -> str:
                     except:
                         pass
                     context.bot.send_message(admin.user.id, msg, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
-                    if not chat.username:
-                        context.bot.sendMessage(admin.user.id, msg, parse_mode=ParseMode.HTML)
+#                     if not chat.username:
+#                         context.bot.sendMessage(admin.user.id, msg parse_mode=ParseMode.HTML)
 
 #                         if should_forward:
 #                             message.reply_to_message.forward(admin.user.id)
