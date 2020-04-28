@@ -321,15 +321,15 @@ def __stats__():
 
 
 def __user_info__(user_id, chat_id):
-    is_gbanned = sql.is_user_gbanned(user_id)
+    # is_gbanned = sql.is_user_gbanned(user_id)
 
     # text = "Globally banned: <b>{}</b>"/
     res = "Reason: {}".format(html.escape(user.reason))
-    if is_gbanned:
+    # if is_gbanned:
         # text = text.format("Yes")
-        user = sql.get_gbanned_user(user_id)
-        if user.reason:
-            return res
+    user = sql.get_gbanned_user(user_id)
+    if user.reason:
+        return res
     else:
         res
     #     text = text.format("No")
