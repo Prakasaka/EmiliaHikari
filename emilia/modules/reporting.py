@@ -59,6 +59,7 @@ def report_setting(update, context):
 def report(update, context) -> str:
     message = update.effective_message  # type: Optional[Message]
     chat = update.effective_chat  # type: Optional[Chat]
+    chat_id = update.effective_chat.id
     user = update.effective_user  # type: Optional[User]
     args = context.args
     user_id = extract_user(message, args)
