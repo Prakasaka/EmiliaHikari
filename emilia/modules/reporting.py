@@ -63,7 +63,7 @@ def report(update, context) -> str:
     args = context.args
     user_id = extract_user(message, args)
 
-    if int(user_id) in OWNER_ID:
+    if user_id == OWNER_ID:
         message.reply_text("are u reporting a owner? O bhai maaro mujhe maaro")
         return
 
