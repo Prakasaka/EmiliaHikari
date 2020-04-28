@@ -328,10 +328,10 @@ def __user_info__(user_id, chat_id):
         # text = text.format("Yes")
         user = sql.get_gbanned_user(user_id)
         if user.reason:
-            text = "Reason: {}".format(html.escape(user.reason))
+            return "Reason: {}".format(html.escape(user.reason))
     # else:
     #     text = text.format("No")
-    return text
+    # return
 
 
 
