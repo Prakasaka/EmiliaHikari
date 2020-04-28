@@ -53,6 +53,7 @@ def report_setting(update, context):
 			send_message(update.effective_message, "This chat's current setting is: `{}`".format(sql.chat_should_report(chat.id)),
 						   parse_mode=ParseMode.MARKDOWN)
 @run_async
+@loggable
 @user_not_admin
 def report(update, context) -> str:
     message = update.effective_message  # type: Optional[Message]
@@ -105,6 +106,9 @@ def report(update, context) -> str:
                 all_admins.append("<a href='tg://user?id={}'>⁣</a>".format(admin.user.id))
                 try:
                     try:
+			context.bot.sendMessage(chat.id, "{} <b>has been reported to the admin</b>{}".format(
+					mention_html(reported_user.id, reported_user.first_name),"".join(all_admins)),
+					parse_mode="HTML", reply_to_message_id=message.reply_to_message.message_id)
                         # context.bot.sendMessage(admin.user.id, msg, parse_mode=ParseMode.HTML)
                         if should_forward:
                             message.reply_to_message.forward(admin.user.id)
@@ -114,7 +118,7 @@ def report(update, context) -> str:
                         pass
 #                     context.bot.send_message(admin.user.id, msg, parse_mode=ParseMode.HTML, reply_markup=reply_markup)
                     if not chat.username:
-                        context.bot.sendMessage(admin.user.id, msg, parse_mode=ParseMode.HTML)
+#                         context.bot.sendMessage(admin.user.id, msg, parse_mode=ParseMode.HTML)
 
                         if should_forward:
                             message.reply_to_message.forward(admin.user.id)
