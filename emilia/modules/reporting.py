@@ -8,7 +8,7 @@ from telegram.ext import CommandHandler, MessageHandler, run_async, Filters, Cal
 from telegram.utils.helpers import mention_html, mention_markdown
 
 from emilia import dispatcher, LOGGER, OWNER_ID, SUDO_USERS, SUPPORT_USERS, STRICT_GBAN
-from emilia.modules.helper_funcs.chat_status import user_not_admin, user_admin, is_this_admin, is_user_ban_protected
+from emilia.modules.helper_funcs.chat_status import user_not_admin, user_admin, is_user_ban_protected
 from emilia.modules.helper_funcs.extraction import extract_user
 from emilia.modules.log_channel import loggable
 from emilia.modules.sql import reporting_sql as sql
@@ -79,9 +79,9 @@ def report(update, context) -> str:
 #         message.reply_text("-_- So funny, lets report myself why don't I? Nice try.")
 #         return
 
-    if is_this_admin(chat, user_id):
-        message.reply_text("dude. it is admin of this group")
-        return
+#     if is_this_admin(chat, user_id):
+#         message.reply_text("dude. it is admin of this group")
+#         return
 
     if chat and message.reply_to_message and sql.chat_should_report(chat.id):
         reported_user = message.reply_to_message.from_user  # type: Optional[User]
