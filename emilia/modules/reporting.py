@@ -8,7 +8,7 @@ from telegram.ext import CommandHandler, MessageHandler, run_async, Filters, Cal
 from telegram.utils.helpers import mention_html, mention_markdown
 
 from emilia import dispatcher, LOGGER, OWNER_ID, SUDO_USERS, SUPPORT_USERS, STRICT_GBAN
-from emilia.modules.helper_funcs.chat_status import user_not_admin, user_admin, is_user_ban_protected
+from emilia.modules.helper_funcs.chat_status import user_not_admin, user_admin, is_user_ban_protected, is_this_admin
 from emilia.modules.helper_funcs.extraction import extract_user
 from emilia.modules.log_channel import loggable
 from emilia.modules.sql import reporting_sql as sql
@@ -61,17 +61,22 @@ def report(update, context) -> str:
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     args = context.args
-    user_id = extract_user(message, args)
+    userid = extract_user(message, args)
+    user_id = update.effective_message.from_user.id
+	
+    if is_this_admin(update.effective_chat, user_id):
+        send_message(update.effective_message, "dude. this boi is admin of this group")
+        return
 
-    if user_id == OWNER_ID:
+    if userid == OWNER_ID:
         message.reply_text("are u reporting a bot owner? O bhai maaro mujhe maaro")
         return
 
-    if int(user_id) in SUDO_USERS:
+    if int(userid) in SUDO_USERS:
         message.reply_text("OOOH someone's trying to report a sudo user! *grabs popcorn*")
         return
 
-    if user_id == context.bot.id:
+    if userid == context.bot.id:
         message.reply_text("-_- So funny, lets report myself why don't I? Nice try.")
         return
 
