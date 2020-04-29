@@ -8,7 +8,7 @@ from telegram.ext import CommandHandler, MessageHandler, run_async, Filters, Cal
 from telegram.utils.helpers import mention_html, mention_markdown
 
 from emilia import dispatcher, LOGGER, OWNER_ID, SUDO_USERS, SUPPORT_USERS, STRICT_GBAN
-from emilia.modules.helper_funcs.chat_status import user_not_admin, user_admin, is_user_ban_protected
+from emilia.modules.helper_funcs.chat_status import user_admin, user_not_admin, user_admin, is_user_ban_protected
 from emilia.modules.helper_funcs.extraction import extract_user
 from emilia.modules.log_channel import loggable
 from emilia.modules.sql import reporting_sql as sql
@@ -55,17 +55,14 @@ def report_setting(update, context):
 						   parse_mode=ParseMode.MARKDOWN)
 @run_async
 @loggable
-@user_not_admin
+@user_admin
+# @user_not_admin
 def report(update, context) -> str:
     message = update.effective_message  # type: Optional[Message]
     chat = update.effective_chat  # type: Optional[Chat]
     user = update.effective_user  # type: Optional[User]
     args = context.args
     user_id = extract_user(message, args)
-	
-    if is_user_ban_protected(chat, user_id):
-        message.reply_text("dude. it is admin of this group")
-        return
 
     if user_id == OWNER_ID:
         message.reply_text("are u reporting a bot owner? O bhai maaro mujhe maaro")
@@ -77,6 +74,10 @@ def report(update, context) -> str:
 
     if user_id == context.bot.id:
         message.reply_text("-_- So funny, lets report myself why don't I? Nice try.")
+        return
+
+    if is_user_ban_protected(chat, user_id):
+        message.reply_text("dude. it is admin of this group")
         return
 
     if chat and message.reply_to_message and sql.chat_should_report(chat.id):
