@@ -52,12 +52,9 @@ def is_this_admin(chat: Chat, user_id: int, member: ChatMember = None) -> bool:
             or chat.all_members_are_administrators or user_id == 777000:
         return True
 
-    try:
-        if not member:
-            member = chat.get_member(user_id)
-        return member.status in ('administrator', 'creator')
-    except:
-        return False
+    if not member:
+        member = chat.get_member(user_id)
+    return member.status in ('creator')
 
 
 def is_bot_admin(chat: Chat, bot_id: int, bot_member: ChatMember = None) -> bool:
