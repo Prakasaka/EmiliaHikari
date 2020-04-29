@@ -55,8 +55,7 @@ def report_setting(update, context):
 						   parse_mode=ParseMode.MARKDOWN)
 @run_async
 @loggable
-@user_admin
-# @user_not_admin
+@user_not_admin
 def report(update, context) -> str:
     message = update.effective_message  # type: Optional[Message]
     chat = update.effective_chat  # type: Optional[Chat]
