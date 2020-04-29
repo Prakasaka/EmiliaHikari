@@ -76,7 +76,7 @@ def report(update, context) -> str:
         message.reply_text("-_- So funny, lets report myself why don't I? Nice try.")
         return
 
-    if is_user_ban_protected(chat, user_id):
+    if is_this_admin(chat, user_id):
         message.reply_text("dude. it is admin of this group")
         return
 
