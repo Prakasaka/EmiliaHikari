@@ -281,16 +281,16 @@ def clear(update, context):
 				catatangagal.append(notename)
 		if len(catatan) >= 1 and len(catatangagal) == 0:
 			if conn:
-				rtext = "Note in *{chat_name}* for `{note_name}` deleted 😁".format(chat_name=chat_name, note_name=", ".join(catatan))
+				rtext = "Note in *{chat_name}* for `{note_name}` deleted".format(chat_name=chat_name, note_name=", ".join(catatan))
 			else:
-				rtext = "Note `{note_name}` deleted 😁".format(note_name=", ".join(catatan))
+				rtext = "Note `{note_name}` deleted".format(note_name=", ".join(catatan))
 			try:
 				send_message(update.effective_message, rtext, parse_mode=ParseMode.MARKDOWN)
 			except BadRequest:
 				if conn:
-					rtext = "Note in <b>{chat_name}</b> for <code>{note_name}</code> deleted 😁".format(chat_name=chat_name, note_name=", ".join(catatan))
+					rtext = "Note in <b>{chat_name}</b> for <code>{note_name}</code> deleted".format(chat_name=chat_name, note_name=", ".join(catatan))
 				else:
-					rtext = "Note <code>{note_name}</code> deleted 😁".format(note_name=", ".join(catatan))
+					rtext = "Note <code>{note_name}</code> deleted".format(note_name=", ".join(catatan))
 				send_message(update.effective_message, rtext, parse_mode=ParseMode.HTML)
 		elif len(catatangagal) >= 0 and len(catatan) == 0:
 			if conn:
@@ -307,16 +307,16 @@ def clear(update, context):
 				send_message(update.effective_message, rtext, parse_mode=ParseMode.HTML)
 		else:
 			if conn:
-				rtext = "Note `{note_name}` deleted in *{chat_name}* 😁\nFailed to delete note `{fnote_name}`!".format(chat_name=chat_name, note_name=", ".join(catatan), fnote_name=", ".join(catatangagal))
+				rtext = "Note `{note_name}` deleted in *{chat_name}*\nFailed to delete note `{fnote_name}`!".format(chat_name=chat_name, note_name=", ".join(catatan), fnote_name=", ".join(catatangagal))
 			else:
-				rtext = "Note `{note_name}` deleted 😁\nFailed to delete note `{fnote_name}`!".format(note_name=", ".join(catatan), fnote_name=", ".join(catatangagal))
+				rtext = "Note `{note_name}` deleted\nFailed to delete note `{fnote_name}`!".format(note_name=", ".join(catatan), fnote_name=", ".join(catatangagal))
 			try:
 				send_message(update.effective_message, rtext, parse_mode=ParseMode.MARKDOWN)
 			except BadRequest:
 				if conn:
-					rtext = "Note <code>{note_name}</code> deleted in <b>{chat_name}</b> 😁\nFailed to delete note <code>{fnote_name}</code>!".format(chat_name=chat_name, note_name=", ".join(catatan), fnote_name=", ".join(catatangagal))
+					rtext = "Note <code>{note_name}</code> deleted in <b>{chat_name}</b>\nFailed to delete note <code>{fnote_name}</code>!".format(chat_name=chat_name, note_name=", ".join(catatan), fnote_name=", ".join(catatangagal))
 				else:
-					rtext = "Note <code>{note_name}</code> deleted 😁\nFailed to delete note <code>{fnote_name}</code>!".format(note_name=", ".join(catatan), fnote_name=", ".join(catatangagal))
+					rtext = "Note <code>{note_name}</code> deleted\nFailed to delete note <code>{fnote_name}</code>!".format(note_name=", ".join(catatan), fnote_name=", ".join(catatangagal))
 				send_message(update.effective_message, rtext, parse_mode=ParseMode.HTML)
 
 	else:
@@ -383,7 +383,7 @@ def list_notes(update, context):
 	note_list = sql.get_all_chat_notes(chat_id)
 
 	for note in note_list:
-		note_name = " - `{}`\n".format(note.name)
+		note_name = " ➺  `#{}`\n".format(note.name)
 		if len(msg) + len(note_name) > MAX_MESSAGE_LENGTH:
 			send_message(update.effective_message, msg, parse_mode=ParseMode.MARKDOWN)
 			msg = ""
@@ -507,7 +507,7 @@ def __migrate__(old_chat_id, new_chat_id):
 
 def __chat_settings__(chat_id, user_id):
 	notes = sql.get_all_chat_notes(chat_id)
-	return user_id, "There are `{}` notes in this chat.".format(len(notes))
+	return "There are `{}` notes in this chat.".format(len(notes))
 
 
 __help__ = """
