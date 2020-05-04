@@ -25,7 +25,7 @@ def afk(update, context):
         reason = ""
 
     sql.set_afk(update.effective_user.id, reason)
-    send_message(update.effective_message, "{} is now AFK!".format(update.effective_user.first_name))
+    send_message(update.effective_message, f"{update.effective_user.first_name} is now AFK!\nSays its because of : {reason}")
 
 
 @run_async
