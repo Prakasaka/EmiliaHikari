@@ -169,11 +169,30 @@ def flood(update, context):
             text = "I'm not currently enforcing flood control!"
         send_message(update.effective_message, text, parse_mode="markdown")
     else:
+        getmode, getvalue = sql.get_flood_setting(chat.id)
+        if getmode == 1:
+            settypeflood = 'banned'
+        elif getmode == 2:
+            settypeflood = 'kicked'
+        elif getmode == 3:
+            settypeflood = 'muted'
+        elif getmode == 4:
+            settypeflood = 'temporarily banned for {}'.format(getvalue)
+        elif getmode == 5:
+            settypeflood = 'temporarily muted for {}'.format(getvalue)
         if conn:
-            text = "I'm currently banning users if they send more than *{}* consecutive messages in *{}*.".format(limit, chat_name)
+            text = "This chat is currently enforcing flood control after *{}* messages. Any users sending more than that amount of messages will be *{}* in *{}*.".format(limit, settypeflood, chat_name)
+#             text = "If member is flooding messages, they will got *{}* in *{}*.".format(settypeflood, chat_name)
         else:
-            text = "I'm currently banning users if they send more than *{}* consecutive messages.".format(limit)
+            text = "This chat is currently enforcing flood control after *{}* messages. Any users sending more than that amount of messages will be *{}*.".format(limit, settypeflood)
+#             text = "If member is flooding messages, they will got *{}*.".format(settypeflood)
         send_message(update.effective_message, text, parse_mode="markdown")
+#     else:
+#         if conn:
+#             text = "I'm currently banning users if they send more than *{}* consecutive messages in *{}*.".format(limit, chat_name)
+#         else:
+#             text = "I'm currently banning users if they send more than *{}* consecutive messages.".format(limit)
+#         send_message(update.effective_message, text, parse_mode="markdown")
 
 
 @run_async
@@ -373,7 +392,7 @@ __help__ = """
  Note:
  - Value must be filled for tban and tmute, Can be:
         `4m` = 4 minutes
-        `3h` = 4 hours
+        `4h` = 4 hours
         `2d` = 2 days
         `1w` = 1 week
 """
