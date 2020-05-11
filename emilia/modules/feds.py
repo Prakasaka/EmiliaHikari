@@ -921,6 +921,7 @@ def get_frules(update, context):
 def fed_broadcast(update, context):
         msg = update.effective_message  # type: Optional[Message]
         user = update.effective_user  # type: Optional[User]
+        chat = update.effective_chat
         args = context.args
 
         if chat.type == 'private':
