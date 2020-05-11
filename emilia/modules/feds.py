@@ -921,7 +921,6 @@ def get_frules(update, context):
 def fed_broadcast(update, context):
         msg = update.effective_message  # type: Optional[Message]
         user = update.effective_user  # type: Optional[User]
-        chat = update.effective_chat  # type: Optional[Chat]
         args = context.args
 
         if chat.type == 'private':
@@ -929,15 +928,17 @@ def fed_broadcast(update, context):
                 return
 
         if args:
+            chat = update.effective_chat
             fed_id = sql.get_fed_id(chat.id)
             fedinfo = sql.get_fed_info(fed_id)
+            text = "*New broadcast from the Federation {}*\n".format(fedinfo['fname'])
             # Parsing md
             raw_text = msg.text
             args = raw_text.split(None, 1)  # use python's maxsplit to separate cmd and args
             txt = args[1]
             offset = len(txt) - len(raw_text)  # set correct offset relative to command
             text_parser = markdown_parser(txt, entities=msg.parse_entities(), offset=offset)
-            text = text_parser
+            text += text_parser
             try:
                 broadcaster = user.first_name
             except:
@@ -946,27 +947,13 @@ def fed_broadcast(update, context):
             chat_list = sql.all_fed_chats(fed_id)
             failed = 0
             for chat in chat_list:
-                title = "*New broadcast from Fed {}*\n".format(fedinfo['fname'])
                 try:
-                    context.bot.sendMessage(chat, title + text, parse_mode="markdown")
+                    context.bot.sendMessage(chat, text, parse_mode="markdown")
                 except TelegramError:
-                    try:
-                        dispatcher.bot.getChat(chat)
-                    except Unauthorized:
-                        failed += 1
-                        sql.chat_leave_fed(chat)
-                        LOGGER.info("Chat {} has leave fed {} because I was kicked".format(chat, fedinfo['fname']))
-                        continue
-                    except BadRequest:
-                        failed += 1
-                        sql.chat_leave_fed(chat)
-                        LOGGER.info("Chat {} has leave fed {} because I was kicked".format(chat, fedinfo['fname']))
-                        continue
-
                     failed += 1
-                    LOGGER.warning("Couldn't send broadcast to {}".format(str(chat)))
+                    LOGGER.warning("Couldn't send broadcast to %s, group name %s", str(chat.chat_id), str(chat.chat_name))
 
-            send_text = "The federation broadcast is complete"
+            send_text = "The federation broadcast is complete!"
             if failed >= 1:
                 send_text += "{} the group failed to receive the message, probably because it left the Federation.".format(failed)
             send_message(update.effective_message, send_text)
