@@ -933,7 +933,7 @@ def fed_broadcast(update, context):
                 fed_id = sql.get_fed_id(chat.id)
                 fedinfo = sql.get_fed_info(fed_id)
                 try:
-                    text = "*New broadcast from the Federation {}*\n".format(fedinfo['fname'])
+                    texts = "*New broadcast from the Federation {}*\n".format(fedinfo['fname'])
                 except TypeError:
                     LOGGER.warning("Couldn't send broadcast to {}".format(str(chat)))              
                 # Parsing md
@@ -944,7 +944,7 @@ def fed_broadcast(update, context):
                 text_parser = markdown_parser(txt,
                                       entities=msg.parse_entities(),
                                       offset=offset)
-                text += text_parser
+                text = text_parser
                 try:
                         broadcaster = user.first_name
                 except Exception:
@@ -954,7 +954,7 @@ def fed_broadcast(update, context):
                 failed = 0
                 for chat in chat_list:
                     try:
-                        context.bot.sendMessage(chat, text, parse_mode="markdown")
+                        context.bot.sendMessage(chat, texts, text, parse_mode="markdown")
                     except TelegramError:
                         failed += 1
                         LOGGER.warning("Couldn't send broadcast to {}".format(str(chat)))
