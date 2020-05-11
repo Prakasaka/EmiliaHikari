@@ -934,7 +934,7 @@ def fed_broadcast(update, context):
                 fedinfo = sql.get_fed_info(fed_id)
                 try:
                     text = "*New broadcast from the Federation {}*\n".format(fedinfo['fname'])
-                except TypeError 
+                except TypeError:
                     LOGGER.warning("Couldn't send broadcast to {}".format(str(chat)))              
                 # Parsing md
                 raw_text = msg.text
