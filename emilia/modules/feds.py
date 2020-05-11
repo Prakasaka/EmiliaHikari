@@ -941,13 +941,13 @@ def fed_broadcast(update, context):
                 text = text_parser
                 try:
                         broadcaster = user.first_name
-                except:
+                except Exception:
                         broadcaster = user.first_name + " " + user.last_name
                 text += "\n\n- {}".format(mention_markdown(user.id, broadcaster))
                 chat_list = sql.all_fed_chats(fed_id)
                 failed = 0
                 for chat in chat_list:
-                        title = chat, "*New broadcast from Fed {}*\n".format(fedinfo['fname'])
+                        title = "*New broadcast from Fed {}*\n".format(fedinfo['fname'])
                         try:
                                 context.bot.sendMessage(chat, title + text, parse_mode="markdown")
                         except TelegramError:
