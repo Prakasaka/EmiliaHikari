@@ -699,9 +699,9 @@ def set_warn_mode(update, context):
         elif args[0].lower() in ("mute"):
             sql.set_warn_mode(chat.id, 3)
             if conn:
-                text = "Too many warns will now result in a ban on *{}*!".format(chat_name)
+                text = "Too many warns will now result in a mute on *{}*!".format(chat_name)
             else:
-                text = "Too many warns will now result in a ban!"
+                text = "Too many warns will now result in a mute!"
             send_message(update.effective_message, text, parse_mode=ParseMode.HTML)
             return "<b>{}:</b>\n" \
                    "<b>Admin:</b> {}\n" \
