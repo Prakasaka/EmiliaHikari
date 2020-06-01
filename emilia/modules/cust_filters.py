@@ -294,6 +294,14 @@ def reply_filter(update, context):
 							except BadRequest as excp:
 								LOGGER.exception("Failed to send message: " + excp.message)
 								pass
+						elif excp.message == "Message text is empty":
+							try:
+								context.bot.send_message(chat.id, filt.reply, parse_mode=ParseMode.MARKDOWN,
+												 disable_web_page_preview=True,
+												 reply_markup=keyboard)
+							except BadRequest as excp:
+								LOGGER.exception("Failed to send message: " + excp.message)
+								pass
 						else:
 							try:
 								send_message(update.effective_message, "This note could not be sent, as it is incorrectly formatted.")
