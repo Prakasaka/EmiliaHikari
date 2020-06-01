@@ -305,11 +305,11 @@ def reply_filter(update, context):
 
 				else:
 		    			# LEGACY - all new filters will have has_markdown set to True.
-		    			try:
-						send_message(update.effective_message, filt.reply)
-		    			except BadRequest as excp:
-						LOGGER.exception("Failed to send message: " + excp.message)
-						pass
+# 		    			try:
+					send_message(update.effective_message, filt.reply)
+# 		    			except BadRequest as excp:
+# 						LOGGER.exception("Failed to send message: " + excp.message)
+# 						pass
 				break
 
 
