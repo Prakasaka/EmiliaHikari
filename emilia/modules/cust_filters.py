@@ -108,59 +108,89 @@ def filters(update, context):
 			return
 		# set trigger -> lower, so as to avoid adding duplicate filters with different cases
 		keyword = extracted[0].lower()
+		is_sticker = False
+		is_document = False
+		is_image = False
+		is_voice = False
+		is_audio = False
+		is_video = False
+		buttons = []
 	
 
-	# Add the filter
-	# Note: perhaps handlers can be removed somehow using sql.get_chat_filters
-	for handler in dispatcher.handlers.get(HANDLER_GROUP, []):
-		if handler.filters == (keyword, chat_id):
-			dispatcher.remove_handler(handler, HANDLER_GROUP)
-
-	text, file_type, file_id = get_filter_type(msg)
+# 	text, file_type, file_id = get_filter_type(msg)
 	if not msg.reply_to_message and len(extracted) >= 2:
 		offset = len(extracted[1]) - len(msg.text)  # set correct offset relative to command + notename
-		text, buttons = button_markdown_parser(extracted[1], entities=msg.parse_entities(), offset=offset)
-		text = text.strip()
-		if not text:
+		content, buttons = button_markdown_parser(extracted[1], entities=msg.parse_entities(), offset=offset)
+		content = content.strip()
+		if not content:
 			send_message(update.effective_message, "There is no note message - You can't JUST have buttons, you need a message to go with it!")
 			return
 
-	elif msg.reply_to_message and len(args) >= 2:
-		if msg.reply_to_message.text:
-			text_to_parsing = msg.reply_to_message.text
-		elif msg.reply_to_message.caption:
-			text_to_parsing = msg.reply_to_message.caption
-		else:
-			text_to_parsing = ""
-		offset = len(text_to_parsing)  # set correct offset relative to command + notename
-		text, buttons = button_markdown_parser(text_to_parsing, entities=msg.parse_entities(), offset=offset)
-		text = text.strip()
+# 	elif msg.reply_to_message and len(args) >= 2:
+# 		if msg.reply_to_message.text:
+# 			text_to_parsing = msg.reply_to_message.text
+# 		elif msg.reply_to_message.caption:
+# 			text_to_parsing = msg.reply_to_message.caption
+# 		else:
+# 			text_to_parsing = ""
+# 		offset = len(text_to_parsing)  # set correct offset relative to command + notename
+# 		content, buttons = button_markdown_parser(text_to_parsing, entities=msg.parse_entities(), offset=offset)
+# 		content = content.strip()
+		
+	elif msg.reply_to_message and msg.reply_to_message.sticker:
+        	content = msg.reply_to_message.sticker.file_id
+        	is_sticker = True
 
-	elif not text and not file_type:
-		send_message(update.effective_message, "You must give a name for this filter!")
-		return
+	elif msg.reply_to_message and msg.reply_to_message.document:
+        	content = msg.reply_to_message.document.file_id
+        	is_document = True
 
-	elif msg.reply_to_message:
-		if msg.reply_to_message.text:
-			text_to_parsing = msg.reply_to_message.text
-		elif msg.reply_to_message.caption:
-			text_to_parsing = msg.reply_to_message.caption
-		else:
-			text_to_parsing = ""
-		offset = len(text_to_parsing)  # set correct offset relative to command + notename
-		text, buttons = button_markdown_parser(text_to_parsing, entities=msg.parse_entities(), offset=offset)
-		text = text.strip()
-		if (msg.reply_to_message.text or msg.reply_to_message.caption) and not text:
-			send_message(update.effective_message, "There is no note message - You can't JUST have buttons, you need a message to go with it!")
-			return
+    	elif msg.reply_to_message and msg.reply_to_message.photo:
+        	content = msg.reply_to_message.photo[-1].file_id  # last elem = best quality
+        	is_image = True
+
+    	elif msg.reply_to_message and msg.reply_to_message.audio:
+        	content = msg.reply_to_message.audio.file_id
+        	is_audio = True
+
+    	elif msg.reply_to_message and msg.reply_to_message.voice:
+        	content = msg.reply_to_message.voice.file_id
+        	is_voice = True
+
+    	elif msg.reply_to_message and msg.reply_to_message.video:
+        	content = msg.reply_to_message.video.file_id
+        	is_video = True
+
+# 	elif not text and not file_type:
+# 		send_message(update.effective_message, "You must give a name for this filter!")
+# 		return
+
+# 	elif msg.reply_to_message:
+# 		if msg.reply_to_message.text:
+# 			text_to_parsing = msg.reply_to_message.text
+# 		elif msg.reply_to_message.caption:
+# 			text_to_parsing = msg.reply_to_message.caption
+# 		else:
+# 			text_to_parsing = ""
+# 		offset = len(text_to_parsing)  # set correct offset relative to command + notename
+# 		text, buttons = button_markdown_parser(text_to_parsing, entities=msg.parse_entities(), offset=offset)
+# 		text = text.strip()
+# 		if (msg.reply_to_message.text or msg.reply_to_message.caption) and not text:
+# 			send_message(update.effective_message, "There is no note message - You can't JUST have buttons, you need a message to go with it!")
+# 			return
 
 	else:
 		send_message(update.effective_message, "Invalid filter!")
 		return
+	
+	for handler in dispatcher.handlers.get(HANDLER_GROUP, []):
+		if handler.filters == (keyword, chat_id):
+			dispatcher.remove_handler(handler, HANDLER_GROUP)
 
-	sql.new_add_filter(chat_id, keyword, text, file_type, file_id, buttons)
+
+# 	sql.new_add_filter(chat_id, keyword, text, file_type, file_id, buttons)
 	# This is an old method
-	# sql.add_filter(chat_id, keyword, content, is_sticker, is_document, is_image, is_audio, is_voice, is_video, buttons)
+	sql.add_filter(chat_id, keyword, content, is_sticker, is_document, is_image, is_audio, is_voice, is_video, buttons)
 
 	send_message(update.effective_message, "Handler '{}' added in *{}*!".format(keyword, chat_name), parse_mode=telegram.ParseMode.MARKDOWN)
 	raise DispatcherHandlerStop
