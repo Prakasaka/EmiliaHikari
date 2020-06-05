@@ -82,7 +82,7 @@ def filters(update, context):
 	args = msg.text.split(None, 1)  # use python's maxsplit to separate Cmd, keyword, and reply_text
 
 	conn = connected(context.bot, update, chat, user.id)
-	if not conn == False:
+	if conn:
 		chat_id = conn
 		chat_name = dispatcher.bot.getChat(conn).title
 	else:
@@ -92,33 +92,26 @@ def filters(update, context):
 		else:
 			chat_name = chat.title
 
-	if not msg.reply_to_message and len(args) < 2:
-		send_message(update.effective_message, "You must give a name for this filter!")
+	if len(args) < 2:
 		return
 
-	if msg.reply_to_message:
-		if len(args) < 2:
-			send_message(update.effective_message, "You must give a name for this filter!")
-			return
-		else:
-			keyword = args[1]
-	else:
-		extracted = split_quotes(args[1])
-		if len(extracted) < 1:
-			return
+	extracted = split_quotes(args[1])
+	if len(extracted) < 1:
+		return
 		# set trigger -> lower, so as to avoid adding duplicate filters with different cases
-		keyword = extracted[0].lower()
-		is_sticker = False
-		is_document = False
-		is_image = False
-		is_voice = False
-		is_audio = False
-		is_video = False
-		buttons = []
+	keyword = extracted[0].lower()
+		
+	is_sticker = False
+	is_document = False
+	is_image = False
+	is_voice = False
+	is_audio = False
+	is_video = False
+	buttons = []
 	
 
 # 	text, file_type, file_id = get_filter_type(msg)
-	if not msg.reply_to_message and len(extracted) >= 2:
+	if len(extracted) >= 2:
 		offset = len(extracted[1]) - len(msg.text)  # set correct offset relative to command + notename
 		content, buttons = button_markdown_parser(extracted[1], entities=msg.parse_entities(), offset=offset)
 		content = content.strip()
