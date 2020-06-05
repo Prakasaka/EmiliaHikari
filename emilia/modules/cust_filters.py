@@ -138,28 +138,28 @@ def filters(update, context):
 # 		content = content.strip()
 		
 	elif msg.reply_to_message and msg.reply_to_message.sticker:
-        	content = msg.reply_to_message.sticker.file_id
-        	is_sticker = True
+		content = msg.reply_to_message.sticker.file_id
+		is_sticker = True
 
 	elif msg.reply_to_message and msg.reply_to_message.document:
-        	content = msg.reply_to_message.document.file_id
-        	is_document = True
+		content = msg.reply_to_message.document.file_id
+		is_document = True
 
-    	elif msg.reply_to_message and msg.reply_to_message.photo:
-        	content = msg.reply_to_message.photo[-1].file_id  # last elem = best quality
-        	is_image = True
+	elif msg.reply_to_message and msg.reply_to_message.photo:
+		content = msg.reply_to_message.photo[-1].file_id  # last elem = best quality
+		is_image = True
 
-    	elif msg.reply_to_message and msg.reply_to_message.audio:
-        	content = msg.reply_to_message.audio.file_id
-        	is_audio = True
+	elif msg.reply_to_message and msg.reply_to_message.audio:
+		content = msg.reply_to_message.audio.file_id
+		is_audio = True
 
-    	elif msg.reply_to_message and msg.reply_to_message.voice:
-        	content = msg.reply_to_message.voice.file_id
-        	is_voice = True
+	elif msg.reply_to_message and msg.reply_to_message.voice:
+		content = msg.reply_to_message.voice.file_id
+		is_voice = True
 
-    	elif msg.reply_to_message and msg.reply_to_message.video:
-        	content = msg.reply_to_message.video.file_id
-        	is_video = True
+	elif msg.reply_to_message and msg.reply_to_message.video:
+		content = msg.reply_to_message.video.file_id
+		is_video = True
 
 # 	elif not text and not file_type:
 # 		send_message(update.effective_message, "You must give a name for this filter!")
