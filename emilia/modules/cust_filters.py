@@ -130,6 +130,20 @@ def filters(update, context):
 		content, buttons = button_markdown_parser(text_to_parsing, entities=msg.parse_entities(), offset=offset)
 		content = content.strip()
 		
+	elif msg.reply_to_message:
+		if msg.reply_to_message.text:
+			text_to_parsing = msg.reply_to_message.text
+		elif msg.reply_to_message.caption:
+			text_to_parsing = msg.reply_to_message.caption
+		else:
+			text_to_parsing = ""
+		offset = len(text_to_parsing)  # set correct offset relative to command + notename
+		content, buttons = button_markdown_parser(text_to_parsing, entities=msg.parse_entities(), offset=offset)
+		content = content.strip()
+		if (msg.reply_to_message.text or msg.reply_to_message.caption) and not content:
+			send_message(update.effective_message, "There is no note message - You can't JUST have buttons, you need a message to go with it!")
+			return
+		
 	elif msg.reply_to_message and msg.reply_to_message.sticker:
 		content = msg.reply_to_message.sticker.file_id
 		is_sticker = True
